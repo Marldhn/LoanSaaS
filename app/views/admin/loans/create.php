@@ -14,6 +14,8 @@
 
 <div class="loan-card">
     <h2 style="margin-top: 0; color: #2563eb;">Create New Loan</h2>
+
+    
     
     <form action="/loansaas/public/index.php?url=loan/store" method="POST" enctype="multipart/form-data">
         
@@ -26,28 +28,32 @@
                 <?php endforeach; ?>
             </select>
         </div>
-             <div class="form-group">
+
+        <div class="form-group">
             <label>Select Account</label>
-            <select name="account_id" class="form-control" required>
+            <select name="account_id" id="account_select" class="form-control" required>
                 <option value="">-- Choose an Account --</option>
                 <?php foreach ($accounts as $acc): ?>
-                    <option value="<?= $acc['id'] ?>">
+                    <option value="<?= $acc['id'] ?>" data-balance="<?= $acc['current_balance'] ?>">
                         <?= htmlspecialchars($acc['name']) ?> (Balance: ₱<?= number_format($acc['current_balance'], 2) ?>)
                     </option>
                 <?php endforeach; ?>
             </select>
         </div>
 
-
         <div class="form-group">
             <label>Loan Amount (Principal)</label>
             <input type="number" step="0.01" id="amount" name="amount" class="form-control" placeholder="0.00" required>
         </div>
 
-   
         <div class="form-group">
             <label>Interest Rate (%)</label>
             <input type="number" step="0.01" id="interest_rate" name="interest_rate" class="form-control" placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+            <label>Fee</label>
+            <input type="number" step="0.01" id="fee" name="fee" class="form-control" placeholder="0.00">
         </div>
 
         <div class="form-group">
@@ -105,19 +111,40 @@
 <script>
     const amountInput = document.getElementById('amount');
     const interestInput = document.getElementById('interest_rate');
+    const feeInput = document.getElementById('fee');
     const totalPayableInput = document.getElementById('total_payable');
     const loanDateInput = document.getElementById('loan_date');
     const termValueInput = document.getElementById('term_months');
     const termTypeInput = document.getElementById('term_type');
     const dueDateDisplay = document.getElementById('due_date_display');
     const dueDateHidden = document.getElementById('due_date_hidden');
+    const accountSelect = document.getElementById('account_select');
 
     function calculateTotal() {
         const principal = parseFloat(amountInput.value) || 0;
         const rate = parseFloat(interestInput.value) || 0;
-        const total = principal + (principal * (rate / 100));
+        const fee = parseFloat(feeInput.value) || 0;
+        const total = principal + (principal * (rate / 100)) + fee;
         totalPayableInput.value = total.toFixed(2);
     }
+
+    // Balance Validation Listener
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+        if (!selectedOption.value) {
+            alert('Please select an account.');
+            e.preventDefault();
+            return;
+        }
+
+        const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+        const principal = parseFloat(amountInput.value) || 0;
+
+        if (principal > balance) {
+            e.preventDefault();
+            alert('Error: Loan amount (₱' + principal.toFixed(2) + ') exceeds the account balance (₱' + balance.toFixed(2) + ').');
+        }
+    });
 
     function calculateDueDate() {
         if (!loanDateInput.value || !termValueInput.value) {
@@ -136,18 +163,16 @@
             date.setDate(date.getDate() + value);
         }
 
-        // Display for user
         dueDateDisplay.innerText = date.toLocaleDateString(undefined, { 
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
 
-        // Set hidden input for database (YYYY-MM-DD)
         dueDateHidden.value = date.toISOString().split('T')[0];
     }
 
-    // Event Listeners
     amountInput.addEventListener('input', calculateTotal);
     interestInput.addEventListener('input', calculateTotal);
+    feeInput.addEventListener('input', calculateTotal);
     [loanDateInput, termValueInput, termTypeInput].forEach(el => {
         el.addEventListener('change', calculateDueDate);
     });

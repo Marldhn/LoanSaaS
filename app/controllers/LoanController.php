@@ -34,16 +34,18 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
 
    public function store() {
     // 1. Capture and sanitize inputs
-    $borrower_id   = $_POST['borrower_id'];
-    $account_id    = $_POST['account_id'];
-    $amount        = (float)$_POST['amount'];
-    $interest      = (float)$_POST['interest_rate'];
-    $total_pay     = (float)$_POST['total_payable'];
-    $term_months   = (int)$_POST['term_months'];
-    $term_type     = $_POST['term_type'];
-    $released_date = $_POST['released_date'];
-    $notes         = $_POST['notes'] ?? '';
-    $company_id    = $_SESSION['user']['company_id'];
+    $borrower_id    = $_POST['borrower_id'];
+    $account_id     = $_POST['account_id'];
+    $amount         = (float)$_POST['amount'];
+    $interest       = (float)$_POST['interest_rate'];
+    $total_pay      = (float)$_POST['total_payable'];
+    $term_months    = (int)$_POST['term_months'];
+    $fee            = (float)($_POST['fee'] ?? 0); 
+    $term_type      = $_POST['term_type'];
+    $released_date  = $_POST['released_date'];
+    $notes          = $_POST['notes'] ?? '';
+    
+    $company_id     = $_SESSION['user']['company_id'];
 
     // Collateral inputs
     $collateral_name  = $_POST['collateral_name'] ?? '';
@@ -58,7 +60,22 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     }
     $due_date = $date->format('Y-m-d');
 
-    (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'CREATE_LOAN', 'loans', $loan_id, "Created new loan #$loan_id");
+    // ... capture your variables ...
+    $account_id = $_POST['account_id'];
+    $amount     = (float)$_POST['amount'];
+
+    // 1. Fetch current balance from database to be 100% sure
+    $loanModel = new Loan();
+    $db = $loanModel->getDb();
+    
+    $stmt = $db->prepare("SELECT current_balance FROM accounts WHERE id = ?");
+    $stmt->execute([$account_id]);
+    $account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($amount > $account['current_balance']) {
+        // Redirect back with an error message
+        die("Error: Insufficient funds. The loan amount exceeds the available account balance.");
+    }
 
     // 3. Database operations
     $loanModel = new Loan();
@@ -68,24 +85,40 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
         $db->beginTransaction();
 
         // A. Insert the loan record
-        $stmt = $db->prepare("INSERT INTO loans 
-            (borrower_id, company_id, account_id, amount, interest_rate, released_date, due_date, total_payable, notes, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
+        $sql = "INSERT INTO loans 
+            (borrower_id, company_id, account_id, amount, interest_rate, released_date, due_date, total_payable, notes, fee, status, term_months, term_type) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $db->prepare($sql);
         
         $stmt->execute([
-            $borrower_id, $company_id, $account_id, $amount, $interest, $released_date, $due_date, $total_pay, $notes
+            $borrower_id,    // 1
+            $company_id,     // 2
+            $account_id,     // 3
+            $amount,         // 4
+            $interest,       // 5
+            $released_date,  // 6
+            $due_date,       // 7
+            $total_pay,      // 8
+            $notes,          // 9
+            $fee,            // 10
+            'Pending',       // 11
+            $term_months,    // 12
+            $term_type       // 13
         ]);
         
         $loan_id = $db->lastInsertId();
 
-        // B. Handle Collateral and File Upload
+        // B. Add Activity Log
+        (new ActivityLog($db))->logAction($company_id, $_SESSION['user']['id'], 'CREATE_LOAN', 'loans', $loan_id, "Created new loan #$loan_id");
+
+        // C. Handle Collateral and File Upload
         if (!empty($collateral_name)) {
             $filePath = null;
 
             if (isset($_FILES['collateral_file']) && $_FILES['collateral_file']['error'] === 0) {
                 $uploadDir = __DIR__ . '/../../public/uploads/collaterals/';
                 
-                // Create directory if it doesn't exist
                 if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
                 
                 $fileExtension = pathinfo($_FILES['collateral_file']['name'], PATHINFO_EXTENSION);
@@ -111,7 +144,9 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
         exit;
 
     } catch (Exception $e) {
-        $db->rollBack();
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
         die("Error saving loan: " . $e->getMessage());
     }
 }
@@ -123,9 +158,10 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     $loanModel = new Loan();
     $db = $loanModel->getDb();
     
-    // Updated query to join with accounts
+    // ADDED: term_months and term_type to the SELECT statement
     $stmt = $db->prepare("
-        SELECT l.*, b.first_name, b.last_name, b.phone, b.address, a.name as account_name 
+        SELECT l.*, b.first_name, b.last_name, b.phone, b.address, a.name as account_name, 
+               l.term_months, l.term_type 
         FROM loans l
         JOIN borrowers b ON l.borrower_id = b.id
         JOIN accounts a ON l.account_id = a.id
@@ -153,44 +189,114 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     $db = $loanModel->getDb();
     
     $status = $_GET['status'] ?? '';
-    $params = [$_SESSION['user']['company_id']];
+    $search = $_GET['search'] ?? '';
+    $company_id = $_SESSION['user']['company_id'];
     
-    // Build the query dynamically
+    // Start building query
     $sql = "SELECT l.*, b.first_name, b.last_name 
             FROM loans l
             JOIN borrowers b ON l.borrower_id = b.id
             WHERE l.company_id = ?";
-            
-    if (!empty($status)) {
-        $sql .= " AND l.status = ?";
-        $params[] = $status;
+    $params = [$company_id];
+    
+    // Add Search logic
+    if (!empty($search)) {
+        $sql .= " AND (b.first_name LIKE ? OR b.last_name LIKE ?)";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
     }
     
     $sql .= " ORDER BY l.created_at DESC";
     
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
-    $loans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $allLoans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Calculate status and apply filter in PHP (because status is calculated dynamically)
+    $loans = [];
+    foreach ($allLoans as $loan) {
+        $loan['display_status'] = $this->calculateLoanStatus($loan);
+        
+        // If user filtered by status, skip if it doesn't match
+        if (!empty($status) && $loan['display_status'] !== $status) {
+            continue;
+        }
+        $loans[] = $loan;
+    }
     
     require_once __DIR__ . '/../views/admin/loans/index.php';
 }
 
+
+private function calculateLoanStatus($loan) {
+    // 1. Always check for Rejected first
+    if ($loan['status'] === 'Rejected') return 'Rejected';
+
+    // 2. Then check for Pending
+    if ($loan['status'] === 'Pending') return 'Pending';
+
+    // 3. Only calculate 'Paid', 'Overdue', or 'Active' if the loan is Approved
+    if ($loan['status'] === 'Approved') {
+        // Check if fully paid
+        if (isset($loan['total_payable'], $loan['total_paid']) && $loan['total_paid'] >= $loan['total_payable']) {
+            return 'Paid';
+        }
+        
+        // Check if overdue
+        if (strtotime($loan['due_date']) < time()) {
+            return 'Overdue';
+        }
+        
+        // Otherwise, it's active
+        return 'Active';
+    }
+
+    // 4. Default fallback if status is something else
+    return 'Pending';
+}
+
     // FIXED: Approve method now uses the Loan model to get DB connection
-    public function approve($id) {
+  public function approve($id = null) {
+    // If $id was not passed as an argument, try to get it from the URL GET parameter
+    if ($id === null) {
+        $id = $_GET['id'] ?? null;
+    }
+
+    if (!$id) {
+        die("Error: Loan ID is missing.");
+    }
+
     $loanModel = new Loan();
     $accountModel = new Account();
     $loan = $loanModel->getById($id);
+    $db = $loanModel->getDb();
 
-    // 1. Verify status is still Pending
+    if (!$loan) {
+        die("Error: Loan not found.");
+    }
+
     if ($loan['status'] !== 'Pending') {
         header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
         return;
     }
 
-    $db = $loanModel->getDb();
     $db->beginTransaction();
     try {
-        // 2. Deduct only if Pending
+        // Fetch balance with FOR UPDATE to prevent race conditions
+        $stmt = $db->prepare("SELECT current_balance FROM accounts WHERE id = ? FOR UPDATE");
+        $stmt->execute([$loan['account_id']]);
+        $account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$account) {
+            throw new Exception("Account not found.");
+        }
+
+        // FIXED: Use $loan['amount'] instead of $amount
+        if ($loan['amount'] > $account['current_balance']) {
+            throw new Exception("Insufficient funds. The loan amount exceeds the available account balance.");
+        }
+
+        // Deduct
         $accountModel->addTransaction(
             $loan['account_id'], 
             -$loan['amount'], 
@@ -199,7 +305,7 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
             $id
         );
         
-        // 3. Update status
+        // Update status
         $stmt = $db->prepare("UPDATE loans SET status = 'Approved' WHERE id = ?");
         $stmt->execute([$id]);
 
@@ -208,12 +314,16 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
         $db->commit();
     } catch (Exception $e) {
         $db->rollBack();
-        die("Approval failed: " . $e->getMessage());
+        // Store error and redirect to details page
+        $_SESSION['error_message'] = $e->getMessage();
+        header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
+        exit;
     }
     
     header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
     exit;
 }
+
 
 public function edit($id = null) {
     // 1. Security Check
