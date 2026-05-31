@@ -7,23 +7,10 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8"><title>Borrowers Directory - Lowndesk</title>
+    <link rel="stylesheet" href="/loansaas/public/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; padding: 24px; margin: 0; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .header-title h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin: 0; }
-        .header-title p { font-size: 14px; color: #64748b; margin: 4px 0 0 0; }
-        .btn-primary { background: #2563eb; color: #ffffff; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-logout { background: #ea580c; color: #ffffff; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-left: 8px;}
-        .card-wrapper { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow-x: auto; }
-        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .data-table th { background: #f8fafc; padding: 14px 20px; font-size: 13px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-transform: uppercase; }
-        .data-table td { padding: 16px 20px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-        .badge-active { background: #dcfce7; color: #15803d; }
-        .badge-inactive { background: #fee2e2; color: #b91c1c; }
-        .btn-toggle { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; }
-    </style>
+    
 </head>
 <body>
     <div class="page-header">
