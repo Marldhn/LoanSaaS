@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3307
--- Generation Time: May 31, 2026 at 12:18 AM
+-- Host: 127.0.0.1:3306
+-- Generation Time: May 31, 2026 at 02:04 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,7 +41,7 @@ CREATE TABLE `accounts` (
 INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`) VALUES
 (1, 2, 'Gcash', 0.00),
 (2, 2, 'Maya', 0.00),
-(3, 2, 'Maribank', 13500.00);
+(3, 2, 'Maribank', 12500.00);
 
 -- --------------------------------------------------------
 
@@ -123,7 +123,8 @@ CREATE TABLE `companies` (
 INSERT INTO `companies` (`id`, `name`, `plan_tier`, `subscription_status`, `expires_at`, `created_at`) VALUES
 (1, 'System Platform Root Admin', 'premium', 'active', '2035-12-31 23:59:59', '2026-05-27 21:00:31'),
 (2, 'Sheldons', 'free', 'active', NULL, '2026-05-27 21:22:38'),
-(3, 'LoanShark', 'free', 'active', NULL, '2026-05-30 16:11:17');
+(3, 'LoanShark', 'free', 'active', NULL, '2026-05-30 16:11:17'),
+(4, 'Bogorsss', 'free', 'active', NULL, '2026-05-31 08:07:28');
 
 -- --------------------------------------------------------
 
@@ -263,7 +264,8 @@ INSERT INTO `users` (`id`, `company_id`, `username`, `password`, `role`, `create
 (4, 1, 'superadmin2', '$2y$10$T8ZJ1pC4O6.Ym9G2Fv4Wk.x9eHwK2aT0.iL0P4K/yXzQ4T2oN5.yS', 'superadmin', '2026-05-30 14:49:23', 1),
 (5, 1, 'mrubinos11@gmail.com', '$2y$10$uSJ14gku5Fn1jrGMS4WdNOgIIEMcahOw1H/E03t2PRmTpfa7O63lS', 'staff', '2026-05-30 15:02:55', 1),
 (6, 1, 'mrubinos@gmail.com', '$2y$10$Is7Ij26lz/wemJongl4oUuQkLRQCyOe3GLalhKsEgbuhNtzwX5YGC', 'staff', '2026-05-30 15:03:11', 1),
-(7, 3, 'azpired@gmail.com', '$2y$10$mXFh/wuuuBD3sInxtoVeFuX0awIBI1JAER2rYvNP4hgyh3D6aNNDG', 'admin', '2026-05-30 16:11:17', 1);
+(7, 3, 'azpired@gmail.com', '$2y$10$mXFh/wuuuBD3sInxtoVeFuX0awIBI1JAER2rYvNP4hgyh3D6aNNDG', 'admin', '2026-05-30 16:11:17', 1),
+(8, 4, 'drubinos@azpired.net', '$2y$10$m404WX5qHOqW4aU1i9LXi.yrTFT9z0Mkyn8Z0vnue9nwDUI1ijKg2', 'admin', '2026-05-31 08:07:28', 1);
 
 --
 -- Indexes for dumped tables
@@ -364,7 +366,7 @@ ALTER TABLE `borrowers`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `company_funds`
@@ -400,7 +402,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
