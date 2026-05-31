@@ -22,7 +22,10 @@
                 <select name="loan_id" class="form-control" required>
                     <option value="">-- Choose an Approved Loan --</option>
                     <?php foreach ($loans as $l): ?>
-                        <option value="<?= $l['id'] ?>">Loan #<?= str_pad($l['id'], 6, '0', STR_PAD_LEFT) ?> - <?= htmlspecialchars($l['borrower_name']) ?></option>
+                        <option value="<?= $l['id'] ?>">
+                            Loan #<?= str_pad($l['id'], 6, '0', STR_PAD_LEFT) ?> - 
+                            <?= htmlspecialchars(($l['first_name'] ?? '') . ' ' . ($l['last_name'] ?? '')) ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>

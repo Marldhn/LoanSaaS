@@ -38,8 +38,17 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
                             <td><?= htmlspecialchars($b['address']) ?></td>
                             <td><code><?= htmlspecialchars($b['valid_id'] ?: 'None') ?></code></td>
                             <td><span class="badge <?= $b['status'] == 1 ? 'badge-active' : 'badge-inactive' ?>"><?= $b['status'] == 1 ? 'Active' : 'Inactive' ?></span></td>
-                            <td><a href="/loansaas/public/index.php?url=borrower/toggle/<?= $b['id'] ?>" class="btn-toggle"><i class="fas fa-sync"></i> Toggle Status</a></td>
-                        </tr>
+<td>
+    <a href="/loansaas/public/index.php?url=borrower/edit/<?= $b['id'] ?>" class="btn-edit" style="margin-right: 10px;">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    
+    <a href="/loansaas/public/index.php?url=borrower/toggle/<?= $b['id'] ?>" class="btn-toggle">
+        <i class="fas fa-sync"></i> Toggle
+    </a>
+    
+    <a href="/loansaas/public/index.php?url=borrower/details&id=<?= $b['id'] ?>" style="margin-left: 10px;" class="btn-details">View Profile</a>
+</td>                       </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>

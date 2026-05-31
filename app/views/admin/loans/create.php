@@ -9,8 +9,6 @@
     .btn-save { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
     .btn-save:hover { background: #1d4ed8; }
     .due-date-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-weight: bold; color: #0f172a; text-align: center; }
-    
-    /* New Collateral Styles */
     .collateral-box { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #e2e8f0; }
 </style>
 
@@ -28,13 +26,7 @@
                 <?php endforeach; ?>
             </select>
         </div>
-
-        <div class="form-group">
-            <label>Loan Amount (Principal)</label>
-            <input type="number" step="0.01" id="amount" name="amount" class="form-control" placeholder="0.00" required>
-        </div>
-
-        <div class="form-group">
+             <div class="form-group">
             <label>Select Account</label>
             <select name="account_id" class="form-control" required>
                 <option value="">-- Choose an Account --</option>
@@ -46,6 +38,13 @@
             </select>
         </div>
 
+
+        <div class="form-group">
+            <label>Loan Amount (Principal)</label>
+            <input type="number" step="0.01" id="amount" name="amount" class="form-control" placeholder="0.00" required>
+        </div>
+
+   
         <div class="form-group">
             <label>Interest Rate (%)</label>
             <input type="number" step="0.01" id="interest_rate" name="interest_rate" class="form-control" placeholder="0.00">
@@ -76,9 +75,9 @@
             <label>Loan Duration</label>
             <div class="row">
                 <input type="number" id="term_months" name="term_months" class="form-control" placeholder="Qty (e.g. 3)" required>
-                <select id="term_type" name="term_type" class="form-control">
-                    <option value="day">Day(s)</option>
+                <select name="term_type" id="term_type" class="form-control" required>
                     <option value="month">Month(s)</option>
+                    <option value="day">Day(s)</option>
                 </select>
             </div>
         </div>
@@ -91,6 +90,7 @@
         <div class="form-group">
             <label>Calculated Due Date</label>
             <div id="due_date_display" class="due-date-box">Select date and term to calculate...</div>
+            <input type="hidden" name="due_date" id="due_date_hidden" required>
         </div>
 
         <div class="form-group">
@@ -103,7 +103,6 @@
 </div>
 
 <script>
-    // ... (Keep your existing JS logic here) ...
     const amountInput = document.getElementById('amount');
     const interestInput = document.getElementById('interest_rate');
     const totalPayableInput = document.getElementById('total_payable');
@@ -111,6 +110,7 @@
     const termValueInput = document.getElementById('term_months');
     const termTypeInput = document.getElementById('term_type');
     const dueDateDisplay = document.getElementById('due_date_display');
+    const dueDateHidden = document.getElementById('due_date_hidden');
 
     function calculateTotal() {
         const principal = parseFloat(amountInput.value) || 0;
@@ -122,25 +122,34 @@
     function calculateDueDate() {
         if (!loanDateInput.value || !termValueInput.value) {
             dueDateDisplay.innerText = "Select date and term to calculate...";
+            dueDateHidden.value = "";
             return;
         }
+
         let date = new Date(loanDateInput.value);
         let value = parseInt(termValueInput.value);
         let type = termTypeInput.value;
+
         if (type === 'month') {
             date.setMonth(date.getMonth() + value);
         } else {
             date.setDate(date.getDate() + value);
         }
+
+        // Display for user
         dueDateDisplay.innerText = date.toLocaleDateString(undefined, { 
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
+
+        // Set hidden input for database (YYYY-MM-DD)
+        dueDateHidden.value = date.toISOString().split('T')[0];
     }
 
+    // Event Listeners
     amountInput.addEventListener('input', calculateTotal);
     interestInput.addEventListener('input', calculateTotal);
     [loanDateInput, termValueInput, termTypeInput].forEach(el => {
-        el.addEventListener('input', calculateDueDate);
+        el.addEventListener('change', calculateDueDate);
     });
 </script>
 

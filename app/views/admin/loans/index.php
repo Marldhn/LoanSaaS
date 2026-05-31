@@ -17,12 +17,55 @@
     /* Green Approve Button */
     .btn-approve { background: #16a34a; color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; margin-left: 5px; }
     .empty-state { text-align: center; padding: 40px; color: #94a3b8; font-style: italic; }
+
+    /* Dropdown container */
+    .dropdown { position: relative; display: inline-block; }
+
+    /* Dropdown Content (Hidden by default) */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: #ffffff;
+        min-width: 120px;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        z-index: 1;
+        border: 1px solid #e2e8f0;
+    }
+
+    .dropdown-content a {
+        color: #475569;
+        padding: 10px 12px;
+        text-decoration: none;
+        display: block;
+        font-size: 12px;
+    }
+
+    .dropdown-content a:hover { background-color: #f8fafc; }
+
+    /* Show the dropdown on hover */
+    .dropdown:hover .dropdown-content { display: block; }
+
+    /* Button style */
+    .btn-action { background: #64748b; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; border: none; }
 </style>
 
 <div class="page-header">
     <h1>Loans List</h1>
     <a href="/loansaas/public/index.php?url=loan/create" class="btn-primary">+ Create New Loan</a>
 </div>
+
+<form method="GET" action="/loansaas/public/index.php" style="margin-bottom: 20px;">
+    <input type="hidden" name="url" value="loan/index">
+    <select name="status" onchange="this.form.submit()" style="padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1;">
+        <option value="">All Statuses</option>
+        <option value="Approved" <?= ($_GET['status'] ?? '') === 'Approved' ? 'selected' : '' ?>>Approved</option>
+        <option value="Pending" <?= ($_GET['status'] ?? '') === 'Pending' ? 'selected' : '' ?>>Pending</option>
+                <option value="Rejected" <?= ($_GET['status'] ?? '') === 'Rejected' ? 'selected' : '' ?>>Rejected</option>
+
+    </select>
+</form>
 
 <div class="card">
     <table class="data-table">
@@ -43,7 +86,9 @@
                 <tr>
                     <td>#LN-<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></td>
                     <td>
-                        <div style="font-weight: 600; color: #0f172a;">ID: <?= $loan['borrower_id'] ?></div>
+                        <div style="font-weight: 600; color: #0f172a;">
+                            <?= htmlspecialchars($loan['first_name'] . ' ' . $loan['last_name']) ?>
+                        </div>
                     </td>
                     <td style="font-weight: 600; color: #059669;">₱<?= number_format($loan['amount'], 2) ?></td>
                     <td>
@@ -53,16 +98,11 @@
                         </span>
                     </td>
                     <td style="text-align: right;">
-    <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-secondary">View Details</a>
-    
-    <?php if (strtolower($loan['status']) !== 'approved'): ?>
-        <a href="/loansaas/public/index.php?url=loan/approve&id=<?= $loan['id'] ?>" 
-           class="btn-approve" 
-           onclick="return confirm('Approve this loan?');">
-           Approve
-        </a>
-    <?php endif; ?>
-</td>
+                        <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-secondary">View Details</a>
+                        
+
+                        </div>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

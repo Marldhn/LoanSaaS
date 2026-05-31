@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../models/Loan.php';
 require_once __DIR__ . '/../models/Payment.php';
 require_once __DIR__ . '/../models/Account.php';
+require_once __DIR__ . '/../models/ActivityLog.php';
 
 class LoanController {
 
@@ -56,6 +57,8 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
         $date->modify("+{$term_months} days");
     }
     $due_date = $date->format('Y-m-d');
+
+    (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'CREATE_LOAN', 'loans', $loan_id, "Created new loan #$loan_id");
 
     // 3. Database operations
     $loanModel = new Loan();
@@ -117,70 +120,262 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     if (!isset($_GET['id'])) die("No ID provided");
     $id = $_GET['id'];
     
-    // 1. Get the DB connection manually (since there is no constructor)
-    $loanModel = new Loan();
-    $db = $loanModel->getDb(); // Use $db instead of $this->db
-    
-    $paymentModel = new Payment();
-    
-    $loan = $loanModel->getById($id);
-    $payments = $paymentModel->getByLoanId($id);
-    $totalPaid = $paymentModel->getTotalPaidByLoanId($id);
-
-    // 2. Use $db here instead of $this->db
-    $stmt = $db->prepare("SELECT * FROM loan_collaterals WHERE loan_id = ?");
-    $stmt->execute([$id]);
-    $collateral = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    $remainingBalance = $loan['total_payable'] - $totalPaid;
-    
-    require_once __DIR__ . '/../views/admin/loans/details.php';
-}
-
-    public function index() {
-        $loanModel = new Loan(); 
-        $company_id = $_SESSION['user']['company_id'];
-        $loans = $loanModel->getAllByCompany($company_id);
-        
-        require_once __DIR__ . '/../views/admin/loans/index.php';
-    }
-
-    // FIXED: Approve method now uses the Loan model to get DB connection
-    public function approve() {
-    if (!isset($_GET['id'])) die("No ID provided");
-    $id = $_GET['id'];
-    
     $loanModel = new Loan();
     $db = $loanModel->getDb();
     
+    // Updated query to join with accounts
+    $stmt = $db->prepare("
+        SELECT l.*, b.first_name, b.last_name, b.phone, b.address, a.name as account_name 
+        FROM loans l
+        JOIN borrowers b ON l.borrower_id = b.id
+        JOIN accounts a ON l.account_id = a.id
+        WHERE l.id = ?
+    ");
+    $stmt->execute([$id]);
+    $loan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Fetch collateral separately
+    $stmtColl = $db->prepare("SELECT * FROM loan_collaterals WHERE loan_id = ?");
+    $stmtColl->execute([$id]);
+    $collateral = $stmtColl->fetch(PDO::FETCH_ASSOC);
+
+    // Fetch payments
+    $paymentModel = new Payment();
+    $payments = $paymentModel->getByLoanId($id);
+    $totalPaid = $paymentModel->getTotalPaidByLoanId($id);
+    $remainingBalance = $loan['total_payable'] - $totalPaid;
+
+    require_once __DIR__ . '/../views/admin/loans/details.php';
+}
+
+   public function index() {
+    $loanModel = new Loan();
+    $db = $loanModel->getDb();
+    
+    $status = $_GET['status'] ?? '';
+    $params = [$_SESSION['user']['company_id']];
+    
+    // Build the query dynamically
+    $sql = "SELECT l.*, b.first_name, b.last_name 
+            FROM loans l
+            JOIN borrowers b ON l.borrower_id = b.id
+            WHERE l.company_id = ?";
+            
+    if (!empty($status)) {
+        $sql .= " AND l.status = ?";
+        $params[] = $status;
+    }
+    
+    $sql .= " ORDER BY l.created_at DESC";
+    
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
+    $loans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    require_once __DIR__ . '/../views/admin/loans/index.php';
+}
+
+    // FIXED: Approve method now uses the Loan model to get DB connection
+    public function approve($id) {
+    $loanModel = new Loan();
+    $accountModel = new Account();
+    $loan = $loanModel->getById($id);
+
+    // 1. Verify status is still Pending
+    if ($loan['status'] !== 'Pending') {
+        header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
+        return;
+    }
+
+    $db = $loanModel->getDb();
+    $db->beginTransaction();
     try {
-        $db->beginTransaction();
-
-        // 1. Get loan details first so we know how much to deduct and which account
-        $stmt = $db->prepare("SELECT amount, account_id, company_id FROM loans WHERE id = ?");
-        $stmt->execute([$id]);
-        $loan = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$loan) throw new Exception("Loan not found.");
-
-        // 2. Update loan status to 'Approved'
-        $stmtApprove = $db->prepare("UPDATE loans SET status = 'Approved' WHERE id = ?");
-        $stmtApprove->execute([$id]);
-
-        // 3. Deduct from the account (only now!)
-        $stmtDeduct = $db->prepare("UPDATE accounts 
-                                    SET current_balance = current_balance - ? 
-                                    WHERE id = ? AND company_id = ?");
+        // 2. Deduct only if Pending
+        $accountModel->addTransaction(
+            $loan['account_id'], 
+            -$loan['amount'], 
+            'loan_issuance', 
+            "Loan #$id Approved", 
+            $id
+        );
         
-        $stmtDeduct->execute([$loan['amount'], $loan['account_id'], $loan['company_id']]);
+        // 3. Update status
+        $stmt = $db->prepare("UPDATE loans SET status = 'Approved' WHERE id = ?");
+        $stmt->execute([$id]);
+
+        (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'APPROVE_LOAN', 'loans', $id, "Approved loan #$id");
+        
+        $db->commit();
+    } catch (Exception $e) {
+        $db->rollBack();
+        die("Approval failed: " . $e->getMessage());
+    }
+    
+    header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
+    exit;
+}
+
+public function edit($id = null) {
+    // 1. Security Check
+    if ($_SESSION['user']['role'] !== 'admin') {
+        die("Access Denied.");
+    }
+
+    $id = $id ?? $_GET['id'] ??     null;
+    if (!$id) die("Error: No Loan ID provided.");
+
+    // 2. Instantiate Model
+    $loanModel = new Loan(); 
+    
+    // 3. Use the model's connection to get the DB
+    // Assuming your Model has a public method or property to access the connection
+    $db = $loanModel->getDb(); 
+
+    // 4. Fetch the Loan
+    $loan = $loanModel->getById($id);
+    if (!$loan) die("Loan record not found.");
+
+    // 5. Fetch Collateral using the correct connection
+    $stmtColl = $db->prepare("SELECT * FROM loan_collaterals WHERE loan_id = ?");
+    $stmtColl->execute([$id]);
+    $collateral = $stmtColl->fetch(PDO::FETCH_ASSOC);
+
+    // 6. Fetch Accounts (to populate dropdown)
+    $stmtAcc = $db->prepare("SELECT id, name FROM accounts WHERE company_id = ?");
+    $stmtAcc->execute([$_SESSION['user']['company_id']]);
+    $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
+
+    require_once __DIR__ . '/../views/admin/loans/edit.php';
+}
+
+public function update() {
+    $id = $_GET['id'];
+    $loanModel = new Loan();
+    $accountModel = new Account();
+    $db = $loanModel->getDb();
+
+    // 1. Get current (OLD) data for comparison
+    $oldLoan = $loanModel->getById($id);
+    $oldAmount = (float)$oldLoan['amount'];
+    $oldAccountId = $oldLoan['account_id'];
+
+    // 2. Prepare new data from POST
+    $newAmount = (float)$_POST['amount'];
+    $newInterest = (float)$_POST['interest_rate'];
+    $newTotal = $newAmount + ($newAmount * ($newInterest / 100));
+    $newAccountId = $_POST['account_id'];
+
+    $db->beginTransaction();
+    try {
+        // ONLY perform account transaction logic if amount or account changed
+        if ($newAmount != $oldAmount || $newAccountId != $oldAccountId) {
+            
+            // A. REVERSE: Add the OLD amount back to the old account balance
+            $accountModel->addTransaction(
+                $oldAccountId, 
+                $oldAmount, 
+                'loan_reversal', 
+                "Reversing loan #$id for edit", 
+                $id
+            );
+
+            // B. APPLY: Subtract the NEW amount from the chosen account
+            $accountModel->addTransaction(
+                $newAccountId, 
+                -$newAmount, 
+                'loan_issuance', 
+                "Loan #$id re-issued with updated amount", 
+                $id
+            );
+        }
+
+        // C. Update the Loan table
+        $stmt = $db->prepare("UPDATE loans SET 
+            amount = ?, 
+            interest_rate = ?, 
+            total_payable = ?, 
+            account_id = ?, 
+            term_months = ?, 
+            term_type = ?, 
+            released_date = ?, 
+            due_date = ?, 
+            notes = ? 
+            WHERE id = ?");
+        
+        $stmt->execute([
+            $newAmount, 
+            $newInterest, 
+            $newTotal, 
+            $newAccountId, 
+            $_POST['term_months'],
+            $_POST['term_type'], 
+            $_POST['released_date'], 
+            $_POST['due_date'], 
+            $_POST['notes'], 
+            $id
+        ]);
+
+        // D. Update Collateral
+        $stmtColl = $db->prepare("UPDATE loan_collaterals SET item_name = ?, estimated_value = ? WHERE loan_id = ?");
+        $stmtColl->execute([$_POST['collateral_name'], $_POST['collateral_value'], $id]);
+
+        (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'UPDATE_LOAN', 'loans', $id, "Updated loan #$id");
 
         $db->commit();
-        header("Location: /loansaas/public/index.php?url=loan/index");
+        header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
         exit;
 
     } catch (Exception $e) {
         $db->rollBack();
-        die("Error approving loan: " . $e->getMessage());
+        die("Error updating loan: " . $e->getMessage());
     }
 }
+// Change the definition to accept $id = null
+public function reject($id = null) {
+    // If $id wasn't passed as an argument, get it from $_GET
+    $id = $id ?? $_GET['id'] ?? null;
+
+    if (!$id) {
+        die("Error: No Loan ID provided.");
+    }
+
+    $loanModel = new Loan();
+    $accountModel = new Account();
+    $db = $loanModel->getDb();
+    $loan = $loanModel->getById($id);
+
+    // Only allow rejection if it was previously Approved
+    if ($loan['status'] === 'Approved') {
+        $db->beginTransaction();
+        try {
+            // Add the money back to the account
+            $accountModel->addTransaction(
+                $loan['account_id'], 
+                $loan['amount'], 
+                'loan_reversal', 
+                "Loan #$id rejected, reversing deduction", 
+                $id
+            );
+
+            // Update status
+            $stmt = $db->prepare("UPDATE loans SET status = 'Rejected' WHERE id = ?");
+            $stmt->execute([$id]);
+
+            (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'REJECT_LOAN', 'loans', $id, "Rejected loan #$id");
+            
+            $db->commit();
+        } catch (Exception $e) {
+            $db->rollBack();
+            die("Error: " . $e->getMessage());
+        }
+    } else {
+        // If it was just 'Pending', just update the status without financial impact
+        $stmt = $db->prepare("UPDATE loans SET status = 'Rejected' WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    
+    header("Location: /loansaas/public/index.php?url=loan/index");
+    exit;
+}
+
 }

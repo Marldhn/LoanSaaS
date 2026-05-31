@@ -10,6 +10,13 @@ class AuthController {
         $this->userModel = new User();
     }
 
+
+    // Add this method to AuthController.php
+    public function index() {
+        header("Location: /loansaas/public/index.php?url=auth/login");
+        exit;
+    }
+
     public function login() {
         require_once __DIR__ . '/../views/auth/login.php';
 
@@ -86,4 +93,7 @@ class AuthController {
         header("Location: /loansaas/public/index.php?url=auth/login");
         exit;
     }
+
+
+
 }

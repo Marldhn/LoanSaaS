@@ -38,4 +38,33 @@ class Borrower extends Model {
         $stmt = $this->conn->prepare("UPDATE borrowers SET status = NOT status WHERE id = ? AND company_id = ?");
         return $stmt->execute([$id, $this->getTenantId()]);
     }
+
+
+// In Borrower.php
+
+// In Borrower.php
+public function getById($id) {
+    $stmt = $this->conn->prepare("SELECT * FROM borrowers WHERE id = ? AND company_id = ?");
+    $stmt->execute([$id, $this->getTenantId()]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC); // Ensure FETCH_ASSOC is used
+    return $result;
+}
+
+public function update($id, $data) {
+    $sql = "UPDATE borrowers 
+            SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, valid_id = ?
+            WHERE id = ? AND company_id = ?";
+
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute([
+        $data['first_name'],
+        $data['last_name'],
+        $data['phone'],
+        $data['email'],
+        $data['address'],
+        $data['valid_id'],
+        $id,
+        $this->getTenantId()
+    ]);
+}
 }

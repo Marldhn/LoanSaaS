@@ -79,4 +79,15 @@ public function getById($id) {
     $stmt->execute([$id, $this->getTenantId()]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
+
+public function getTransactionsByAccountId($account_id) {
+    $stmt = $this->conn->prepare("
+        SELECT * FROM account_transactions 
+        WHERE account_id = ? AND company_id = ? 
+        ORDER BY created_at DESC
+    ");
+    $stmt->execute([$account_id, $this->getTenantId()]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }

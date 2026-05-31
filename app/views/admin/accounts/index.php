@@ -2,7 +2,6 @@
 require_once dirname(__DIR__, 2) . '/layouts/header.php'; 
 ?>
 
-
 <style>
     /* Global Page Wrapper */
     .page-container { max-width: 1200px; margin: 0 auto; }
@@ -80,10 +79,12 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
 
 <div class="grid-container">
     <?php foreach ($accounts as $a): ?>
-    <div class="card">
-        <h4><?= htmlspecialchars($a['name']) ?></h4>
-        <h2>₱<?= number_format($a['current_balance'], 2) ?></h2>
-    </div>
+    <a href="/loansaas/public/index.php?url=account/details&id=<?= $a['id'] ?>" style="text-decoration: none;">
+        <div class="card">
+            <h4><?= htmlspecialchars($a['name']) ?></h4>
+            <h2>₱<?= number_format($a['current_balance'], 2) ?></h2>
+        </div>
+    </a>
     <?php endforeach; ?>
 </div>
 
@@ -117,13 +118,76 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
 </div>
 
 
+
+<div id="transferModal" class="modal-overlay">
+    <div class="modal-content" style="background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="margin: 0; font-size: 18px; color: #1e293b;">Transfer Funds</h3>
+            <span onclick="toggleModal('transferModal')" style="cursor: pointer; font-size: 24px; color: #94a3b8;">&times;</span>
+        </div>
+        
+        <form method="POST" action="/loansaas/public/index.php?url=account/transfer" id="transferForm">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">From Account</label>
+                <select name="from_id" id="from_id" class="form-input" required style="background: #f8fafc;">
+                    <?php foreach($accounts as $a): ?><option value="<?= $a['id'] ?>"><?= $a['name'] ?> (₱<?= number_format($a['current_balance'], 2) ?>)</option><?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div style="text-align: center; margin: 10px 0; color: #94a3b8;">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">To Account</label>
+                <select name="to_id" id="to_id" class="form-input" required>
+                    <?php foreach($accounts as $a): ?><option value="<?= $a['id'] ?>"><?= $a['name'] ?></option><?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Amount (₱)</label>
+                <input type="number" name="amount" class="form-input" placeholder="0.00" step="0.01" required style="font-size: 18px; font-weight: 700;">
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; height: 50px; font-size: 16px;">Confirm Transfer</button>
+        </form>
+    </div>
+</div>
+
+
+<div id="errorModal" class="modal-overlay" style="<?= isset($_SESSION['error_message']) ? 'display: flex;' : 'display: none;' ?>">
+    <div class="modal-content" style="background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center;">
+        <h3 style="color: #e11d48; margin-top: 0;">Transfer Failed</h3>
+        <p><?= $_SESSION['error_message'] ?? '' ?></p>
+        <button class="btn-primary" onclick="toggleModal('errorModal')">Close</button>
+    </div>
+</div>
+
 <?php 
-require_once dirname(__DIR__, 2) . '/layouts/footer.php'; 
+// Clear the error message after displaying it
+unset($_SESSION['error_message']); 
 ?>
+
 
 
 <script>
     function toggleModal(id) {
+        const modal = document.getElementById(id);
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    // Prevent transferring to the same account
+    document.getElementById('transferForm').addEventListener('submit', function(e) {
+        const from = document.getElementById('from_id').value;
+        const to = document.getElementById('to_id').value;
+        if (from === to) {
+            alert("Please select a different destination account.");
+            e.preventDefault();
+        }
+    });
+
+        function toggleModal(id) {
         const modal = document.getElementById(id);
         // Toggle the 'display' directly
         if (modal.style.display === 'none' || modal.style.display === '') {
@@ -132,4 +196,16 @@ require_once dirname(__DIR__, 2) . '/layouts/footer.php';
             modal.style.display = 'none';
         }
     }
+
+
+    function toggleModal(id) {
+        const modal = document.getElementById(id);
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+    }
 </script>
+
+<?php 
+require_once dirname(__DIR__, 2) . '/layouts/footer.php'; 
+?>
+
+
