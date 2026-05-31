@@ -53,14 +53,16 @@
                         </span>
                     </td>
                     <td style="text-align: right;">
-                        <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-secondary">View Details</a>
-                        
-                        <a href="/loansaas/public/index.php?url=loan/approve&id=<?= $loan['id'] ?>" 
-                           class="btn-approve" 
-                           onclick="return confirm('Approve this loan?');">
-                           Approve
-                        </a>
-                    </td>
+    <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-secondary">View Details</a>
+    
+    <?php if (strtolower($loan['status']) !== 'approved'): ?>
+        <a href="/loansaas/public/index.php?url=loan/approve&id=<?= $loan['id'] ?>" 
+           class="btn-approve" 
+           onclick="return confirm('Approve this loan?');">
+           Approve
+        </a>
+    <?php endif; ?>
+</td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

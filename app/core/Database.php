@@ -3,7 +3,7 @@
 class Database {
 
     private static $host = "localhost";
-    private static $port = "3307";
+    private static $port = "3306";
     private static $db   = "loan_saas_db";
     private static $user = "root";
     private static $pass = "";
