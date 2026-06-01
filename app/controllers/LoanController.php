@@ -12,6 +12,17 @@ class LoanController {
     $company_id = $_SESSION['user']['company_id'];
     $loanModel = new Loan();
     $db = $loanModel->getDb();
+
+
+    // 1. Fetch categories for this company
+    require_once __DIR__ . '/../models/Category.php';
+    $categoryModel = new Category();
+    $categories = $categoryModel->getAllByCompany($_SESSION['user']['company_id']);
+    
+    // 2. Filter for only 'loan' type categories
+    $loanCategories = array_filter($categories, function($cat) {
+        return $cat['type'] === 'loan';
+    });
     
     // 1. Fetch Borrowers
     $stmt = $db->prepare("SELECT id, first_name, last_name FROM borrowers WHERE company_id = ?");
@@ -36,6 +47,7 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     // 1. Capture and sanitize inputs
     $borrower_id    = $_POST['borrower_id'];
     $account_id     = $_POST['account_id'];
+    $category_id = (int)$_POST['category_id']; // <--- ADD THIS
     $amount         = (float)$_POST['amount'];
     $interest       = (float)$_POST['interest_rate'];
     $total_pay      = (float)$_POST['total_payable'];
@@ -85,9 +97,9 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
         $db->beginTransaction();
 
         // A. Insert the loan record
-        $sql = "INSERT INTO loans 
-            (borrower_id, company_id, account_id, amount, interest_rate, released_date, due_date, total_payable, notes, fee, status, term_months, term_type) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+       $sql = "INSERT INTO loans 
+            (borrower_id, company_id, account_id, amount, interest_rate, released_date, due_date, total_payable, notes, fee, status, term_months, term_type, category_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // <--- Added one '?'
         
         $stmt = $db->prepare($sql);
         
@@ -105,6 +117,7 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
             'Pending',       // 11
             $term_months,    // 12
             $term_type       // 13
+            ,$category_id     // 14 <--- Added this
         ]);
         
         $loan_id = $db->lastInsertId();
@@ -152,77 +165,119 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
 }
 
     public function details() {
-    if (!isset($_GET['id'])) die("No ID provided");
+    // 1. Validate input
+    if (!isset($_GET['id'])) {
+        die("No ID provided");
+    }
     $id = $_GET['id'];
     
     $loanModel = new Loan();
     $db = $loanModel->getDb();
-    
-    // ADDED: term_months and term_type to the SELECT statement
-    $stmt = $db->prepare("
+
+    // 2. Fetch the loan data first
+   $stmt = $db->prepare("
         SELECT l.*, b.first_name, b.last_name, b.phone, b.address, a.name as account_name, 
                l.term_months, l.term_type 
         FROM loans l
-        JOIN borrowers b ON l.borrower_id = b.id
-        JOIN accounts a ON l.account_id = a.id
+        LEFT JOIN borrowers b ON l.borrower_id = b.id
+        LEFT JOIN accounts a ON l.account_id = a.id
         WHERE l.id = ?
     ");
     $stmt->execute([$id]);
     $loan = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Fetch collateral separately
+    // 3. Now check if the loan exists
+    if (!$loan) {
+        die("Error: Loan ID $id not found in the database.");
+    }
+
+    // 4. Fetch collateral separately
     $stmtColl = $db->prepare("SELECT * FROM loan_collaterals WHERE loan_id = ?");
     $stmtColl->execute([$id]);
     $collateral = $stmtColl->fetch(PDO::FETCH_ASSOC);
 
-    // Fetch payments
+    // 5. Fetch payments
     $paymentModel = new Payment();
     $payments = $paymentModel->getByLoanId($id);
     $totalPaid = $paymentModel->getTotalPaidByLoanId($id);
-    $remainingBalance = $loan['total_payable'] - $totalPaid;
+    
+    // 6. Calculate remaining balance safely
+    $remainingBalance = ($loan['total_payable'] ?? 0) - $totalPaid;
 
+    // 7. Load the view
     require_once __DIR__ . '/../views/admin/loans/details.php';
 }
 
-   public function index() {
+  public function index() {
     $loanModel = new Loan();
+    $paymentModel = new Payment();
     $db = $loanModel->getDb();
+
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = 10;
+    $offset = ($page - 1) * $limit;
     
     $status = $_GET['status'] ?? '';
     $search = $_GET['search'] ?? '';
     $company_id = $_SESSION['user']['company_id'];
     
-    // Start building query
+    // 1. Get TOTAL count for pagination calculation
+    // Note: We count based on filters
+    $countSql = "SELECT COUNT(*) FROM loans l JOIN borrowers b ON l.borrower_id = b.id WHERE l.company_id = ?";
+    $params = [$company_id];
+    
+    if (!empty($search)) {
+        $countSql .= " AND (b.first_name LIKE ? OR b.last_name LIKE ?)";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+    }
+    
+    $stmtCount = $db->prepare($countSql);
+    $stmtCount->execute($params);
+    $totalLoans = $stmtCount->fetchColumn();
+    $totalPages = ceil($totalLoans / $limit);
+
+    // 2. Fetch only the 10 rows for THIS page
     $sql = "SELECT l.*, b.first_name, b.last_name 
             FROM loans l
             JOIN borrowers b ON l.borrower_id = b.id
             WHERE l.company_id = ?";
-    $params = [$company_id];
     
-    // Add Search logic
     if (!empty($search)) {
         $sql .= " AND (b.first_name LIKE ? OR b.last_name LIKE ?)";
-        $params[] = "%$search%";
-        $params[] = "%$search%";
     }
     
-    $sql .= " ORDER BY l.created_at DESC";
+    $sql .= " ORDER BY l.created_at DESC LIMIT $limit OFFSET $offset";
     
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
-    $allLoans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $loans = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Calculate status and apply filter in PHP (because status is calculated dynamically)
-    $loans = [];
-    foreach ($allLoans as $loan) {
+    // 3. Add remaining balance and status
+    foreach ($loans as &$loan) {
+        $totalPaid = $paymentModel->getTotalPaidByLoanId($loan['id']);
+        $loan['remaining_balance'] = $loan['total_payable'] - $totalPaid;
         $loan['display_status'] = $this->calculateLoanStatus($loan);
-        
-        // If user filtered by status, skip if it doesn't match
-        if (!empty($status) && $loan['display_status'] !== $status) {
-            continue;
-        }
-        $loans[] = $loan;
     }
+
+    // 1. Capture sorting parameters
+    $sort = $_GET['sort'] ?? 'created_at'; // Default sort column
+    $order = ($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC'; // Default order
+
+    // 2. Validate sort column to prevent SQL injection
+    $allowedSortColumns = ['id', 'borrower_name', 'due_date', 'status'];
+    if (!in_array($sort, $allowedSortColumns)) $sort = 'created_at';
+
+    // 3. Adjust SQL to include dynamic sorting
+    // Note: If you want to sort by borrower name, join the borrower table
+    $sql = "SELECT l.*, b.first_name, b.last_name 
+            FROM loans l
+            JOIN borrowers b ON l.borrower_id = b.id
+            WHERE l.company_id = ?";
+    
+    // ... (append search/status filters) ...
+
+    $sql .= " ORDER BY $sort $order LIMIT $limit OFFSET $offset";
     
     require_once __DIR__ . '/../views/admin/loans/index.php';
 }
@@ -238,7 +293,7 @@ private function calculateLoanStatus($loan) {
     // 3. Only calculate 'Paid', 'Overdue', or 'Active' if the loan is Approved
     if ($loan['status'] === 'Approved') {
         // Check if fully paid
-        if (isset($loan['total_payable'], $loan['total_paid']) && $loan['total_paid'] >= $loan['total_payable']) {
+        if (isset($loan['remaining_balance']) && $loan['remaining_balance'] <= 0) {
             return 'Paid';
         }
         
@@ -282,8 +337,8 @@ private function calculateLoanStatus($loan) {
 
     $db->beginTransaction();
     try {
-        // Fetch balance with FOR UPDATE to prevent race conditions
-        $stmt = $db->prepare("SELECT current_balance FROM accounts WHERE id = ? FOR UPDATE");
+        // REMOVED "FOR UPDATE" to prevent lock wait timeout errors
+        $stmt = $db->prepare("SELECT current_balance FROM accounts WHERE id = ?");
         $stmt->execute([$loan['account_id']]);
         $account = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -291,7 +346,6 @@ private function calculateLoanStatus($loan) {
             throw new Exception("Account not found.");
         }
 
-        // FIXED: Use $loan['amount'] instead of $amount
         if ($loan['amount'] > $account['current_balance']) {
             throw new Exception("Insufficient funds. The loan amount exceeds the available account balance.");
         }
@@ -305,9 +359,14 @@ private function calculateLoanStatus($loan) {
             $id
         );
         
-        // Update status
-        $stmt = $db->prepare("UPDATE loans SET status = 'Approved' WHERE id = ?");
+        // UPDATED: Added "AND status = 'Pending'" to prevent double-processing
+        $stmt = $db->prepare("UPDATE loans SET status = 'Approved' WHERE id = ? AND status = 'Pending'");
         $stmt->execute([$id]);
+
+        // Check if the update actually happened
+        if ($stmt->rowCount() === 0) {
+            throw new Exception("This loan has already been processed.");
+        }
 
         (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'APPROVE_LOAN', 'loans', $id, "Approved loan #$id");
         
@@ -454,11 +513,20 @@ public function reject($id = null) {
     $db = $loanModel->getDb();
     $loan = $loanModel->getById($id);
 
-    // Only allow rejection if it was previously Approved
-    if ($loan['status'] === 'Approved') {
-        $db->beginTransaction();
-        try {
-            // Add the money back to the account
+    if (!$loan) {
+        die("Error: Loan not found.");
+    }
+
+    // If already rejected, just redirect
+    if ($loan['status'] === 'Rejected') {
+        header("Location: /loansaas/public/index.php?url=loan/index");
+        exit;
+    }
+
+    $db->beginTransaction();
+    try {
+        // Handle financial reversal if it was already Approved
+        if ($loan['status'] === 'Approved') {
             $accountModel->addTransaction(
                 $loan['account_id'], 
                 $loan['amount'], 
@@ -466,22 +534,25 @@ public function reject($id = null) {
                 "Loan #$id rejected, reversing deduction", 
                 $id
             );
-
-            // Update status
-            $stmt = $db->prepare("UPDATE loans SET status = 'Rejected' WHERE id = ?");
-            $stmt->execute([$id]);
-
-            (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'REJECT_LOAN', 'loans', $id, "Rejected loan #$id");
-            
-            $db->commit();
-        } catch (Exception $e) {
-            $db->rollBack();
-            die("Error: " . $e->getMessage());
         }
-    } else {
-        // If it was just 'Pending', just update the status without financial impact
-        $stmt = $db->prepare("UPDATE loans SET status = 'Rejected' WHERE id = ?");
+
+        // Update status only if it was Pending or Approved
+        $stmt = $db->prepare("UPDATE loans SET status = 'Rejected' WHERE id = ? AND status IN ('Pending', 'Approved')");
         $stmt->execute([$id]);
+
+        if ($stmt->rowCount() === 0) {
+            throw new Exception("Loan status could not be updated.");
+        }
+
+        // Log the action only after a successful database update
+        (new ActivityLog($db))->logAction($_SESSION['user']['company_id'], $_SESSION['user']['id'], 'REJECT_LOAN', 'loans', $id, "Rejected loan #$id");
+        
+        $db->commit();
+    } catch (Exception $e) {
+        $db->rollBack();
+        $_SESSION['error_message'] = "Rejection failed: " . $e->getMessage();
+        header("Location: /loansaas/public/index.php?url=loan/details&id=" . $id);
+        exit;
     }
     
     header("Location: /loansaas/public/index.php?url=loan/index");

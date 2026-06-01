@@ -60,6 +60,15 @@
             <label>Total Payable</label>
             <input type="number" step="0.01" id="total_payable" name="total_payable" class="form-control" readonly style="background: #e9ecef;">
         </div>
+        <div class="form-group">
+    <label>Loan Category</label>
+    <select name="category_id" class="form-input" required>
+        <option value="">-- Select Category --</option>
+        <?php foreach ($loanCategories as $cat): ?>
+            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+        <?php endforeach; ?>
+    </select>
+</div>
 
         <div class="collateral-box">
             <h4 style="margin-top:0;">Collateral Details (Optional)</h4>

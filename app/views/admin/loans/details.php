@@ -122,6 +122,8 @@
 <?php endif; ?>
 
 <script>
+
+    
     // Confirmation Modal Script
     const confirmModal = document.getElementById('confirmModal');
     const confirmBtn = document.getElementById('modalConfirmBtn');

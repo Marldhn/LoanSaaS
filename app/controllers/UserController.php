@@ -20,9 +20,19 @@ class UserController {
         require_once dirname(__DIR__) . '/views/admin/users/index.php';
     }
 
+
     public function create() {
-        require_once dirname(__DIR__) . '/views/admin/users/create.php';
+    // 1. Start the session and verify user login
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    
+    if (!isset($_SESSION['user'])) {
+        header("Location: /loansaas/public/index.php?url=auth/login");
+        exit;
     }
+
+    // 2. Load the view only if logged in
+    require_once dirname(__DIR__) . '/views/admin/users/create.php';
+}
 
     public function store() {
         if (session_status() === PHP_SESSION_NONE) session_start();

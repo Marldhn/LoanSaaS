@@ -17,18 +17,19 @@
         
         <form action="/loansaas/public/index.php?url=payment/store" method="POST">
             
-            <div class="form-group">
-                <label>Select Loan</label>
-                <select name="loan_id" class="form-control" required>
-                    <option value="">-- Choose an Approved Loan --</option>
-                    <?php foreach ($loans as $l): ?>
-                        <option value="<?= $l['id'] ?>">
-                            Loan #<?= str_pad($l['id'], 6, '0', STR_PAD_LEFT) ?> - 
-                            <?= htmlspecialchars(($l['first_name'] ?? '') . ' ' . ($l['last_name'] ?? '')) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+           <div class="form-group">
+    <label>Select Loan</label>
+    <select name="loan_id" id="loan_id" class="form-control" onchange="updateBalance()" required>
+        <option value="">-- Choose an Approved Loan --</option>
+        <?php foreach ($loans as $loan): ?>
+            <option value="<?= $loan['id'] ?>" data-balance="<?= $loan['remaining_balance'] ?? 0 ?>">
+                Loan #<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?> 
+                - Balance: ₱<?= number_format($loan['remaining_balance'] ?? 0, 2) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+</div>
 
             <div class="form-group">
                 <label>Deposit to Account</label>
@@ -55,3 +56,5 @@
 </div>
 
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>
+
+
