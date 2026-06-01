@@ -208,80 +208,69 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     require_once __DIR__ . '/../views/admin/loans/details.php';
 }
 
-  public function index() {
+public function index() {
     $loanModel = new Loan();
     $paymentModel = new Payment();
     $db = $loanModel->getDb();
 
+    $company_id = $_SESSION['user']['company_id'];
+    $search = $_GET['search'] ?? '';
+    $status = $_GET['status'] ?? '';
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = 10;
-    $offset = ($page - 1) * $limit;
-    
-    $status = $_GET['status'] ?? '';
-    $search = $_GET['search'] ?? '';
-    $company_id = $_SESSION['user']['company_id'];
-    
-    // 1. Get TOTAL count for pagination calculation
-    // Note: We count based on filters
-    $countSql = "SELECT COUNT(*) FROM loans l JOIN borrowers b ON l.borrower_id = b.id WHERE l.company_id = ?";
-    $params = [$company_id];
-    
-    if (!empty($search)) {
-        $countSql .= " AND (b.first_name LIKE ? OR b.last_name LIKE ?)";
-        $params[] = "%$search%";
-        $params[] = "%$search%";
-    }
-    
-    $stmtCount = $db->prepare($countSql);
-    $stmtCount->execute($params);
-    $totalLoans = $stmtCount->fetchColumn();
-    $totalPages = ceil($totalLoans / $limit);
 
-    // 2. Fetch only the 10 rows for THIS page
+    // 1. Fetch all relevant loans from DB
     $sql = "SELECT l.*, b.first_name, b.last_name 
             FROM loans l
             JOIN borrowers b ON l.borrower_id = b.id
-            WHERE l.company_id = ?";
+            WHERE l.company_id = ? ORDER BY l.created_at DESC";
     
+    $params = [$company_id];
     if (!empty($search)) {
-        $sql .= " AND (b.first_name LIKE ? OR b.last_name LIKE ?)";
+        $sql = str_replace("ORDER BY l.created_at DESC", "", $sql) . " AND (b.first_name LIKE ? OR b.last_name LIKE ?) ORDER BY l.created_at DESC";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
     }
-    
-    $sql .= " ORDER BY l.created_at DESC LIMIT $limit OFFSET $offset";
-    
+
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
-    $loans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $allLoans = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 3. Add remaining balance and status
-    foreach ($loans as &$loan) {
+    // 2. Calculate balance and status, then apply filters
+    $filteredLoans = [];
+    foreach ($allLoans as $loan) {
         $totalPaid = $paymentModel->getTotalPaidByLoanId($loan['id']);
-        $loan['remaining_balance'] = $loan['total_payable'] - $totalPaid;
+        $loan['remaining_balance'] = (float)($loan['total_payable'] - $totalPaid);
         $loan['display_status'] = $this->calculateLoanStatus($loan);
+
+        if (empty($status) || $loan['display_status'] === $status) {
+            $filteredLoans[] = $loan;
+        }
     }
 
-    // 1. Capture sorting parameters
-    $sort = $_GET['sort'] ?? 'created_at'; // Default sort column
-    $order = ($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC'; // Default order
+    // 3. Sort the filtered array
+    $sort = $_GET['sort'] ?? 'created_at';
+$order = ($_GET['order'] ?? 'DESC');
 
-    // 2. Validate sort column to prevent SQL injection
-    $allowedSortColumns = ['id', 'borrower_name', 'due_date', 'status'];
-    if (!in_array($sort, $allowedSortColumns)) $sort = 'created_at';
+usort($filteredLoans, function($a, $b) use ($sort, $order) {
+    // Only sorting the items that passed the status filter
+    if ($sort === 'remaining_balance') {
+        $cmp = $a['remaining_balance'] <=> $b['remaining_balance'];
+    } elseif ($sort === 'due_date') {
+        $cmp = strcmp($a['due_date'], $b['due_date']);
+    } else {
+        $cmp = strcmp($a['first_name'], $b['first_name']);
+    }
+    return ($order === 'DESC') ? -$cmp : $cmp;
+});
 
-    // 3. Adjust SQL to include dynamic sorting
-    // Note: If you want to sort by borrower name, join the borrower table
-    $sql = "SELECT l.*, b.first_name, b.last_name 
-            FROM loans l
-            JOIN borrowers b ON l.borrower_id = b.id
-            WHERE l.company_id = ?";
-    
-    // ... (append search/status filters) ...
-
-    $sql .= " ORDER BY $sort $order LIMIT $limit OFFSET $offset";
-    
+    // 4. Paginate
+    $totalLoans = count($filteredLoans);
+    $totalPages = ceil($totalLoans / $limit);
+    $offset = ($page - 1) * $limit;
+$loans = array_slice($filteredLoans, $offset, $limit);
     require_once __DIR__ . '/../views/admin/loans/index.php';
 }
-
 
 private function calculateLoanStatus($loan) {
     // 1. Always check for Rejected first
