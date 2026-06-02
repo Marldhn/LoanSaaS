@@ -41,7 +41,7 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
                     <tr>
                         <th>User</th>
                         <th>Action</th>
-                        <th>Table</th>
+                        <th>Category</th>
                         <th>Description</th>
                         <th>Date</th>
                     </tr>

@@ -1,83 +1,77 @@
 <?php
-// Location: C:/xampp/htdocs/loansaas/app/controllers/UserController.php
-
 require_once __DIR__ . '/../models/User.php';
 
 class UserController {
+    private $userModel;
 
-    public function index() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        $user = $_SESSION['user'] ?? null;
-
-        if (!$user) {
-            header("Location: /loansaas/public/index.php?url=auth/login");
-            exit;
-        }
-
-        $userModel = new User();
-        $users = $userModel->getByCompany($user['company_id']);
-
-        require_once dirname(__DIR__) . '/views/admin/users/index.php';
+    public function __construct() {
+        $this->userModel = new User();
     }
-
 
     public function create() {
-    // 1. Start the session and verify user login
-    if (session_status() === PHP_SESSION_NONE) session_start();
-    
-    if (!isset($_SESSION['user'])) {
-        header("Location: /loansaas/public/index.php?url=auth/login");
-        exit;
+        require_once dirname(__DIR__) . '/views/admin/users/create.php';
     }
 
-    // 2. Load the view only if logged in
-    require_once dirname(__DIR__) . '/views/admin/users/create.php';
-}
-
     public function store() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
         $user = $_SESSION['user'];
-
-        $userModel = new User();
-        $userModel->create([
+        $this->userModel->create([
             'company_id' => $user['company_id'],
-            'username'   => $_POST['username'], // Ensure this matches your DB column
+            'username'   => $_POST['username'],
             'password'   => password_hash($_POST['password'], PASSWORD_DEFAULT),
             'role'       => 'staff'
         ]);
-
-        header("Location: /loansaas/public/index.php?url=user/index");
+        header("Location: /loansaas/public/index.php?url=business/settings");
         exit;
     }
 
-    public function toggle($id) {
-    // 1. Start session if not started
+    public function resetPassword($id) {
     if (session_status() === PHP_SESSION_NONE) session_start();
-    
-    // 2. Security Check: Are they logged in?
-    if (!isset($_SESSION['user'])) {
-        header("Location: /loansaas/public/index.php?url=auth/login");
+
+    // 1. Debug: Make sure we are getting the right ID
+    if (!$id) { die("No User ID provided."); }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $defaultPassword = 'password123';
+        $hashedPassword = password_hash($defaultPassword, PASSWORD_DEFAULT);
+        
+        // 2. Debug: Check if the model call returns true or false
+        $result = $this->userModel->updatePassword($id, $hashedPassword);
+        
+        if ($result) {
+            $_SESSION['success'] = "Password has been reset to 'password123'.";
+        } else {
+            // If this shows up, your SQL update failed
+            die("Error: The password was not updated in the database.");
+        }
+
+        header("Location: /loansaas/public/index.php?url=business/settings");
         exit;
     }
-
-    // 3. Security Check: Is the user an Admin?
-    if ($_SESSION['user']['role'] !== 'admin') {
-        // Stop unauthorized users from even running this logic
-        die("Access Denied: Only administrators can modify user status.");
-    }
-
-    // 4. Security Check: Prevent self-toggle
-    if ($_SESSION['user']['id'] == $id) {
-        die("Security Alert: You cannot toggle your own status.");
-    }
-
-    // 5. If all checks pass, proceed
-    $userModel = new User();
-    $userModel->toggleStatus($id);
-
-    header("Location: /loansaas/public/index.php?url=user/index");
-    exit;
 }
 
-    
+public function manageAdmins() {
+    // 1. Only allow Superadmin
+    if ($_SESSION['user']['role'] !== 'superadmin') {
+        die("Access Denied");
+    }
+
+    // 2. Fetch only Admins or specific users
+    $admins = $this->userModel->getAllAdmins(); 
+    require_once dirname(__DIR__) . '/views/admin/superadmin_users.php';
+}
+
+
+public function changePassword($id) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $old = $_POST['old_password'];
+        $new = $_POST['new_password'];
+        $confirm = $_POST['confirm_password'];
+        
+        // 1. Verify the OLD password from the database here
+        // 2. Validate $new === $confirm
+        // 3. Update with $this->userModel->updatePassword($id, password_hash($new, PASSWORD_DEFAULT));
+    }
+}
+
+
 }

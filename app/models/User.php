@@ -71,4 +71,35 @@ public function getByCompany($companyId) {
         $stmt = $this->conn->prepare("UPDATE users SET status = NOT status WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+
+    public function updatePassword($id, $hashedPassword) {
+    // Change $this->db to $this->conn to match your Model base class
+    $stmt = $this->conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+    return $stmt->execute([$hashedPassword, $id]);
+}
+
+
+public function getAdminsOnly() {
+        // This selects all users where the role is 'admin'
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE role = 'admin' ORDER BY id DESC");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+
+    
+    
+    // Add to app/models/User.php
+public function getAllAdmins() {
+    $db = $this->conn; // Assuming $this->conn is your PDO instance
+    $stmt = $db->query("
+        SELECT u.*, c.name as company_name 
+        FROM users u 
+        JOIN companies c ON u.company_id = c.id 
+        WHERE u.role = 'admin'
+    ");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }

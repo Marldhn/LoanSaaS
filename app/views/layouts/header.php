@@ -1,4 +1,7 @@
 <?php
+// 1. Require the Model file to prevent "Class not found" error
+require_once dirname(__DIR__, 2) . '/models/Loan.php';
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 $current_url = $_GET['url'] ?? '';
 $userRole = $_SESSION['user']['role'] ?? '';
@@ -16,32 +19,44 @@ $userRole = $_SESSION['user']['role'] ?? '';
     <aside class="sidebar" style="display: flex; flex-direction: column; height: 100vh; width: 260px; background: #ffffff; border-right: 1px solid #f1f5f9;">
         <div class="sidebar-brand" style="padding: 24px 20px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; color: #1e293b; border-bottom: 1px solid #f1f5f9;">
             <i class="fas fa-wallet" style="color: var(--primary-color); font-size: 20px;"></i>
-            <span><?= htmlspecialchars($_SESSION['user']['company_name'] ?? 'SHELDONS') ?></span>
+            <span id="sidebar-company-name">
+                <?php
+                // Safely fetch company name from DB if company_id exists
+                if (!empty($_SESSION['user']['company_id'])) {
+                    $loanModel = new Loan();
+                    $db = $loanModel->getDb();
+                    $stmt = $db->prepare("SELECT name FROM companies WHERE id = ?");
+                    $stmt->execute([$_SESSION['user']['company_id']]);
+                    $companyName = $stmt->fetchColumn();
+                    echo htmlspecialchars($companyName ?: 'SHELDONS');
+                } else {
+                    echo 'SHELDONS';
+                }
+                ?>
+            </span>
         </div>
-
-
-        
 
         <ul class="sidebar-menu" style="list-style: none; padding: 15px 0; margin: 0; flex-grow: 1;">
             <?php
-            $menuItems = [
-                ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
-                ['url' => 'account/index', 'icon' => 'fa-bank', 'label' => 'Accounts'],
-                ['url' => 'borrower/index', 'icon' => 'fa-user-group', 'label' => 'Borrowers'],
-                ['url' => 'payment/index', 'icon' => 'fa-receipt', 'label' => 'Payments'],
-                ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'],
-                ['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Manage Categories'],
-                ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
-                ['url' => 'feedback/create', 'icon' => 'fa-comment', 'label' => 'Send Feedback']
-            ];
 
-            // Only show Messages to Super Admin
             if ($userRole === 'superadmin') {
                 $menuItems[] = ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'];
+                $menuItems[] = ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'];
+                $menuItems[] = ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'];
             }
 
             if ($userRole === 'admin') {
-                $menuItems[] = ['url' => 'user/index', 'icon' => 'fa-user-gear', 'label' => 'Staff Users'];
+                $menuItems[] =['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'];
+                $menuItems[] =['url' => 'account/index', 'icon' => 'fa-bank', 'label' => 'Accounts'];
+                $menuItems[] =['url' => 'borrower/index', 'icon' => 'fa-user-group', 'label' => 'Borrowers'];
+                $menuItems[] =['url' => 'payment/index', 'icon' => 'fa-receipt', 'label' => 'Payments'];
+                $menuItems[] = ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'];
+                $menuItems[] =['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Manage Categories'];
+                $menuItems[] =['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'];
+                $menuItems[] =['url' => 'feedback/create', 'icon' => 'fa-comment', 'label' => 'Send Feedback'];
+
+                            $menuItems[] = ['url' => 'admin/settings', 'icon' => 'fa-cog', 'label' => 'Business Settings'];
+
             }
 
             foreach ($menuItems as $item) {

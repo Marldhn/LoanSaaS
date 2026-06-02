@@ -17,11 +17,6 @@ class AuthController {
         exit;
     }
 
-    public function login() {
-        require_once __DIR__ . '/../views/auth/login.php';
-
-        
-    }
 
     public function authenticate() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -85,13 +80,20 @@ class AuthController {
         }
     }
 
-    public function logout() {
-        $_SESSION = [];
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
+    public function login() {
+        // Capture the error from the URL if it exists
+        $error = $_GET['error'] ?? '';
+        $message = '';
+
+        // Match the error code to a user-friendly message
+        if ($error === 'account_closed') {
+            $message = "Your account has been closed. Please contact support.";
+        } elseif (isset($_SESSION['auth_error'])) {
+            $message = $_SESSION['auth_error'];
+            unset($_SESSION['auth_error']); // Clear after showing
         }
-        header("Location: /loansaas/public/index.php?url=auth/login");
-        exit;
+
+        require_once __DIR__ . '/../views/auth/login.php';
     }
 
 

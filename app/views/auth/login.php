@@ -25,6 +25,12 @@
         <div class="title"><h2>Welcome back</h2><p>Access your isolated lending operational environment.</p></div>
         <?php if(isset($_SESSION['auth_error'])): ?><div class="alert alert-error"><?= $_SESSION['auth_error']; unset($_SESSION['auth_error']); ?></div><?php endif; ?>
         <?php if(isset($_SESSION['auth_success'])): ?><div class="alert alert-success"><?= $_SESSION['auth_success']; unset($_SESSION['auth_success']); ?></div><?php endif; ?>
+            
+<?php if (!empty($message)): ?>
+    <div style="background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #fecaca; text-align: center; font-size: 14px;">
+        <?= htmlspecialchars($message) ?>
+    </div>
+<?php endif; ?>
         <form method="POST" action="/loansaas/public/index.php?url=auth/authenticate">
             <div class="form-group"><label class="form-label">Username</label><input type="text" name="username" class="form-input" required autocomplete="off"></div>
             <div class="form-group"><label class="form-label">Password</label><input type="password" name="password" class="form-input" required></div>
@@ -34,3 +40,4 @@
     </div>
 </body>
 </html>
+
