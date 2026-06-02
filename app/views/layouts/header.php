@@ -19,6 +19,9 @@ $userRole = $_SESSION['user']['role'] ?? '';
             <span><?= htmlspecialchars($_SESSION['user']['company_name'] ?? 'SHELDONS') ?></span>
         </div>
 
+
+        
+
         <ul class="sidebar-menu" style="list-style: none; padding: 15px 0; margin: 0; flex-grow: 1;">
             <?php
             $menuItems = [
@@ -32,8 +35,8 @@ $userRole = $_SESSION['user']['role'] ?? '';
                 ['url' => 'feedback/create', 'icon' => 'fa-comment', 'label' => 'Send Feedback']
             ];
 
-            // Only show Messages to Admin/Super Admin
-            if ($userRole === 'admin') {
+            // Only show Messages to Super Admin
+            if ($userRole === 'superadmin') {
                 $menuItems[] = ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'];
             }
 

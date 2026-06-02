@@ -14,10 +14,7 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
 </head>
 <body>
     <div class="page-header">
-        <div class="header-title">
-            <h1>Borrowers Directory (<?= htmlspecialchars($_SESSION['user']['company_name']) ?>)</h1>
-            <p>Monitor profiles assigned strictly to your isolated database branch cluster node partition.</p>
-        </div>
+
         <div>
             <a href="/loansaas/public/index.php?url=borrower/create" class="btn-primary"><i class="fas fa-plus"></i> Add Borrower</a>
         </div>

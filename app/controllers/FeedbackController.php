@@ -23,14 +23,14 @@ class FeedbackController {
             $_POST['message']
         ]);
         
-        header("Location: /loansaas/public/index.php?url=feedback/success");
+        header("Location: /loansaas/public/index.php?url=feedback/create");
         exit;
     }
 
     public function index() {
         // Remove redundant session_start() here as well
         // Security check
-        if ($_SESSION['user']['role'] !== 'admin') {
+        if ($_SESSION['user']['role'] !== 'superadmin') {
             die("Access Denied");
         }
         
