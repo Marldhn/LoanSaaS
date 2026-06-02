@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Jun 01, 2026 at 11:04 PM
+-- Generation Time: Jun 02, 2026 at 11:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -152,7 +152,10 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (22, 2, 3, 'CREATE_LOAN', 'loans', 28, 'Created new loan #28', '::1', '2026-06-01 20:29:09'),
 (23, 2, 3, 'UPDATE_LOAN', 'loans', 28, 'Updated loan #28', '::1', '2026-06-01 20:29:13'),
 (24, 2, 3, 'CREATE_LOAN', 'loans', 29, 'Created new loan #29', '::1', '2026-06-01 20:30:07'),
-(25, 2, 3, 'REJECT_LOAN', 'loans', 29, 'Rejected loan #29', '::1', '2026-06-01 20:30:11');
+(25, 2, 3, 'REJECT_LOAN', 'loans', 29, 'Rejected loan #29', '::1', '2026-06-01 20:30:11'),
+(26, 2, 2, 'UPDATE_BUSINESS_NAME', 'companies', 2, 'Updated business name to: ShelDohnsss', '::1', '2026-06-02 20:38:41'),
+(27, 2, 2, 'UPDATE_BUSINESS_NAME', 'companies', 2, 'Updated business name to: ShelDohnssss', '::1', '2026-06-02 20:38:45'),
+(28, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Test', '::1', '2026-06-02 21:23:36');
 
 -- --------------------------------------------------------
 
@@ -206,7 +209,9 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `company_id`, `type`, `name`, `description`, `created_at`) VALUES
-(1, 2, 'loan', 'Emergency', '-', '2026-06-01 19:54:38');
+(1, 2, 'loan', 'Emergency', '-', '2026-06-01 19:54:38'),
+(2, 2, 'payment', 'Test', 'qwf', '2026-06-02 21:23:13'),
+(3, 2, 'payment', 'Test', 'qwf', '2026-06-02 21:23:36');
 
 -- --------------------------------------------------------
 
@@ -229,9 +234,9 @@ CREATE TABLE `companies` (
 
 INSERT INTO `companies` (`id`, `name`, `plan_tier`, `subscription_status`, `expires_at`, `created_at`) VALUES
 (1, 'System Platform Root Admin', 'premium', 'active', '2035-12-31 23:59:59', '2026-05-27 21:00:31'),
-(2, 'Sheldons', 'free', 'active', NULL, '2026-05-27 21:22:38'),
-(3, 'LoanShark', 'free', 'active', NULL, '2026-05-30 16:11:17'),
-(4, 'Bogorsss', 'free', 'active', NULL, '2026-05-31 08:07:28');
+(2, 'ShelDohnssss', 'basic', 'active', NULL, '2026-05-27 21:22:38'),
+(3, 'LoanShark', 'basic', 'active', NULL, '2026-05-30 16:11:17'),
+(4, 'Bogorsss', 'basic', 'active', NULL, '2026-05-31 08:07:28');
 
 -- --------------------------------------------------------
 
@@ -416,11 +421,11 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `company_id`, `username`, `password`, `role`, `created_at`, `status`) VALUES
 (1, 1, 'super@admin.com', 'password', 'super_admin', '2026-05-27 21:00:31', 1),
-(2, 2, 'mrubinos@azpired.net', '$2y$10$aW3cTVhs4SFEl7Ixyo4OKOmqKTjgKL/LeNq6yRWJOLy0tQe2WOSP2', 'admin', '2026-05-27 21:22:38', 1),
-(3, 2, 'staff1@gmail.com', '$2y$10$YMp1R.9MH1c.M6s84fwV0un8WowcDZY/1VfTrA2Ud7xWcp0kL6u1u', 'staff', '2026-05-28 18:53:10', 1),
+(2, 2, 'mrubinos@azpired.net', '$2y$10$lw71329OuDv7OoCX8rC5wuZee/0VQ9/jz9sKxdKsveeGnLO450j/G', 'admin', '2026-05-27 21:22:38', 1),
+(3, 2, 'staff1@gmail.com', '$2y$10$P8kMM293jsQphvzqiuU34ewY0xialKUTiP.R202lsi/bSI2/qYDHK', 'staff', '2026-05-28 18:53:10', 0),
 (4, 1, 'superadmin2', '$2y$10$T8ZJ1pC4O6.Ym9G2Fv4Wk.x9eHwK2aT0.iL0P4K/yXzQ4T2oN5.yS', 'superadmin', '2026-05-30 14:49:23', 1),
 (5, 1, 'mrubinos11@gmail.com', '$2y$10$uSJ14gku5Fn1jrGMS4WdNOgIIEMcahOw1H/E03t2PRmTpfa7O63lS', 'staff', '2026-05-30 15:02:55', 1),
-(6, 1, 'mrubinos@gmail.com', '$2y$10$Is7Ij26lz/wemJongl4oUuQkLRQCyOe3GLalhKsEgbuhNtzwX5YGC', 'staff', '2026-05-30 15:03:11', 1),
+(6, 1, 'mrubinos@gmail.com', '$2y$10$K3sezJ8u.ug9ZrlwXTupc.2Za1e7BleYcdDo8UWVu/0p7QW6ocnA.', 'staff', '2026-05-30 15:03:11', 1),
 (7, 3, 'azpired@gmail.com', '$2y$10$mXFh/wuuuBD3sInxtoVeFuX0awIBI1JAER2rYvNP4hgyh3D6aNNDG', 'admin', '2026-05-30 16:11:17', 1),
 (8, 4, 'drubinos@azpired.net', '$2y$10$m404WX5qHOqW4aU1i9LXi.yrTFT9z0Mkyn8Z0vnue9nwDUI1ijKg2', 'admin', '2026-05-31 08:07:28', 1);
 
@@ -542,7 +547,7 @@ ALTER TABLE `account_transactions`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
@@ -554,7 +559,7 @@ ALTER TABLE `borrowers`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `companies`

@@ -36,40 +36,40 @@ $userRole = $_SESSION['user']['role'] ?? '';
             </span>
         </div>
 
-        <ul class="sidebar-menu" style="list-style: none; padding: 15px 0; margin: 0; flex-grow: 1;">
-            <?php
+      <ul class="sidebar-menu" style="list-style: none; padding: 15px 0; margin: 0; flex-grow: 1;">
+    <?php
+    $menuItems = []; // Initialize array to prevent errors
 
-            if ($userRole === 'superadmin') {
-                $menuItems[] = ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'];
-                $menuItems[] = ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'];
-                $menuItems[] = ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'];
-            }
+    if ($userRole === 'superadmin') {
+        $menuItems[] = ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'];
+        $menuItems[] = ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'];
+        $menuItems[] = ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'];
+    }
 
-            if ($userRole === 'admin') {
-                $menuItems[] =['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'];
-                $menuItems[] =['url' => 'account/index', 'icon' => 'fa-bank', 'label' => 'Accounts'];
-                $menuItems[] =['url' => 'borrower/index', 'icon' => 'fa-user-group', 'label' => 'Borrowers'];
-                $menuItems[] =['url' => 'payment/index', 'icon' => 'fa-receipt', 'label' => 'Payments'];
-                $menuItems[] = ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'];
-                $menuItems[] =['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Manage Categories'];
-                $menuItems[] =['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'];
-                $menuItems[] =['url' => 'feedback/create', 'icon' => 'fa-comment', 'label' => 'Send Feedback'];
+if ($userRole === 'admin' || $userRole === 'staff') {   
+        $menuItems[] = ['url' => 'dashboard/index', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'];     
+        $menuItems[] = ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'];
+        $menuItems[] = ['url' => 'account/index', 'icon' => 'fa-bank', 'label' => 'Accounts'];
+        $menuItems[] = ['url' => 'borrower/index', 'icon' => 'fa-user-group', 'label' => 'Borrowers'];
+        $menuItems[] = ['url' => 'payment/index', 'icon' => 'fa-receipt', 'label' => 'Payments'];
+        $menuItems[] = ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'];
+        // Combined Category links into one efficient entry
+        $menuItems[] = ['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Categories'];
+        $menuItems[] = ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'];
+        $menuItems[] = ['url' => 'feedback/create', 'icon' => 'fa-comment', 'label' => 'Send Feedback'];
+        $menuItems[] = ['url' => 'admin/settings', 'icon' => 'fa-cog', 'label' => 'Settings'];
+    }
 
-                            $menuItems[] = ['url' => 'admin/settings', 'icon' => 'fa-cog', 'label' => 'Business Settings'];
-
-            }
-
-            foreach ($menuItems as $item) {
-                $active = (strpos($current_url, explode('/', $item['url'])[0]) === 0) ? 'active' : '';
-                echo "<li class='menu-item $active'>
-                        <a href='/loansaas/public/index.php?url={$item['url']}' style='display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #64748b; text-decoration: none; transition: 0.2s;'>
-                            <i class='fas {$item['icon']}'></i> <span>{$item['label']}</span>
-                        </a>
-                      </li>";
-            }
-            ?>
-        </ul>
-
+    foreach ($menuItems as $item) {
+        $active = (strpos($current_url, explode('/', $item['url'])[0]) === 0) ? 'active' : '';
+        echo "<li class='menu-item $active'>
+                <a href='/loansaas/public/index.php?url={$item['url']}' style='display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #64748b; text-decoration: none; transition: 0.2s;'>
+                    <i class='fas {$item['icon']}' style='width: 20px; text-align: center;'></i> <span>{$item['label']}</span>
+                </a>
+              </li>";
+    }
+    ?>
+</ul>
         <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid #f1f5f9;">
             <div class="user-profile" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                 <div class="user-avatar" style="width: 38px; height: 38px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #475569;">
