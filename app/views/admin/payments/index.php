@@ -19,10 +19,8 @@
             <h2 style="margin:0;">Payment History</h2>
             <p style="margin:5px 0 0; color: #94a3b8; font-size: 0.9rem;">View and manage processed payment records</p>
         </div>
-        <button type="button" onclick="document.getElementById('payModal').style.display='flex'" 
-                style="padding: 10px 20px; background: #fff; color: #1e293b; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-            + Record Payment
-        </button>
+                <a href="/loansaas/public/index.php?url=payment/create" class="btn-primary" style="background:#fff; color:#1e293b; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:600;">+ New Payment</a>
+
     </div>
 </div>
 
