@@ -18,6 +18,8 @@
                     <option value="loan">Loan Category</option>
                     <option value="payment">Payment Category</option>
                     <option value="feedback">Feedback Category</option>
+                                        <option value="expense">Expense Category</option>
+
                 </select>
             </div>
 

@@ -102,4 +102,42 @@ class AccountController {
     // Explicitly require the details view
     require_once __DIR__ . '/../views/admin/accounts/details.php';
 }
+
+
+// NEW METHOD ADDED HERE
+    public function processAdjustment() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $accountModel = new Account();
+            $db = $accountModel->getDb();
+            
+            $amount = (float)$_POST['amount'];
+            $type = $_POST['type'];
+            $account_id = $_POST['account_id'];
+            $notes = $_POST['notes'];
+            
+            $finalAmount = ($type === 'deduct') ? -$amount : $amount;
+
+            $db->beginTransaction();
+            try {
+                // Add the transaction record
+                $accountModel->addTransaction($account_id, $finalAmount, 'adjustment', $notes);
+
+                // Log the activity
+                (new ActivityLog($db))->logAction(
+                    $_SESSION['user']['company_id'], 
+                    $_SESSION['user']['id'], 
+                    'ADJUST_BALANCE', 
+                    'accounts', 
+                    $account_id, 
+                    "Adjusted account balance: $type ₱" . number_format($amount, 2) . " | Note: " . $notes
+                );
+
+                $db->commit();
+                header("Location: /loansaas/public/index.php?url=account/details&id=" . $account_id);
+            } catch (Exception $e) {
+                $db->rollBack();
+                die("Adjustment failed: " . $e->getMessage());
+            }
+        }
+    }
 }

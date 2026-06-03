@@ -1,8 +1,9 @@
 <?php require_once dirname(__DIR__, 2) . '/layouts/header.php'; ?>
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
     .page-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-    
     .account-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
     .account-header h1 { font-size: 24px; font-weight: 700; color: #1e293b; margin: 0; }
     
@@ -19,23 +20,22 @@
     .data-table { width: 100%; border-collapse: collapse; }
     .data-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 12px; color: #64748b; text-transform: uppercase; }
     .data-table td { padding: 16px 24px; border-top: 1px solid #f1f5f9; font-size: 14px; color: #334155; }
-    .data-table tr:hover { background: #fdfdfd; }
     
-    .badge { 
-        padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
-        background: #e2e8f0; color: #475569; text-transform: capitalize;
-    }
-    .btn-back { 
-        padding: 10px 20px; background: #64748b; color: white; border-radius: 8px; 
-        text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s;
-    }
-    .btn-back:hover { background: #475569; }
+    .btn-back { padding: 10px 20px; background: #64748b; color: white; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .btn-adjust { background: #059669; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
 </style>
 
 <div class="page-container">
     <div class="account-header">
         <h1><?= htmlspecialchars($account['name']) ?> Details</h1>
-        <a href="/loansaas/public/index.php?url=account/index" class="btn-back">← Back to Accounts</a>
+        <div class="d-flex gap-2">
+            <?php if ($_SESSION['user']['role'] === 'admin'): ?>
+                <button type="button" class="btn-adjust" data-bs-toggle="modal" data-bs-target="#adjustModal">
+                    Adjust Balance
+                </button>
+            <?php endif; ?>
+            <a href="?url=account/index" class="btn-back">← Back to Accounts</a>
+        </div>
     </div>
 
     <div class="balance-card">
@@ -67,5 +67,45 @@
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="adjustModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="?url=account/processAdjustment" method="POST">
+        <input type="hidden" name="account_id" value="<?= $account['id'] ?>">
+        
+        <div class="modal-header">
+          <h5 class="modal-title">Adjust Account Balance</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Adjustment Type</label>
+            <select name="type" class="form-control" required>
+              <option value="add">Add Funds</option>
+              <option value="deduct">Deduct Funds</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount (₱)</label>
+            <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason / Note</label>
+            <input type="text" name="notes" class="form-control" placeholder="e.g., Opening Balance Adjustment" required>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>

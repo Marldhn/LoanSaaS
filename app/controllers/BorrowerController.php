@@ -75,31 +75,37 @@ class BorrowerController {
     }
 
     public function update($id) {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'first_name'  => $_POST['first_name'],
-                'last_name'   => $_POST['last_name'],
-                'phone'       => $_POST['phone'],
-                'email'       => $_POST['email'],
-                'address'     => $_POST['address'],
-                'valid_id'    => $_POST['valid_id']
-            ];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // 1. Fetch current data using the correct method name (getById)
+        $borrower = $this->borrowerModel->getById($id); 
+        $fullName = ($borrower) ? $borrower['first_name'] . ' ' . $borrower['last_name'] : "ID #$id";
 
-            $this->borrowerModel->update($id, $data);
+        $data = [
+            'first_name'  => $_POST['first_name'],
+            'last_name'   => $_POST['last_name'],
+            'phone'       => $_POST['phone'],
+            'email'       => $_POST['email'],
+            'address'     => $_POST['address'],
+            'valid_id'    => $_POST['valid_id']
+        ];
 
-            (new ActivityLog($this->borrowerModel->getDb()))->logAction(
-                $_SESSION['user']['company_id'], 
-                $_SESSION['user']['id'], 
-                'UPDATE_BORROWER', 
-                'borrowers', 
-                $id, 
-                "Updated profile for borrower ID #$id"
-            );
-            
-            header("Location: /loansaas/public/index.php?url=borrower/index");
-            exit;
-        }
+        // 2. Perform the update
+        $this->borrowerModel->update($id, $data);
+
+        // 3. Log using the name
+        (new ActivityLog($this->borrowerModel->getDb()))->logAction(
+            $_SESSION['user']['company_id'], 
+            $_SESSION['user']['id'], 
+            'UPDATE_BORROWER', 
+            'borrowers', 
+            $id, 
+            "Updated profile for: " . $fullName
+        );
+        
+        header("Location: /loansaas/public/index.php?url=borrower/index");
+        exit;
     }
+}
 
     public function details($id = null) {
         $id = $id ?? $_GET['id'] ?? null;

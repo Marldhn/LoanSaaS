@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3307
--- Generation Time: Jun 03, 2026 at 12:37 AM
+-- Host: 127.0.0.1:3306
+-- Generation Time: Jun 03, 2026 at 01:03 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,9 +39,9 @@ CREATE TABLE `accounts` (
 --
 
 INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`) VALUES
-(1, 2, 'Gcash', 8000.00),
-(2, 2, 'Maya', 0.00),
-(3, 2, 'Maribank', 3000.00);
+(1, 2, 'Gcash', 6500.00),
+(2, 2, 'Maya', 5000.00),
+(3, 2, 'Maribank', 2000.00);
 
 -- --------------------------------------------------------
 
@@ -103,7 +103,8 @@ INSERT INTO `account_transactions` (`id`, `company_id`, `account_id`, `loan_id`,
 (44, 2, 3, NULL, -50.00, 'transfer_out', NULL, 'Transfer to Maya', '2026-06-01 11:58:44'),
 (45, 2, 2, NULL, 50.00, 'transfer_in', NULL, 'Transfer from Maribank', '2026-06-01 11:58:44'),
 (48, 2, 2, 26, -50.00, '', NULL, 'Loan #26 Approved', '2026-06-01 19:59:02'),
-(53, 2, 2, 26, -50.00, '', NULL, 'Loan #26 Approved', '2026-06-01 20:25:23');
+(53, 2, 2, 26, -50.00, '', NULL, 'Loan #26 Approved', '2026-06-01 20:25:23'),
+(54, 2, 2, NULL, 5000.00, '', NULL, 'qwd', '2026-06-02 23:46:27');
 
 -- --------------------------------------------------------
 
@@ -155,7 +156,19 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (25, 2, 3, 'REJECT_LOAN', 'loans', 29, 'Rejected loan #29', '::1', '2026-06-01 20:30:11'),
 (26, 2, 2, 'UPDATE_BUSINESS_NAME', 'companies', 2, 'Updated business name to: ShelDohnsss', '::1', '2026-06-02 20:38:41'),
 (27, 2, 2, 'UPDATE_BUSINESS_NAME', 'companies', 2, 'Updated business name to: ShelDohnssss', '::1', '2026-06-02 20:38:45'),
-(28, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Test', '::1', '2026-06-02 21:23:36');
+(28, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Test', '::1', '2026-06-02 21:23:36'),
+(29, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Food', '::1', '2026-06-02 22:49:44'),
+(30, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: qwf', '::1', '2026-06-02 22:54:31'),
+(31, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Expense', '::1', '2026-06-02 22:54:42'),
+(32, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Expense', '::1', '2026-06-02 22:55:16'),
+(33, 2, 2, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Food', '::1', '2026-06-02 22:57:56'),
+(34, 2, 2, 'CREATE_EXPENSE', 'expenses', 5, 'Created new expense: Henlooo - Amount: ₱500.00', '::1', '2026-06-02 23:32:23'),
+(35, 2, 2, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Dondi Rubinos Rubinos', '::1', '2026-06-02 23:33:07'),
+(36, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for borrower ID #4', '::1', '2026-06-02 23:33:33'),
+(37, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for: Dondi Rubinosss Rubinos', '::1', '2026-06-02 23:37:01'),
+(38, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for: Dondi Rubinos Rubinos', '::1', '2026-06-02 23:37:11'),
+(39, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for: Dondi  Rubinos', '::1', '2026-06-02 23:37:54'),
+(40, 2, 2, 'ADJUST_BALANCE', 'accounts', 2, 'Adjusted account balance: add ₱5,000.00 | Note: qwd', '::1', '2026-06-02 23:46:27');
 
 -- --------------------------------------------------------
 
@@ -187,7 +200,8 @@ CREATE TABLE `borrowers` (
 INSERT INTO `borrowers` (`id`, `company_id`, `first_name`, `middle_name`, `last_name`, `gender`, `birthdate`, `phone`, `email`, `address`, `valid_id`, `status`, `created_at`, `occupation`) VALUES
 (1, 2, 'Marldohn ', 'Codizar', 'Rubinos', 'Male', '1111-10-10', '09061941138', 'marldohcrubinos11@gmail.com', '8541851weqf', '01010101010101', 1, '2026-05-28 13:17:53', NULL),
 (2, 2, 'Marldohnssssasd', 'Codizar', 'Rubinos', 'Male', '2002-11-04', '09061941138', NULL, 'Jakosalem Street Cebu City', NULL, 1, '2026-05-28 19:28:19', NULL),
-(3, 2, 'Rolan', '', 'Cabanos', 'Male', '1111-11-11', 'qwfqfqf', 'rcabanos@azpired.net', '651', '15641651651', 1, '2026-05-31 19:39:04', NULL);
+(3, 2, 'Rolan', '', 'Cabanos', 'Male', '1111-11-11', 'qwfqfqf', 'rcabanos@azpired.net', '651', '15641651651', 1, '2026-05-31 19:39:04', NULL),
+(4, 2, 'Dondi ', 'Novabos', 'Rubinos', 'Male', '7244-09-12', '109248091274', NULL, '12412', NULL, 1, '2026-06-02 23:33:07', NULL);
 
 -- --------------------------------------------------------
 
@@ -211,7 +225,12 @@ CREATE TABLE `categories` (
 INSERT INTO `categories` (`id`, `company_id`, `type`, `name`, `description`, `created_at`) VALUES
 (1, 2, 'loan', 'Emergency', '-', '2026-06-01 19:54:38'),
 (2, 2, 'payment', 'Test', 'qwf', '2026-06-02 21:23:13'),
-(3, 2, 'payment', 'Test', 'qwf', '2026-06-02 21:23:36');
+(3, 2, 'payment', 'Test', 'qwf', '2026-06-02 21:23:36'),
+(4, 2, 'feedback', 'Food', 'qwf', '2026-06-02 22:49:44'),
+(5, 2, 'feedback', 'qwf', 'qwf', '2026-06-02 22:54:31'),
+(6, 2, 'feedback', 'Expense', 'qf', '2026-06-02 22:54:42'),
+(7, 2, 'expense', 'Expense', 'qwf', '2026-06-02 22:55:16'),
+(8, 2, 'expense', 'Food', 'qf', '2026-06-02 22:57:56');
 
 -- --------------------------------------------------------
 
@@ -254,6 +273,36 @@ CREATE TABLE `company_funds` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `expenses`
+--
+
+CREATE TABLE `expenses` (
+  `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `account_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `category` varchar(100) DEFAULT 'General',
+  `category_id` int(11) DEFAULT NULL,
+  `expense_date` date NOT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `expenses`
+--
+
+INSERT INTO `expenses` (`id`, `company_id`, `account_id`, `title`, `amount`, `category`, `category_id`, `expense_date`, `notes`, `created_at`) VALUES
+(1, 2, 3, 'Wifi', 1000.00, NULL, NULL, '2026-06-03', '', '2026-06-02 22:48:14'),
+(2, 2, 1, 'Gas', 50.00, NULL, NULL, '2026-06-03', 'wqr', '2026-06-02 23:03:38'),
+(3, 2, 1, '450', 450.00, NULL, NULL, '2026-06-03', '', '2026-06-02 23:04:03'),
+(4, 2, 1, 'qwf', 500.00, 'General', 8, '2026-06-03', 'qwf', '2026-06-02 23:11:04'),
+(5, 2, 1, 'Henlooo', 500.00, 'General', 7, '2026-06-03', '', '2026-06-02 23:32:23');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `feedback`
 --
 
@@ -292,7 +341,7 @@ CREATE TABLE `loans` (
   `released_date` date DEFAULT NULL,
   `due_date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `term_months` int(11),
+  `term_months` int(11) DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `term_type` varchar(20) DEFAULT 'month',
   `fee` decimal(15,2) DEFAULT 0.00,
@@ -484,6 +533,12 @@ ALTER TABLE `company_funds`
   ADD UNIQUE KEY `company_method` (`company_id`,`payment_method`);
 
 --
+-- Indexes for table `expenses`
+--
+ALTER TABLE `expenses`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `feedback`
 --
 ALTER TABLE `feedback`
@@ -541,25 +596,25 @@ ALTER TABLE `accounts`
 -- AUTO_INCREMENT for table `account_transactions`
 --
 ALTER TABLE `account_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
 --
 ALTER TABLE `borrowers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `companies`
@@ -572,6 +627,12 @@ ALTER TABLE `companies`
 --
 ALTER TABLE `company_funds`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `expenses`
+--
+ALTER TABLE `expenses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `feedback`

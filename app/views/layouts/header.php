@@ -53,7 +53,7 @@ if ($userRole === 'admin' || $userRole === 'staff') {
         $menuItems[] = ['url' => 'borrower/index', 'icon' => 'fa-user-group', 'label' => 'Borrowers'];
         $menuItems[] = ['url' => 'payment/index', 'icon' => 'fa-receipt', 'label' => 'Payments'];
         $menuItems[] = ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'];
-        // Combined Category links into one efficient entry
+        $menuItems[] = ['url' => 'expense/index', 'icon' => 'fa-shield-halved', 'label' => 'Expenses'];
         $menuItems[] = ['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Categories'];
         $menuItems[] = ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'];
         $menuItems[] = ['url' => 'feedback/create', 'icon' => 'fa-comment', 'label' => 'Send Feedback'];
