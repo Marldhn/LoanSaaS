@@ -24,35 +24,38 @@ class BorrowerController {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $_SESSION['user'];
         
-        // 1. Create the borrower and ensure your Model returns $db->lastInsertId();
+        // 1. Create the borrower 
+        // Ensure your Borrower Model's create() method returns $db->lastInsertId();
         $borrower_id = $this->borrowerModel->create([
             'company_id'  => $user['company_id'],
             'first_name'  => $_POST['first_name'],
-            'middle_name' => $_POST['middle_name'],
+            'middle_name' => $_POST['middle_name'] ?? '',
             'last_name'   => $_POST['last_name'],
-            'gender'      => $_POST['gender'],
-            'birthdate'   => $_POST['birthdate'],
+            'gender'      => $_POST['gender'] ?? '',
+            'birthdate'   => $_POST['birthdate'] ?? null,
             'phone'       => $_POST['phone'],
-            'email'       => $_POST['email'],
+            'email'       => $_POST['email'] ?? '',
             'address'     => $_POST['address'],
-            'valid_id'    => $_POST['valid_id']
+            'valid_id'    => $_POST['valid_id'] ?? ''
         ]);
 
-        // 2. Now $borrower_id is available and valid for the log
-        (new ActivityLog($this->borrowerModel->getDb()))->logAction(
-            $_SESSION['user']['company_id'], 
-            $_SESSION['user']['id'], 
-            'CREATE_BORROWER', 
-            'borrowers', 
-            $borrower_id, 
-            "Added new borrower: " . $_POST['first_name'] . " " . $_POST['last_name']
-        );
+        if ($borrower_id) {
+            // 2. Log the activity
+            (new ActivityLog($this->borrowerModel->getDb()))->logAction(
+                $user['company_id'], 
+                $user['id'], 
+                'CREATE_BORROWER', 
+                'borrowers', 
+                $borrower_id, 
+                "Added new borrower: " . $_POST['first_name'] . " " . $_POST['last_name']
+            );
+        }
 
-        header("Location: /loansaas/public/index.php?url=borrower/index");
+        // Redirect back to index (the modal will close automatically on page reload)
+        header("Location: /loansaas/public/index.php?url=borrower/index&status=success");
         exit;
     }
 }
-
     public function toggle($id) {
         $this->borrowerModel->toggleStatus($id);
 

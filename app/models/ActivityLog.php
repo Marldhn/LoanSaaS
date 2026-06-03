@@ -1,6 +1,5 @@
 <?php
 // Location: C:/xampp/htdocs/loansaas/app/models/ActivityLog.php
-
 require_once __DIR__ . '/../core/Model.php';
 
 class ActivityLog extends Model {
@@ -10,45 +9,34 @@ class ActivityLog extends Model {
     }
 
     public function logAction($company_id, $user_id, $action, $table_name, $record_id, $description) {
-    $sql = "INSERT INTO activity_logs (company_id, user_id, action, table_name, record_id, description, ip_address) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-    
-    $stmt = $this->conn->prepare($sql);
-    $ip = $_SERVER['REMOTE_ADDR'];
-    
-    return $stmt->execute([$company_id, $user_id, $action, $table_name, $record_id, $description, $ip]);
-}
+        $sql = "INSERT INTO activity_logs (company_id, user_id, action, table_name, record_id, description, ip_address) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $ip = $_SERVER['REMOTE_ADDR'];
+        return $stmt->execute([$company_id, $user_id, $action, $table_name, $record_id, $description, $ip]);
+    }
 
-    // Add to ActivityLog.php
-public function getRecentLogs($limit = 50) {
-    // Ensure you are filtering by the logged-in company
-    $sql = "SELECT l.*, u.username 
+    public function countByCompany($company_id) {
+        // FIXED: Changed $this->db to $this->conn
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM activity_logs WHERE company_id = ?");
+        $stmt->execute([$company_id]);
+        return $stmt->fetchColumn();
+    }
+
+    public function getPaginatedByCompany($company_id, $limit, $offset) {
+        // FIXED: Added JOIN users to get the username for the UI
+        $stmt = $this->conn->prepare("
+            SELECT l.*, u.username 
             FROM activity_logs l
             JOIN users u ON l.user_id = u.id 
             WHERE l.company_id = ? 
-            ORDER BY l.created_at DESC LIMIT ?";
-            
-    $stmt = $this->conn->prepare($sql);
-    // Ensure getTenantId() returns $_SESSION['user']['company_id']
-    $stmt->execute([$this->getTenantId(), $limit]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
-// In ActivityLog.php
-public function getAllByCompany($company_id) {
-    $sql = "SELECT l.*, u.username 
-            FROM activity_logs l
-            JOIN users u ON l.user_id = u.id 
-            WHERE l.company_id = ? 
-            ORDER BY l.created_at DESC";
-            
-    // Change $this->db to $this->conn 
-    // (Most base Models in these types of apps use 'conn' or 'db')
-    $stmt = $this->conn->prepare($sql); 
-    $stmt->execute([$company_id]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
+            ORDER BY l.created_at DESC 
+            LIMIT ? OFFSET ?
+        ");
+        $stmt->bindValue(1, (int)$company_id, PDO::PARAM_INT);
+        $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(3, (int)$offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

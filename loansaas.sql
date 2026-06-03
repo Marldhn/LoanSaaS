@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Generation Time: Jun 03, 2026 at 01:03 PM
+-- Host: 127.0.0.1:3307
+-- Generation Time: Jun 03, 2026 at 11:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `loan_saas_db`
+-- Database: `loan_saas_db1`
 --
 
 -- --------------------------------------------------------
@@ -168,7 +168,8 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (37, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for: Dondi Rubinosss Rubinos', '::1', '2026-06-02 23:37:01'),
 (38, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for: Dondi Rubinos Rubinos', '::1', '2026-06-02 23:37:11'),
 (39, 2, 2, 'UPDATE_BORROWER', 'borrowers', 4, 'Updated profile for: Dondi  Rubinos', '::1', '2026-06-02 23:37:54'),
-(40, 2, 2, 'ADJUST_BALANCE', 'accounts', 2, 'Adjusted account balance: add ₱5,000.00 | Note: qwd', '::1', '2026-06-02 23:46:27');
+(40, 2, 2, 'ADJUST_BALANCE', 'accounts', 2, 'Adjusted account balance: add ₱5,000.00 | Note: qwd', '::1', '2026-06-02 23:46:27'),
+(41, 2, 2, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: rthrth rthrt', '::1', '2026-06-03 17:36:15');
 
 -- --------------------------------------------------------
 
@@ -201,7 +202,8 @@ INSERT INTO `borrowers` (`id`, `company_id`, `first_name`, `middle_name`, `last_
 (1, 2, 'Marldohn ', 'Codizar', 'Rubinos', 'Male', '1111-10-10', '09061941138', 'marldohcrubinos11@gmail.com', '8541851weqf', '01010101010101', 1, '2026-05-28 13:17:53', NULL),
 (2, 2, 'Marldohnssssasd', 'Codizar', 'Rubinos', 'Male', '2002-11-04', '09061941138', NULL, 'Jakosalem Street Cebu City', NULL, 1, '2026-05-28 19:28:19', NULL),
 (3, 2, 'Rolan', '', 'Cabanos', 'Male', '1111-11-11', 'qwfqfqf', 'rcabanos@azpired.net', '651', '15641651651', 1, '2026-05-31 19:39:04', NULL),
-(4, 2, 'Dondi ', 'Novabos', 'Rubinos', 'Male', '7244-09-12', '109248091274', NULL, '12412', NULL, 1, '2026-06-02 23:33:07', NULL);
+(4, 2, 'Dondi ', 'Novabos', 'Rubinos', 'Male', '7244-09-12', '109248091274', NULL, '12412', NULL, 1, '2026-06-02 23:33:07', NULL),
+(5, 2, 'rthrth', 'hrthrt', 'rthrt', 'Male', '1222-03-12', '2523523', 'gergre@gweg.wegom', '23423', 'fweg2314234', 1, '2026-06-03 17:36:15', NULL);
 
 -- --------------------------------------------------------
 
@@ -602,13 +604,13 @@ ALTER TABLE `account_transactions`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
 --
 ALTER TABLE `borrowers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `categories`

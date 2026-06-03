@@ -16,9 +16,9 @@ class DashboardController {
 
         $stats = [];
 
-        // 1-8. Basic Stats (Total Loans, Collected, Borrowers, Pending, etc.)
-        $stats['total_loans'] = $db->prepare("SELECT COUNT(*) FROM loans WHERE company_id = ?");
-        $stats['total_loans']->execute([$company_id]); $stats['total_loans'] = $stats['total_loans']->fetchColumn();
+        // 1-8. Basic Stats
+        $stmt = $db->prepare("SELECT COUNT(*) FROM loans WHERE company_id = ?");
+        $stmt->execute([$company_id]); $stats['total_loans'] = $stmt->fetchColumn();
 
         $stmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE company_id = ?");
         $stmt->execute([$company_id]); $stats['total_collected'] = $stmt->fetchColumn() ?? 0;
@@ -41,7 +41,10 @@ class DashboardController {
         $stmt = $db->prepare("SELECT SUM(amount) FROM loans WHERE company_id = ? AND status IN ('approved', 'paid')");
         $stmt->execute([$company_id]); $stats['total_disbursed'] = $stmt->fetchColumn() ?? 0;
 
-        // 9. Total Remaining: Calculate dynamically (Total Payable - Total Paid)
+        $stmt = $db->prepare("SELECT SUM(amount) FROM expenses WHERE company_id = ?");
+        $stmt->execute([$company_id]); $stats['total_expenses'] = $stmt->fetchColumn() ?? 0;
+
+        // 9. Total Remaining
         $stmt = $db->prepare("
             SELECT SUM(l.total_payable - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)) 
             FROM loans l 
@@ -52,24 +55,43 @@ class DashboardController {
         
         $stats['total_profit'] = $stats['total_collected'] - $stats['total_disbursed'];
 
-        // 10. Chart Data
-        $chartStmt = $db->prepare("SELECT DATE(created_at) as date, SUM(amount) as total FROM loans WHERE company_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(created_at) ORDER BY date ASC");
-        $chartStmt->execute([$company_id]);
-        $chartData = $chartStmt->fetchAll(PDO::FETCH_ASSOC);
-        $chartLabels = []; $chartTotals = [];
-        foreach ($chartData as $row) { $chartLabels[] = date('M d', strtotime($row['date'])); $chartTotals[] = $row['total']; }
+        // 10. Chart Data (Loans & Expenses Alignment)
+        $dateRange = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $dateRange[date('Y-m-d', strtotime("-$i days"))] = ['loans' => 0, 'expenses' => 0];
+        }
 
-        // 11. Active Borrowers with Balance
+        // Fetch Loans
+        $loanStmt = $db->prepare("SELECT DATE(created_at) as date, SUM(amount) as total FROM loans WHERE company_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(created_at)");
+        $loanStmt->execute([$company_id]);
+        while ($row = $loanStmt->fetch(PDO::FETCH_ASSOC)) {
+            if (isset($dateRange[$row['date']])) $dateRange[$row['date']]['loans'] = $row['total'];
+        }
+
+        // Fetch Expenses (Using expense_date column)
+        $expStmt = $db->prepare("SELECT DATE(expense_date) as date, SUM(amount) as total FROM expenses WHERE company_id = ? AND expense_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(expense_date)");
+        $expStmt->execute([$company_id]);
+        while ($row = $expStmt->fetch(PDO::FETCH_ASSOC)) {
+            if (isset($dateRange[$row['date']])) $dateRange[$row['date']]['expenses'] = $row['total'];
+        }
+
+        $chartLabels = []; $chartTotals = []; $chartExpenses = [];
+        foreach ($dateRange as $date => $data) {
+            $chartLabels[] = date('M d', strtotime($date));
+            $chartTotals[] = $data['loans'];
+            $chartExpenses[] = $data['expenses'];
+        }
+
+        // 11. Active Borrowers
         $borrowerStmt = $db->prepare("
-    SELECT 
-        CONCAT(b.first_name, ' ', b.last_name) as name,
-        SUM(l.total_payable - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)) as total_due
-    FROM borrowers b
-    JOIN loans l ON b.id = l.borrower_id
-    WHERE l.company_id = ? AND l.status = 'approved'
-    GROUP BY b.id
-    LIMIT 5
-");
+            SELECT CONCAT(b.first_name, ' ', b.last_name) as name,
+            SUM(l.total_payable - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)) as total_due
+            FROM borrowers b
+            JOIN loans l ON b.id = l.borrower_id
+            WHERE l.company_id = ? AND l.status = 'approved'
+            GROUP BY b.id
+            LIMIT 5
+        ");
         $borrowerStmt->execute([$company_id]);
         $activeBorrowers = $borrowerStmt->fetchAll(PDO::FETCH_ASSOC);
 

@@ -68,6 +68,8 @@
     <div class="stat-card"><div class="stat-icon" style="background:#f0fdfa; color:#0d9488;"><i class="fas fa-check-circle"></i></div><div class="stat-info"><span class="stat-label">Active Loans</span><span class="stat-value"><?= $stats['active_loans'] ?></span></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#f0fdf4; color:#15803d;"><i class="fas fa-chart-line"></i></div><div class="stat-info"><span class="stat-label">Total Profit</span><span class="stat-value" style="color:<?= $stats['total_profit'] >= 0 ? '#15803d' : '#dc2626' ?>;">₱<?= number_format($stats['total_profit'], 2) ?></span></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#f8fafc; color:#475569;"><i class="fas fa-coins"></i></div><div class="stat-info"><span class="stat-label">Total Disbursed</span><span class="stat-value">₱<?= number_format($stats['total_disbursed'], 2) ?></span></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#f8fafc; color:red; "><i class="fas fa-coins"></i></div><div class="stat-info"><span class="stat-label">Total Expenses</span><span class="stat-value" style="color:red;">₱<?= number_format($stats['total_expenses'], 2) ?></span></div></div>
+
 </div>
 
 <div class="dashboard-bottom">
@@ -105,20 +107,37 @@ new Chart(ctx, {
     type: 'line',
     data: {
         labels: <?= json_encode($chartLabels) ?>,
-        datasets: [{
-            label: 'Loan Amount',
-            data: <?= json_encode($chartTotals) ?>,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
+        datasets: [
+            {
+                label: 'Loan Amount',
+                data: <?= json_encode($chartTotals) ?>,
+                borderColor: '#10b981', // Green
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Expenses',
+                data: <?= json_encode($chartExpenses) ?>, // Ensure this variable is passed from your PHP controller
+                borderColor: '#ef4444', // Red
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4,
+                fill: true
+            }
+        ]
     },
     options: { 
         responsive: true, 
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } }, 
-        scales: { y: { beginAtZero: true } } 
+        plugins: { 
+            legend: { 
+                display: true, // Set to true to show labels
+                position: 'top' 
+            } 
+        }, 
+        scales: { 
+            y: { beginAtZero: true } 
+        } 
     }
 });
 </script>

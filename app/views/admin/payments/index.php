@@ -1,58 +1,75 @@
 <?php require_once dirname(__DIR__, 2) . '/layouts/header.php'; ?>
 
 <style>
-    .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-    .page-header h1 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; }
+    /* Consistent Dashboard Design */
+    .pay-card { background: #1e293b; color: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .pay-list { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
     
-    .card { background: #fff; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .pay-row { display: grid; grid-template-columns: 1.5fr 1.5fr 1.5fr 1fr; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; }
+    .pay-row.header { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
     
-    .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .data-table thead { background: #f8fafc; }
-    .data-table th { padding: 16px 20px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; text-align: left; }
-    .data-table td { padding: 16px 20px; font-size: 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-    .data-table tr:hover { background: #fcfcfc; }
-    
-    .btn-secondary { background: #f1f5f9; color: #475569; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s; }
-    .btn-secondary:hover { background: #e2e8f0; color: #1e293b; }
-    
-    .btn-primary { background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; }
-    .btn-primary:hover { background: #334155; }
-    
-    .empty-state { text-align: center; padding: 40px; color: #94a3b8; font-style: italic; }
+    /* Modal Styles */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    .modal-content { background: #fff; width: 90%; max-width: 500px; border-radius: 12px; padding: 24px; }
 </style>
 
-<div class="page-header">
-    <h1>Payment History</h1>
-    <a href="/loansaas/public/index.php?url=payment/create" class="btn-primary">+ Record Payment</a>
+<div class="pay-card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h2 style="margin:0;">Payment History</h2>
+            <p style="margin:5px 0 0; color: #94a3b8; font-size: 0.9rem;">View and manage processed payment records</p>
+        </div>
+        <button type="button" onclick="document.getElementById('payModal').style.display='flex'" 
+                style="padding: 10px 20px; background: #fff; color: #1e293b; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            + Record Payment
+        </button>
+    </div>
 </div>
 
-<div class="card">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Loan Reference</th>
-                <th>Amount</th>
-                <th style="text-align: right;">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (empty($payments)): ?>
-                <tr><td colspan="4" class="empty-state">No payment records found.</td></tr>
-            <?php else: ?>
-                <?php foreach ($payments as $p): ?>
-                <tr>
-                    <td><?= htmlspecialchars($p['payment_date']) ?></td>
-                    <td style="font-weight: 600; color: #0f172a;">#LN-<?= str_pad($p['loan_id'], 6, '0', STR_PAD_LEFT) ?></td>
-                    <td style="font-weight: 600; color: #059669;">₱<?= number_format($p['amount'], 2) ?></td>
-                    <td style="text-align: right;">
-                        <a href="/loansaas/public/index.php?url=loan/details&id=<?= $p['loan_id'] ?>" class="btn-secondary">View Loan</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
+<div class="pay-list">
+    <div class="pay-row header">
+        <div>Date</div>
+        <div>Loan Reference</div>
+        <div>Amount</div>
+        <div style="text-align: right;">Action</div>
+    </div>
+
+    <?php if (empty($payments)): ?>
+        <div style="padding: 40px; text-align: center; color: #94a3b8;">No payment records found.</div>
+    <?php else: ?>
+        <?php foreach ($payments as $p): ?>
+            <div class="pay-row">
+                <div style="color:#64748b;"><?= htmlspecialchars($p['payment_date']) ?></div>
+                <div style="font-weight: 700; color: #1e293b;">#LN-<?= str_pad($p['loan_id'], 6, '0', STR_PAD_LEFT) ?></div>
+                <div style="font-weight: 700; color: #059669;">₱<?= number_format($p['amount'], 2) ?></div>
+                <div style="text-align: right;">
+    <a href="/loansaas/public/index.php?url=loan/details&id=<?= $p['loan_id'] ?>" 
+       style="color:#64748b; text-decoration:none; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; transition: 0.2s;"
+       onmouseover="this.style.color='#4f46e5'; this.style.borderColor='#4f46e5'"
+       onmouseout="this.style.color='#64748b'; this.style.borderColor='#e2e8f0'">
+        <i class="fas fa-eye"></i>
+    </a>
+</div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
+<div id="payModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">Record New Payment</h3>
+        <form method="POST" action="/loansaas/public/index.php?url=payment/store">
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; font-weight:600; margin-bottom:5px;">Loan ID</label>
+                <input type="number" name="loan_id" class="form-input" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; font-weight:600; margin-bottom:5px;">Amount</label>
+                <input type="number" name="amount" step="0.01" class="form-input" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            <button type="submit" style="width:100%; padding:12px; background:#1e293b; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Save Payment</button>
+        </form>
+    </div>
 </div>
 
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>
