@@ -56,6 +56,7 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     $term_type      = $_POST['term_type'];
     $released_date  = $_POST['released_date'];
     $notes          = $_POST['notes'] ?? '';
+    $loan_type      = $_POST['loan_type'] ?? 'standard';
     
     $company_id     = $_SESSION['user']['company_id'];
 
@@ -98,8 +99,8 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
 
         // A. Insert the loan record
        $sql = "INSERT INTO loans 
-            (borrower_id, company_id, account_id, amount, interest_rate, released_date, due_date, total_payable, notes, fee, status, term_months, term_type, category_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // <--- Added one '?'
+            (borrower_id, company_id, account_id, amount, interest_rate, released_date, due_date, total_payable, notes, fee, status, term_months, term_type, category_id, loan_type) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // <--- Added one '?'
         
         $stmt = $db->prepare($sql);
         
@@ -116,8 +117,10 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
             $fee,            // 10
             'Pending',       // 11
             $term_months,    // 12
-            $term_type       // 13
-            ,$category_id     // 14 <--- Added this
+            $term_type,        // 13
+            $category_id,     // 14
+            $loan_type         // 15 
+
         ]);
         
         $loan_id = $db->lastInsertId();
@@ -412,16 +415,15 @@ public function update() {
     $accountModel = new Account();
     $db = $loanModel->getDb();
 
-    // 1. Get current (OLD) data for comparison
     $oldLoan = $loanModel->getById($id);
     $oldAmount = (float)$oldLoan['amount'];
     $oldAccountId = $oldLoan['account_id'];
 
-    // 2. Prepare new data from POST
     $newAmount = (float)$_POST['amount'];
     $newInterest = (float)$_POST['interest_rate'];
-    $newTotal = $newAmount + ($newAmount * ($newInterest / 100));
+    $newTotal = (float)$_POST['total_payable'];
     $newAccountId = $_POST['account_id'];
+    $newLoanType = $_POST['loan_type']; // ADDED
 
     $db->beginTransaction();
     try {
@@ -457,7 +459,8 @@ public function update() {
             term_type = ?, 
             released_date = ?, 
             due_date = ?, 
-            notes = ? 
+            notes = ? ,
+            loan_type = ?
             WHERE id = ?");
         
         $stmt->execute([
@@ -470,6 +473,7 @@ public function update() {
             $_POST['released_date'], 
             $_POST['due_date'], 
             $_POST['notes'], 
+            $_POST['loan_type'],
             $id
         ]);
 

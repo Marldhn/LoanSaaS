@@ -20,14 +20,16 @@
            <div class="form-group">
     <label>Select Loan</label>
     <select name="loan_id" id="loan_id" class="form-control" onchange="updateBalance()" required>
-        <option value="">-- Choose an Approved Loan --</option>
-        <?php foreach ($loans as $loan): ?>
-            <option value="<?= $loan['id'] ?>" data-balance="<?= $loan['remaining_balance'] ?? 0 ?>">
-                Loan #<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?> 
-                - Balance: ₱<?= number_format($loan['remaining_balance'] ?? 0, 2) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+    <option value="">-- Choose an Approved Loan --</option>
+    <?php foreach ($loans as $loan): ?>
+        <option value="<?= $loan['id'] ?>" 
+            <?= (isset($selected_loan_id) && $selected_loan_id == $loan['id']) ? 'selected' : '' ?>
+            data-balance="<?= $loan['remaining_balance'] ?>">
+            Loan #<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?> 
+            - Balance: ₱<?= number_format($loan['remaining_balance'], 2) ?>
+        </option>
+    <?php endforeach; ?>
+</select>
 
 </div>
 
@@ -54,6 +56,9 @@
         </form>
     </div>
 </div>
+
+
+
 
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>
 

@@ -111,18 +111,27 @@ new Chart(ctx, {
             {
                 label: 'Loan Amount',
                 data: <?= json_encode($chartTotals) ?>,
-                borderColor: '#10b981', // Green
+                borderColor: '#10b981', 
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.4,
                 fill: true
             },
             {
                 label: 'Expenses',
-                data: <?= json_encode($chartExpenses) ?>, // Ensure this variable is passed from your PHP controller
-                borderColor: '#ef4444', // Red
+                data: <?= json_encode($chartExpenses) ?>,
+                borderColor: '#ef4444', 
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 tension: 0.4,
                 fill: true
+            },
+            {
+                label: 'Daily Profit', // New Profit line
+                data: <?= json_encode($chartProfits) ?>, 
+                borderColor: '#6366f1', // Indigo
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderDash: [5, 5] // Dotted line style
             }
         ]
     },
@@ -130,10 +139,7 @@ new Chart(ctx, {
         responsive: true, 
         maintainAspectRatio: false,
         plugins: { 
-            legend: { 
-                display: true, // Set to true to show labels
-                position: 'top' 
-            } 
+            legend: { position: 'top' } 
         }, 
         scales: { 
             y: { beginAtZero: true } 
@@ -141,5 +147,4 @@ new Chart(ctx, {
     }
 });
 </script>
-
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>

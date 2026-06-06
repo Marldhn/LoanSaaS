@@ -42,7 +42,8 @@ $userRole = $_SESSION['user']['role'] ?? '';
                     ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
                     ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard']
                 ];
-            } elseif ($userRole === 'admin' || $userRole === 'staff') {
+                
+            } elseif ($userRole === 'admin') {
                 $menuItems = [
                     ['url' => 'dashboard/index', 'icon' => 'fa-chart-line', 'label' => 'Dashboard'],
                     ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
@@ -55,6 +56,20 @@ $userRole = $_SESSION['user']['role'] ?? '';
                     ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
                     ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback'],
                     ['url' => 'admin/settings', 'icon' => 'fa-gear', 'label' => 'Settings']
+                ];
+
+               } elseif ($userRole === 'staff') {
+
+                $menuItems = [
+                    ['url' => 'dashboard/index', 'icon' => 'fa-chart-line', 'label' => 'Dashboard'],
+                    ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
+                    ['url' => 'account/index', 'icon' => 'fa-building-columns', 'label' => 'Accounts'],
+                    ['url' => 'borrower/index', 'icon' => 'fa-users', 'label' => 'Borrowers'],
+                    ['url' => 'payment/index', 'icon' => 'fa-money-bill-wave', 'label' => 'Payments'],
+                    ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'],
+                    ['url' => 'expense/index', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Expenses'],
+                    ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
+                    ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback'],
                 ];
             }
 

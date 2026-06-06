@@ -7,10 +7,7 @@ require_once __DIR__ . '/../models/ActivityLog.php';
 class CategoryController {
 
     public function index() {
-        // Same security/role check as your working FeedbackController
-        if ($_SESSION['user']['role'] !== 'admin') {
-            die("Access Denied");
-        }
+ 
 
         $categoryModel = new Category();
         $categories = $categoryModel->getAllByCompany($_SESSION['user']['company_id']);

@@ -51,19 +51,27 @@ class PaymentController {
     }
 }
 
-    public function create() {
+  public function create() {
     $company_id = $_SESSION['user']['company_id'];
+    $selected_loan_id = $_GET['loan_id'] ?? null;
+    
     $loanModel = new Loan();
     $paymentModel = new Payment();
     
     // Fetch approved loans
-    $loans = $loanModel->getApprovedLoansByCompany($company_id);
+    $allLoans = $loanModel->getApprovedLoansByCompany($company_id);
+    $loans = []; // Initialize a new array for filtered loans
     
-    // Calculate balance for every loan
-    foreach ($loans as &$loan) {
+    // Calculate balance and filter out fully paid loans
+    foreach ($allLoans as $loan) {
         $totalPaid = $paymentModel->getTotalPaidByLoanId($loan['id']);
-        // Calculation: Total Payable - Total Paid
-        $loan['remaining_balance'] = $loan['total_payable'] - $totalPaid;
+        $remainingBalance = $loan['total_payable'] - $totalPaid;
+        
+        // Only add to the list if the balance is greater than 0
+        if ($remainingBalance > 0) {
+            $loan['remaining_balance'] = $remainingBalance;
+            $loans[] = $loan;
+        }
     }
     
     // Fetch accounts

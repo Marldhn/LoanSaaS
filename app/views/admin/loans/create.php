@@ -8,14 +8,12 @@
     .row { display: flex; gap: 15px; }
     .btn-save { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
     .btn-save:hover { background: #1d4ed8; }
-    .due-date-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-weight: bold; color: #0f172a; text-align: center; }
+    .due-date-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-weight: bold; color: #0f172a; text-align: left; }
     .collateral-box { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #e2e8f0; }
 </style>
 
 <div class="loan-card">
     <h2 style="margin-top: 0; color: #2563eb;">Create New Loan</h2>
-
-    
     
     <form action="/loansaas/public/index.php?url=loan/store" method="POST" enctype="multipart/form-data">
         
@@ -60,15 +58,24 @@
             <label>Total Payable</label>
             <input type="number" step="0.01" id="total_payable" name="total_payable" class="form-control" readonly style="background: #e9ecef;">
         </div>
+
         <div class="form-group">
-    <label>Loan Category</label>
-    <select name="category_id" class="form-input" required>
-        <option value="">-- Select Category --</option>
-        <?php foreach ($loanCategories as $cat): ?>
-            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-        <?php endforeach; ?>
-    </select>
-</div>
+            <label>Loan Purpose</label>
+            <select name="category_id" class="form-control" required>
+                <option value="">-- Select Category --</option>
+                <?php foreach ($loanCategories as $cat): ?>
+                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+      <div class="form-group">
+            <label>Loan Type</label>
+            <select name="loan_type" id="loan_type" class="form-control" onchange="calculateDates()">
+                <option value="fixed">Fixed (Flat Rate)</option>
+               <!--   <option value="amortized">Amortized (Declining Balance)</option>-->
+            </select>
+        </div> 
 
         <div class="collateral-box">
             <h4 style="margin-top:0;">Collateral Details (Optional)</h4>
@@ -103,7 +110,7 @@
         </div>
 
         <div class="form-group">
-            <label>Calculated Due Date</label>
+            <label>Due Date(s)</label>
             <div id="due_date_display" class="due-date-box">Select date and term to calculate...</div>
             <input type="hidden" name="due_date" id="due_date_hidden" required>
         </div>
@@ -125,6 +132,7 @@
     const loanDateInput = document.getElementById('loan_date');
     const termValueInput = document.getElementById('term_months');
     const termTypeInput = document.getElementById('term_type');
+    const loanTypeInput = document.getElementById('loan_type');
     const dueDateDisplay = document.getElementById('due_date_display');
     const dueDateHidden = document.getElementById('due_date_hidden');
     const accountSelect = document.getElementById('account_select');
@@ -137,53 +145,54 @@
         totalPayableInput.value = total.toFixed(2);
     }
 
-    // Balance Validation Listener
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const selectedOption = accountSelect.options[accountSelect.selectedIndex];
-        if (!selectedOption.value) {
-            alert('Please select an account.');
-            e.preventDefault();
-            return;
-        }
-
-        const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
-        const principal = parseFloat(amountInput.value) || 0;
-
-        if (principal > balance) {
-            e.preventDefault();
-            alert('Error: Loan amount (₱' + principal.toFixed(2) + ') exceeds the account balance (₱' + balance.toFixed(2) + ').');
-        }
-    });
-
-    function calculateDueDate() {
+    function calculateDates() {
         if (!loanDateInput.value || !termValueInput.value) {
             dueDateDisplay.innerText = "Select date and term to calculate...";
-            dueDateHidden.value = "";
             return;
         }
 
-        let date = new Date(loanDateInput.value);
-        let value = parseInt(termValueInput.value);
-        let type = termTypeInput.value;
+        const startDate = new Date(loanDateInput.value);
+        const qty = parseInt(termValueInput.value);
+        const type = termTypeInput.value;
+        const loanType = loanTypeInput.value;
 
-        if (type === 'month') {
-            date.setMonth(date.getMonth() + value);
+        if (loanType === 'fixed') {
+            let finalDate = new Date(startDate);
+            if (type === 'month') finalDate.setMonth(finalDate.getMonth() + qty);
+            else finalDate.setDate(finalDate.getDate() + qty);
+            
+            dueDateDisplay.innerText = "Final Due Date: " + finalDate.toLocaleDateString();
+            dueDateHidden.value = finalDate.toISOString().split('T')[0];
         } else {
-            date.setDate(date.getDate() + value);
+            // Amortized: Show monthly list
+            let html = "<strong>Monthly Schedule:</strong><ul style='margin:10px 0 0 0;'>";
+            let lastDate = "";
+            for (let i = 1; i <= qty; i++) {
+                let nextDate = new Date(startDate);
+                nextDate.setMonth(nextDate.getMonth() + i);
+                html += `<li>Payment ${i}: ${nextDate.toLocaleDateString()}</li>`;
+                lastDate = nextDate.toISOString().split('T')[0];
+            }
+            html += "</ul>";
+            dueDateDisplay.innerHTML = html;
+            dueDateHidden.value = lastDate;
         }
-
-        dueDateDisplay.innerText = date.toLocaleDateString(undefined, { 
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-        });
-
-        dueDateHidden.value = date.toISOString().split('T')[0];
     }
 
+    // Event Listeners
     amountInput.addEventListener('input', calculateTotal);
     interestInput.addEventListener('input', calculateTotal);
     feeInput.addEventListener('input', calculateTotal);
-    [loanDateInput, termValueInput, termTypeInput].forEach(el => {
-        el.addEventListener('change', calculateDueDate);
+    [loanDateInput, termValueInput, termTypeInput, loanTypeInput].forEach(el => {
+        el.addEventListener('change', calculateDates);
+    });
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const balance = parseFloat(accountSelect.options[accountSelect.selectedIndex].getAttribute('data-balance')) || 0;
+        if (parseFloat(amountInput.value) > balance) {
+            e.preventDefault();
+            alert('Error: Loan amount exceeds account balance.');
+        }
     });
 </script>
 

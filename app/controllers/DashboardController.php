@@ -68,18 +68,20 @@ class DashboardController {
             if (isset($dateRange[$row['date']])) $dateRange[$row['date']]['loans'] = $row['total'];
         }
 
-        // Fetch Expenses (Using expense_date column)
+        // Fetch Expenses
         $expStmt = $db->prepare("SELECT DATE(expense_date) as date, SUM(amount) as total FROM expenses WHERE company_id = ? AND expense_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(expense_date)");
         $expStmt->execute([$company_id]);
         while ($row = $expStmt->fetch(PDO::FETCH_ASSOC)) {
             if (isset($dateRange[$row['date']])) $dateRange[$row['date']]['expenses'] = $row['total'];
         }
 
-        $chartLabels = []; $chartTotals = []; $chartExpenses = [];
+        $chartLabels = []; $chartTotals = []; $chartExpenses = []; $chartProfits = [];
         foreach ($dateRange as $date => $data) {
             $chartLabels[] = date('M d', strtotime($date));
             $chartTotals[] = $data['loans'];
             $chartExpenses[] = $data['expenses'];
+            // Daily Profit Calculation
+            $chartProfits[] = $data['loans'] - $data['expenses'];
         }
 
         // 11. Active Borrowers
