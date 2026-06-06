@@ -1,26 +1,45 @@
 <?php
 // Location: app/controllers/FeedbackController.php
 
-// 1. You MUST require the Loan model so the class is found
 require_once __DIR__ . '/../models/Loan.php'; 
 
 class FeedbackController {
 
     public function create() {
-        // No session_start() here; it's handled in the header/layout
         require_once dirname(__DIR__) . '/views/admin/feedback/create.php';
     }
 
     public function store() {
-        // Ensure $_SESSION is available without re-starting it
         $loanModel = new Loan();
         $db = $loanModel->getDb(); 
         
-        $stmt = $db->prepare("INSERT INTO feedback (sender_id, company_id, message) VALUES (?, ?, ?)");
+        $imagePath = null;
+
+        // Handle Image Upload if present
+        if (isset($_FILES['feedback_image']) && $_FILES['feedback_image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = dirname(__DIR__, 2) . '/public/uploads/feedback/';
+            
+            // Create directory if it doesn't exist
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $fileName = time() . '_' . basename($_FILES['feedback_image']['name']);
+            $targetPath = $uploadDir . $fileName;
+
+            // Move file to server
+            if (move_uploaded_file($_FILES['feedback_image']['tmp_name'], $targetPath)) {
+                $imagePath = 'uploads/feedback/' . $fileName;
+            }
+        }
+        
+        // Insert data including image_path
+        $stmt = $db->prepare("INSERT INTO feedback (sender_id, company_id, message, image_path) VALUES (?, ?, ?, ?)");
         $stmt->execute([
             $_SESSION['user']['id'], 
             $_SESSION['user']['company_id'], 
-            $_POST['message']
+            $_POST['message'],
+            $imagePath
         ]);
         
         header("Location: /loansaas/public/index.php?url=feedback/create");
@@ -28,7 +47,6 @@ class FeedbackController {
     }
 
     public function index() {
-        // Remove redundant session_start() here as well
         // Security check
         if ($_SESSION['user']['role'] !== 'superadmin') {
             die("Access Denied");
@@ -37,7 +55,12 @@ class FeedbackController {
         $loanModel = new Loan();
         $db = $loanModel->getDb();
         
-        $messages = $db->query("SELECT f.*, u.username FROM feedback f JOIN users u ON f.sender_id = u.id ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+        // Fetching messages including image_path
+        $messages = $db->query("SELECT f.*, u.username 
+                                FROM feedback f 
+                                JOIN users u ON f.sender_id = u.id 
+                                ORDER BY created_at DESC")
+                       ->fetchAll(PDO::FETCH_ASSOC);
         
         require_once dirname(__DIR__) . '/views/admin/feedback/index.php';
     }

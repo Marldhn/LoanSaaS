@@ -31,7 +31,7 @@
         <?php foreach ($collaterals as $c): ?>
             <div class="col-row">
                 <div style="font-weight: 600; color: #1e293b;"><?= htmlspecialchars($c['first_name'] . ' ' . $c['last_name']) ?></div>
-                <div style="color: #64748b;">#LN-<?= str_pad($c['loan_id'], 6, '0', STR_PAD_LEFT) ?></div>
+                <div style="color: #64748b;"><b>#LN-<?= str_pad($c['loan_id'], 6, '0', STR_PAD_LEFT) ?></b></div>
                 <div style="color: #334155;"><?= htmlspecialchars($c['item_name']) ?></div>
                 <div style="font-weight: 700; color: #059669;">₱<?= number_format($c['estimated_value'], 2) ?></div>
                 <div style="text-align: right;">

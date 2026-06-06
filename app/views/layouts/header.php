@@ -29,7 +29,7 @@ $userRole = $_SESSION['user']['role'] ?? '';
     <aside class="sidebar">
         <div class="sidebar-brand">
             <i class="fas fa-wallet"></i>
-            <span><?= htmlspecialchars($_SESSION['company_name'] ?? 'SHELDONS') ?></span>
+            <span><?= htmlspecialchars($_SESSION['user']['company_name'] ?? 'Loan Management') ?></span>
         </div>
 
         <ul class="sidebar-menu">

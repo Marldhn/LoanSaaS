@@ -73,7 +73,7 @@ public function settings() {
 public function updateBusinessName() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SESSION['user']['role'] === 'admin') {
         $newName = trim($_POST['business_name']);
-        $companyId = $_SESSION['user']['company_id'];
+        $companyId = $_SESSION['user']['company_id'];;
         
         // Ensure this line is present and correct:
         $userId = $_SESSION['user']['id'] ?? null; 
@@ -101,8 +101,12 @@ public function updateBusinessName() {
         );
         
         // 3. Update the session
-        $_SESSION['user']['company_name'] = $newName; 
-        
+        $_SESSION['user']['company_name'] = $newName;     
+        header("Location: /loansaas/public/index.php?url=admin/settings");
+        exit;
+
+        session_write_close();
+
         header("Location: /loansaas/public/index.php?url=admin/settings");
         exit;
     }
