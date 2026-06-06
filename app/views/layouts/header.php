@@ -39,7 +39,8 @@ $userRole = $_SESSION['user']['role'] ?? '';
                 $menuItems = [
                     ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'],
                     ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'],
-                    ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List']
+                    ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
+                    ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard']
                 ];
             } elseif ($userRole === 'admin' || $userRole === 'staff') {
                 $menuItems = [
