@@ -56,11 +56,40 @@
         <div class="grid-container">
             <div class="form-group">
                 <label>Principal Amount</label>
-                <input type="number" name="amount" value="<?= htmlspecialchars($loan['amount']) ?>" required>
+                <input type="number" id="amount" name="amount" value="<?= htmlspecialchars($loan['amount']) ?>" required oninput="calculateTotal()">
             </div>
             <div class="form-group">
                 <label>Interest Rate (%)</label>
-                <input type="number" step="0.01" name="interest_rate" value="<?= htmlspecialchars($loan['interest_rate']) ?>" required>
+                <input type="number" id="interest_rate" step="0.01" name="interest_rate" value="<?= htmlspecialchars($loan['interest_rate']) ?>" required oninput="calculateTotal()">
+            </div>
+
+   
+     <div class="form-group">
+    <label>Loan Duration & Frequency</label>
+    <div style="display: flex; gap: 5px;">
+        <input type="number" id="term_months" name="term_months" 
+               value="<?= htmlspecialchars($loan['term_months'] ?? '1') ?>" 
+               style="width: 40%;" required oninput="calculateTotal()">
+        
+        <select name="term_type" id="term_type" style="width: 60%;" onchange="calculateTotal()">
+            <option value="one_time" <?= ($loan['term_type'] ?? '') === 'one_time' ? 'selected' : '' ?>>One Time (Full Payment)</option>
+            <option value="monthly" <?= ($loan['term_type'] ?? '') === 'monthly' ? 'selected' : '' ?>>Monthly</option>
+            <option value="semi_monthly" <?= ($loan['term_type'] ?? '') === 'semi_monthly' ? 'selected' : '' ?>>Every 15 Days</option>
+            <option value="weekly" <?= ($loan['term_type'] ?? '') === 'weekly' ? 'selected' : '' ?>>Weekly</option>
+            <option value="daily" <?= ($loan['term_type'] ?? '') === 'daily' ? 'selected' : '' ?>>Daily</option>
+        </select>
+    </div>
+</div>
+
+            <div class="form-group">
+                <label>Released Date</label>
+                <input type="date" name="released_date" value="<?= htmlspecialchars($loan['released_date']) ?>" required>
+            </div>
+
+
+                     <div class="form-group">
+                <label>Total Payable Amount</label>
+                <input type="text" id="total_payable" name="total_payable" readonly style="background: #f1f5f9;">
             </div>
 
             <div class="form-group">
@@ -75,21 +104,6 @@
             </div>
             
             <div class="form-group">
-                <label>Term & Type</label>
-                <div style="display: flex; gap: 5px;">
-                    <input type="number" name="term_months" value="<?= htmlspecialchars($loan['term_months'] ?? '') ?>" style="width: 60%;" required>
-                    <select name="term_type" style="width: 40%;">
-                        <option value="month" <?= ($loan['term_type'] ?? '') === 'month' ? 'selected' : '' ?>>Month(s)</option>
-                        <option value="day" <?= ($loan['term_type'] ?? '') === 'day' ? 'selected' : '' ?>>Day(s)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Released Date</label>
-                <input type="date" name="released_date" value="<?= htmlspecialchars($loan['released_date']) ?>" required>
-            </div>
-            <div class="form-group">
                 <label>Due Date</label>
                 <input type="date" name="due_date" value="<?= htmlspecialchars($loan['due_date']) ?>" required>
             </div>
@@ -100,7 +114,7 @@
             </div>
         </div>
 
-        <div class="card" style="margin-top: 20px; background: #f8fafc;">
+        <div style="margin-top: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
             <h3>Edit Collateral</h3>
             <div class="grid-container">
                 <input type="hidden" name="collateral_id" value="<?= $collateral['id'] ?? '' ?>">
@@ -119,5 +133,30 @@
         <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" style="display:block; text-align:center; margin-top:15px; color:#64748b;">Cancel</a>
     </form>
 </div>
+
+<script>
+function calculateTotal() {
+    const P = parseFloat(document.getElementById('amount').value) || 0;
+    const rate = parseFloat(document.getElementById('interest_rate').value) || 0;
+    const qty = parseFloat(document.getElementById('term_months').value) || 1;
+    const freq = document.getElementById('term_type').value;
+
+    let total = 0;
+
+    // Logic: If One Time, no multiplication, otherwise multiply by qty
+    if (freq === 'one_time') {
+        total = P + (P * (rate / 100));
+    } else {
+        // This calculates interest based on the term quantity
+        // E.g., Monthly for 5 months = P * rate * 5
+        total = P + (P * (rate / 100) * qty);
+    }
+    
+    document.getElementById('total_payable').value = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+// Run on load
+window.onload = calculateTotal;
+</script>
 
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>

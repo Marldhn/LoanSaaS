@@ -27,36 +27,33 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label>Select Account</label>
-            <select name="account_id" id="account_select" class="form-control" required>
-                <option value="">-- Choose an Account --</option>
-                <?php foreach ($accounts as $acc): ?>
-                    <option value="<?= $acc['id'] ?>" data-balance="<?= $acc['current_balance'] ?>">
-                        <?= htmlspecialchars($acc['name']) ?> (Balance: ₱<?= number_format($acc['current_balance'], 2) ?>)
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <div class="row">
+            <div class="form-group" style="flex: 2;">
+                <label>Select Account</label>
+                <select name="account_id" id="account_select" class="form-control" required>
+                    <option value="">-- Choose an Account --</option>
+                    <?php foreach ($accounts as $acc): ?>
+                        <option value="<?= $acc['id'] ?>" data-balance="<?= $acc['current_balance'] ?>">
+                            <?= htmlspecialchars($acc['name']) ?> (Balance: ₱<?= number_format($acc['current_balance'], 2) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Principal Amount</label>
+                <input type="number" step="0.01" id="amount" name="amount" class="form-control" placeholder="0.00" required>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>Loan Amount (Principal)</label>
-            <input type="number" step="0.01" id="amount" name="amount" class="form-control" placeholder="0.00" required>
-        </div>
-
-        <div class="form-group">
-            <label>Interest Rate (%)</label>
-            <input type="number" step="0.01" id="interest_rate" name="interest_rate" class="form-control" placeholder="0.00">
-        </div>
-
-        <div class="form-group">
-            <label>Fee</label>
-            <input type="number" step="0.01" id="fee" name="fee" class="form-control" placeholder="0.00">
-        </div>
-
-        <div class="form-group">
-            <label>Total Payable</label>
-            <input type="number" step="0.01" id="total_payable" name="total_payable" class="form-control" readonly style="background: #e9ecef;">
+        <div class="row">
+            <div class="form-group" style="flex: 1;">
+                <label>Interest Rate (%)</label>
+                <input type="number" step="0.01" id="interest_rate" name="interest_rate" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Fee</label>
+                <input type="number" step="0.01" id="fee" name="fee" class="form-control" placeholder="0.00">
+            </div>
         </div>
 
         <div class="form-group">
@@ -69,13 +66,35 @@
             </select>
         </div>
 
-      <div class="form-group">
-            <label>Loan Type</label>
-            <select name="loan_type" id="loan_type" class="form-control" onchange="calculateDates()">
-                <option value="fixed">Fixed (Flat Rate)</option>
-               <!--   <option value="amortized">Amortized (Declining Balance)</option>-->
-            </select>
-        </div> 
+        <div class="form-group">
+            <label>Loan Duration</label>
+            <div class="row">
+                <input type="number" id="term_months" name="term_months" class="form-control" placeholder="Qty (e.g. 3)" required style="flex: 2;">
+                <select name="term_type" id="term_type" class="form-control" required style="flex: 1;">
+                    <option value="one_time">One Time (Full Payment)</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="semi_monthly">Every 15 Days</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="daily">Daily</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Release Date</label>
+            <input type="date" id="loan_date" name="released_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+        </div>
+
+        <div class="form-group">
+            <label>Due Date(s)</label>
+            <div id="due_date_display" class="due-date-box">Select date and term to calculate...</div>
+            <input type="hidden" name="due_date" id="due_date_hidden" required>
+        </div>
+
+        <div class="form-group">
+            <label>Total Payable</label>
+            <input type="number" step="0.01" id="total_payable" name="total_payable" class="form-control" readonly style="background: #e9ecef;">
+        </div>
 
         <div class="collateral-box">
             <h4 style="margin-top:0;">Collateral Details (Optional)</h4>
@@ -91,28 +110,6 @@
                 <label>Upload Attachment</label>
                 <input type="file" name="collateral_file" class="form-control">
             </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 20px;">
-            <label>Loan Duration</label>
-            <div class="row">
-                <input type="number" id="term_months" name="term_months" class="form-control" placeholder="Qty (e.g. 3)" required>
-                <select name="term_type" id="term_type" class="form-control" required>
-                    <option value="month">Month(s)</option>
-                    <option value="day">Day(s)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Release Date</label>
-            <input type="date" id="loan_date" name="released_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
-        </div>
-
-        <div class="form-group">
-            <label>Due Date(s)</label>
-            <div id="due_date_display" class="due-date-box">Select date and term to calculate...</div>
-            <input type="hidden" name="due_date" id="due_date_hidden" required>
         </div>
 
         <div class="form-group">
@@ -132,7 +129,6 @@
     const loanDateInput = document.getElementById('loan_date');
     const termValueInput = document.getElementById('term_months');
     const termTypeInput = document.getElementById('term_type');
-    const loanTypeInput = document.getElementById('loan_type');
     const dueDateDisplay = document.getElementById('due_date_display');
     const dueDateHidden = document.getElementById('due_date_hidden');
     const accountSelect = document.getElementById('account_select');
@@ -141,51 +137,61 @@
         const principal = parseFloat(amountInput.value) || 0;
         const rate = parseFloat(interestInput.value) || 0;
         const fee = parseFloat(feeInput.value) || 0;
-        const total = principal + (principal * (rate / 100)) + fee;
-        totalPayableInput.value = total.toFixed(2);
+        const qty = parseFloat(termValueInput.value) || 1;
+        const freq = termTypeInput.value;
+
+        let interest = 0;
+        
+        // Logic: Calculate interest based on duration if monthly/daily/etc
+        if (freq !== "one_time") {
+            interest = principal * (rate / 100) * qty;
+        } else {
+            interest = principal * (rate / 100);
+        }
+
+        totalPayableInput.value = (principal + interest + fee).toFixed(2);
+        calculateDates();
     }
 
     function calculateDates() {
-        if (!loanDateInput.value || !termValueInput.value) {
-            dueDateDisplay.innerText = "Select date and term to calculate...";
-            return;
-        }
+        if (!loanDateInput.value || !termValueInput.value) return;
 
         const startDate = new Date(loanDateInput.value);
         const qty = parseInt(termValueInput.value);
-        const type = termTypeInput.value;
-        const loanType = loanTypeInput.value;
+        const freq = termTypeInput.value;
+        let finalDate = new Date(startDate);
 
-        if (loanType === 'fixed') {
-            let finalDate = new Date(startDate);
-            if (type === 'month') finalDate.setMonth(finalDate.getMonth() + qty);
-            else finalDate.setDate(finalDate.getDate() + qty);
-            
-            dueDateDisplay.innerText = "Final Due Date: " + finalDate.toLocaleDateString();
-            dueDateHidden.value = finalDate.toISOString().split('T')[0];
-        } else {
-            // Amortized: Show monthly list
-            let html = "<strong>Monthly Schedule:</strong><ul style='margin:10px 0 0 0;'>";
-            let lastDate = "";
-            for (let i = 1; i <= qty; i++) {
-                let nextDate = new Date(startDate);
-                nextDate.setMonth(nextDate.getMonth() + i);
-                html += `<li>Payment ${i}: ${nextDate.toLocaleDateString()}</li>`;
-                lastDate = nextDate.toISOString().split('T')[0];
-            }
-            html += "</ul>";
-            dueDateDisplay.innerHTML = html;
-            dueDateHidden.value = lastDate;
+        // Calculate Final Date
+        if (freq === "monthly") finalDate.setMonth(finalDate.getMonth() + qty);
+        else if (freq === "daily") finalDate.setDate(finalDate.getDate() + qty);
+        else if (freq === "weekly") finalDate.setDate(finalDate.getDate() + (qty * 7));
+        else if (freq === "semi_monthly") finalDate.setDate(finalDate.getDate() + (qty * 15));
+        else finalDate.setDate(finalDate.getDate() + qty); // Default for one-time
+
+        dueDateHidden.value = finalDate.toISOString().split('T')[0];
+
+        if (freq === "one_time") {
+            dueDateDisplay.innerHTML = "<strong>Final Due Date:</strong> " + finalDate.toLocaleDateString();
+            return;
         }
+
+        // Show Schedule
+        let html = "<strong>Payment Schedule</strong><ul style='margin-top:10px'>";
+        let current = new Date(startDate);
+        for(let i = 1; i <= qty; i++) {
+            if (freq === "monthly") current.setMonth(current.getMonth() + 1);
+            else if (freq === "weekly") current.setDate(current.getDate() + 7);
+            else if (freq === "semi_monthly") current.setDate(current.getDate() + 15);
+            else if (freq === "daily") current.setDate(current.getDate() + 1);
+            
+            html += `<li>Payment ${i}: ${current.toLocaleDateString()}</li>`;
+        }
+        dueDateDisplay.innerHTML = html + "</ul>";
     }
 
     // Event Listeners
-    amountInput.addEventListener('input', calculateTotal);
-    interestInput.addEventListener('input', calculateTotal);
-    feeInput.addEventListener('input', calculateTotal);
-    [loanDateInput, termValueInput, termTypeInput, loanTypeInput].forEach(el => {
-        el.addEventListener('change', calculateDates);
-    });
+    [amountInput, interestInput, feeInput, termValueInput].forEach(el => el.addEventListener('input', calculateTotal));
+    [termTypeInput, loanDateInput].forEach(el => el.addEventListener('change', calculateTotal));
 
     document.querySelector('form').addEventListener('submit', function(e) {
         const balance = parseFloat(accountSelect.options[accountSelect.selectedIndex].getAttribute('data-balance')) || 0;

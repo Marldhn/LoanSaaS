@@ -4,7 +4,7 @@
     .customer-card { background: #1e293b; color: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     .customer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .customer-list { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
-    .customer-row { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1fr 1.5fr; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; }
+    .customer-row { display: grid; grid-template-columns: 2fr 2fr 2fr 1fr 1fr; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; }
     .customer-row.header { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
     .avatar-circle { width: 40px; height: 40px; background: #6366f1; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; }
     .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
@@ -61,7 +61,6 @@
         <div>Customer</div>
         <div>Contact</div>
         <div>Location</div>
-        <div>Valid ID</div>
         <div>Status</div>
         <div style="text-align: right;">Actions</div>
     </div>
@@ -80,10 +79,9 @@
                 </div>
                 <div>
                     <i class="fas fa-envelope" style="color: #94a3b8; font-size: 0.8rem;"></i> <?= htmlspecialchars($b['email']) ?><br>
-                    <i class="fas fa-phone" style="color: #94a3b8; font-size: 0.8rem;"></i> <?= htmlspecialchars($b['phone']) ?>
+                    <i class="fas fa-phone" style="co   lor: #94a3b8; font-size: 0.8rem;"></i> <?= htmlspecialchars($b['phone']) ?>
                 </div>
                 <div style="font-size: 0.85rem;"><?= htmlspecialchars($b['address']) ?></div>
-                <div><code><?= htmlspecialchars($b['valid_id'] ?: 'N/A') ?></code></div>
                 <div>
                     <span class="badge <?= $b['status'] == 1 ? 'badge-active' : 'badge-inactive' ?>">
                         <?= $b['status'] == 1 ? 'Active' : 'Inactive' ?>

@@ -32,8 +32,16 @@ class DashboardController {
         $stmt = $db->prepare("SELECT SUM(current_balance) FROM accounts WHERE company_id = ?");
         $stmt->execute([$company_id]); $stats['cash_on_hand'] = $stmt->fetchColumn() ?? 0;
 
-        $stmt = $db->prepare("SELECT COUNT(*) FROM loans WHERE company_id = ? AND status = 'approved' AND due_date < CURDATE()");
-        $stmt->execute([$company_id]); $stats['overdue_loans'] = $stmt->fetchColumn();
+        // UPDATED OVERDUE QUERY
+$stmt = $db->prepare("
+    SELECT COUNT(*) 
+    FROM loans l 
+    WHERE l.company_id = ? 
+    AND l.due_date < CURDATE()
+    AND (l.total_payable - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)) > 0
+");
+$stmt->execute([$company_id]);
+$stats['overdue_loans'] = $stmt->fetchColumn();
 
         $stmt = $db->prepare("SELECT COUNT(*) FROM loans WHERE company_id = ? AND status = 'approved'");
         $stmt->execute([$company_id]); $stats['active_loans'] = $stmt->fetchColumn();
@@ -92,7 +100,7 @@ class DashboardController {
             JOIN loans l ON b.id = l.borrower_id
             WHERE l.company_id = ? AND l.status = 'approved'
             GROUP BY b.id
-            LIMIT 5
+            LIMIT 20
         ");
         $borrowerStmt->execute([$company_id]);
         $activeBorrowers = $borrowerStmt->fetchAll(PDO::FETCH_ASSOC);
