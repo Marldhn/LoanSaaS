@@ -30,6 +30,20 @@
     </div>
 
     <div class="settings-card">
+    <div class="card-header"><h3 class="card-title">System Maintenance</h3></div>
+    <div style="padding: 24px;">
+        <p style="color: #64748b; margin-bottom: 15px; font-size: 0.9rem;">
+            Export activity logs to CSV and clear database storage. <strong>Keep a backup!</strong>
+        </p>
+        <a href="/loansaas/public/index.php?url=admintools/exportLogs" 
+   class="btn" 
+   style="...">
+   Download Logs & Clear
+</a>
+    </div>
+</div>
+
+    <div class="settings-card">
         <div class="card-header">
             <h3 class="card-title">Staff Management</h3>
             <a href="/loansaas/public/index.php?url=user/create" style="padding: 8px 16px; background: #6366f1; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ Add Staff</a>

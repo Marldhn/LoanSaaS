@@ -20,15 +20,30 @@
         gap: 20px;
     }
 
+
+
+    .filter-buttons { margin-bottom: 15px; }
+.filter-buttons a {
+    padding: 6px 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #475569;
+    font-size: 0.8rem;
+    margin-right: 5px;
+}
+.filter-buttons a:hover { background: #cbd5e1; }
+
     .stat-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
     .stat-info { display: flex; flex-direction: column; }
     .stat-label { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; }
     .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; margin-top: 4px; }
 
-    /* Bottom Grid Layout */
     .dashboard-bottom {
         display: grid;
-        grid-template-columns: 2fr 1fr; /* Chart takes 2/3, List takes 1/3 */
+        /* Use minmax to ensure the chart is at least 500px, 
+           and the sidebar is exactly 320px */
+        grid-template-columns: minmax(500px, 2fr) 320px; 
         gap: 20px;
         align-items: start;
     }
@@ -48,8 +63,12 @@
         width: 100%;
     }
 
-    @media (max-width: 992px) {
-        .dashboard-bottom { grid-template-columns: 1fr; }
+    @media (max-width: 1200px) {
+        /* If the screen is smaller than 1200px, stack them vertically 
+           instead of trying to squish them side-by-side */
+        .dashboard-bottom { 
+            grid-template-columns: 1fr; 
+        }
     }
 </style>
 
@@ -61,7 +80,7 @@
 <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon" style="background:#eef2ff; color:#6366f1;"><i class="fas fa-hand-holding-dollar"></i></div><div class="stat-info"><span class="stat-label">Total Loans</span><span class="stat-value"><?= $stats['total_loans'] ?></span></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#f0fdf4; color:#16a34a;"><i class="fas fa-wallet"></i></div><div class="stat-info"><span class="stat-label">Total Collected</span><span class="stat-value">₱<?= number_format($stats['total_collected'], 2) ?></span></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#fff7ed; color:#ea580c;"><i class="fas fa-bank"></i></div><div class="stat-info"><span class="stat-label">Cash on Hand</span><span class="stat-value">₱<?= number_format($stats['cash_on_hand'], 2) ?></span></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fff7ed; color:#ea580c;"><i class="fas fa-bank"></i></div><div class="stat-info"><span class="stat-label">Available Money</span><span class="stat-value">₱<?= number_format($stats['cash_on_hand'], 2) ?></span></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#fef2f2; color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-info"><span class="stat-label">Overdue</span><span class="stat-value"><?= $stats['overdue_loans'] ?></span></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#fefce8; color:#ca8a04;"><i class="fas fa-clock"></i></div><div class="stat-info"><span class="stat-label">Pending</span><span class="stat-value"><?= $stats['pending_loans'] ?></span></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#f1f5f9; color:#475569;"><i class="fas fa-users"></i></div><div class="stat-info"><span class="stat-label">Borrowers</span><span class="stat-value"><?= $stats['total_borrowers'] ?></span></div></div>
@@ -74,7 +93,19 @@
 
 <div class="dashboard-bottom">
     <div class="card-box">
-        <h3>Loan Trends (Last 30 Days)</h3>
+        
+<h3>Loan Trends (Last <?= htmlspecialchars($_GET['range'] ?? '30') ?> Days)</h3>
+       <div class="filter-buttons" style="margin-bottom: 15px;">
+    <?php 
+    // Get the base URL for your dashboard
+    $baseUrl = "/loansaas/public/index.php?url=dashboard/index&range="; 
+    ?>
+    <a href="<?= $baseUrl ?>7">7 Days</a>
+    <a href="<?= $baseUrl ?>15">15 Days</a>
+    <a href="<?= $baseUrl ?>30">30 Days</a>
+    <a href="<?= $baseUrl ?>365">Yearly</a>
+</div>
+
         <div class="chart-container">
             <canvas id="loanChart"></canvas>
         </div>

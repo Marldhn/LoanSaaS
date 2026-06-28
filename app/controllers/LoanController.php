@@ -167,8 +167,7 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-    public function details() {
-    // 1. Validate input
+   public function details() {
     if (!isset($_GET['id'])) {
         die("No ID provided");
     }
@@ -177,8 +176,7 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     $loanModel = new Loan();
     $db = $loanModel->getDb();
 
-    // 2. Fetch the loan data first
-   $stmt = $db->prepare("
+    $stmt = $db->prepare("
         SELECT l.*, b.first_name, b.last_name, b.phone, b.address, a.name as account_name, 
                l.term_months, l.term_type 
         FROM loans l
@@ -189,25 +187,30 @@ $accounts = $stmtAcc->fetchAll(PDO::FETCH_ASSOC);
     $stmt->execute([$id]);
     $loan = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // 3. Now check if the loan exists
     if (!$loan) {
-        die("Error: Loan ID $id not found in the database.");
+        die("Error: Loan ID $id not found.");
     }
 
-    // 4. Fetch collateral separately
     $stmtColl = $db->prepare("SELECT * FROM loan_collaterals WHERE loan_id = ?");
     $stmtColl->execute([$id]);
     $collateral = $stmtColl->fetch(PDO::FETCH_ASSOC);
 
-    // 5. Fetch payments
     $paymentModel = new Payment();
     $payments = $paymentModel->getByLoanId($id);
     $totalPaid = $paymentModel->getTotalPaidByLoanId($id);
     
-    // 6. Calculate remaining balance safely
-    $remainingBalance = ($loan['total_payable'] ?? 0) - $totalPaid;
+    // Fetch and calculate penalties
+    $stmtPen = $db->prepare("SELECT * FROM penalties WHERE loan_id = ? ORDER BY date_applied DESC");
+    $stmtPen->execute([$id]);
+    $penalties = $stmtPen->fetchAll(PDO::FETCH_ASSOC);
+    
+    $totalPenalties = 0;
+    foreach($penalties as $penalty) {
+        $totalPenalties += $penalty['amount'];
+    }
 
-    // 7. Load the view
+    $remainingBalance = ($loan['total_payable'] ?? 0) - $totalPaid + $totalPenalties;
+
     require_once __DIR__ . '/../views/admin/loans/details.php';
 }
 
@@ -375,6 +378,33 @@ private function calculateLoanStatus($loan) {
     exit;
 }
 
+public function apply_penalty() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: /loansaas/public/index.php?url=loan/index");
+            exit;
+        }
+
+        $loan_id = $_POST['loan_id'];
+        $amount = (float)$_POST['amount'];
+        $reason = $_POST['reason'];
+        $company_id = $_SESSION['user']['company_id'];
+
+        $loanModel = new Loan();
+        $db = $loanModel->getDb();
+
+        try {
+            $stmt = $db->prepare("INSERT INTO penalties (company_id, loan_id, amount, reason, date_applied) VALUES (?, ?, ?, ?, CURDATE())");
+            $stmt->execute([$company_id, $loan_id, $amount, $reason]);
+            
+            // Log the action
+            (new ActivityLog($db))->logAction($company_id, $_SESSION['user']['id'], 'APPLY_PENALTY', 'penalties', $loan_id, "Applied penalty of ₱$amount to loan #$loan_id. Reason: $reason");
+
+            header("Location: /loansaas/public/index.php?url=loan/details&id=" . $loan_id);
+            exit;
+        } catch (Exception $e) {
+            die("Error applying penalty: " . $e->getMessage());
+        }
+    }
 
 public function edit($id = null) {
     // 1. Security Check

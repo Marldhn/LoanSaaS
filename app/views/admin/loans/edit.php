@@ -89,8 +89,9 @@
 
                      <div class="form-group">
                 <label>Total Payable Amount</label>
-                <input type="text" id="total_payable" name="total_payable" readonly style="background: #f1f5f9;">
-            </div>
+<input type="text" id="total_payable" name="total_payable" 
+       value="<?= htmlspecialchars($loan['total_payable']) ?>" 
+       readonly style="background: #f1f5f9;">            </div>
 
             <div class="form-group">
                 <label>Loan Account</label>
@@ -143,18 +144,15 @@ function calculateTotal() {
 
     let total = 0;
 
-    // Logic: If One Time, no multiplication, otherwise multiply by qty
     if (freq === 'one_time') {
         total = P + (P * (rate / 100));
     } else {
-        // This calculates interest based on the term quantity
-        // E.g., Monthly for 5 months = P * rate * 5
         total = P + (P * (rate / 100) * qty);
     }
     
-    document.getElementById('total_payable').value = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    // Set the value to the raw number (no commas) so PHP can process it
+    document.getElementById('total_payable').value = total.toFixed(2);
 }
-
 // Run on load
 window.onload = calculateTotal;
 </script>

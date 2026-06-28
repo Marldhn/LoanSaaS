@@ -43,7 +43,12 @@ $stmt = $db->prepare("
 $stmt->execute([$company_id]);
 $stats['overdue_loans'] = $stmt->fetchColumn();
 
-        $stmt = $db->prepare("SELECT COUNT(*) FROM loans WHERE company_id = ? AND status = 'approved'");
+$stmt = $db->prepare("
+            SELECT COUNT(*) FROM loans l 
+            WHERE l.company_id = ? AND l.status = 'approved'
+            AND (l.total_payable + (SELECT IFNULL(SUM(amount), 0) FROM penalties WHERE loan_id = l.id) 
+                 - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)) > 0
+        ");
         $stmt->execute([$company_id]); $stats['active_loans'] = $stmt->fetchColumn();
 
         $stmt = $db->prepare("SELECT SUM(amount) FROM loans WHERE company_id = ? AND status IN ('approved', 'paid')");
@@ -54,7 +59,10 @@ $stats['overdue_loans'] = $stmt->fetchColumn();
 
         // 9. Total Remaining
         $stmt = $db->prepare("
-            SELECT SUM(l.total_payable - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)) 
+            SELECT SUM(
+                (l.total_payable + (SELECT IFNULL(SUM(amount), 0) FROM penalties WHERE loan_id = l.id)) 
+                - (SELECT IFNULL(SUM(amount), 0) FROM payments WHERE loan_id = l.id)
+            ) 
             FROM loans l 
             WHERE l.company_id = ? AND l.status = 'approved'
         ");
@@ -63,21 +71,24 @@ $stats['overdue_loans'] = $stmt->fetchColumn();
         
         $stats['total_profit'] = $stats['total_collected'] - $stats['total_disbursed'];
 
-        // 10. Chart Data (Loans & Expenses Alignment)
+      // 10. Chart Data (Dynamic Range)
+        $range = isset($_GET['range']) && in_array($_GET['range'], [7, 15, 30, 365]) ? (int)$_GET['range'] : 30;
         $dateRange = [];
-        for ($i = 29; $i >= 0; $i--) {
+        
+        // Generate date keys for the selected range
+        for ($i = $range - 1; $i >= 0; $i--) {
             $dateRange[date('Y-m-d', strtotime("-$i days"))] = ['loans' => 0, 'expenses' => 0];
         }
 
-        // Fetch Loans
-        $loanStmt = $db->prepare("SELECT DATE(created_at) as date, SUM(amount) as total FROM loans WHERE company_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(created_at)");
+        // Fetch Loans with dynamic range
+        $loanStmt = $db->prepare("SELECT DATE(created_at) as date, SUM(amount) as total FROM loans WHERE company_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL $range DAY) GROUP BY DATE(created_at)");
         $loanStmt->execute([$company_id]);
         while ($row = $loanStmt->fetch(PDO::FETCH_ASSOC)) {
             if (isset($dateRange[$row['date']])) $dateRange[$row['date']]['loans'] = $row['total'];
         }
 
-        // Fetch Expenses
-        $expStmt = $db->prepare("SELECT DATE(expense_date) as date, SUM(amount) as total FROM expenses WHERE company_id = ? AND expense_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(expense_date)");
+        // Fetch Expenses with dynamic range
+        $expStmt = $db->prepare("SELECT DATE(expense_date) as date, SUM(amount) as total FROM expenses WHERE company_id = ? AND expense_date >= DATE_SUB(CURDATE(), INTERVAL $range DAY) GROUP BY DATE(expense_date)");
         $expStmt->execute([$company_id]);
         while ($row = $expStmt->fetch(PDO::FETCH_ASSOC)) {
             if (isset($dateRange[$row['date']])) $dateRange[$row['date']]['expenses'] = $row['total'];
@@ -88,7 +99,6 @@ $stats['overdue_loans'] = $stmt->fetchColumn();
             $chartLabels[] = date('M d', strtotime($date));
             $chartTotals[] = $data['loans'];
             $chartExpenses[] = $data['expenses'];
-            // Daily Profit Calculation
             $chartProfits[] = $data['loans'] - $data['expenses'];
         }
 
