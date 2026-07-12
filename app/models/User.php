@@ -24,13 +24,16 @@ class User extends Model {
         try {
             $this->conn->beginTransaction();
 
+            // Create the company with 'free' tier and 'active' status
             $stmt1 = $this->conn->prepare("INSERT INTO companies (name, plan_tier, subscription_status) VALUES (?, 'free', 'active')");
             $stmt1->execute([$companyName]);
             $companyId = $this->conn->lastInsertId();
 
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-            $stmt2 = $this->conn->prepare("INSERT INTO users (company_id, username, password, role) VALUES (?, ?, ?, 'admin')");
+            // Updated: Added 'status' column. Defaulting to 0 (pending)
+            // Ensure your 'users' table has a 'status' column that defaults to 0 or is nullable
+            $stmt2 = $this->conn->prepare("INSERT INTO users (company_id, username, password, role, status) VALUES (?, ?, ?, 'admin', 0)");
             $stmt2->execute([$companyId, $username, $hashedPassword]);
 
             $this->conn->commit();

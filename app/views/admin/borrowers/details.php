@@ -1,3 +1,28 @@
+<style>
+    .bp-wrapper { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+    .bp-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    .bp-card-title { font-weight: 700; margin-bottom: 15px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+    .bp-info-group { margin-bottom: 12px; }
+    .bp-info-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
+    .bp-info-value { font-size: 0.95rem; color: #1e293b; }
+    .bp-stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+    .bp-stat-value { font-size: 1.5rem; font-weight: 700; color: #6366f1; }
+    
+    /* Table Responsive */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+
+    @media (max-width: 768px) {
+        .bp-wrapper { grid-template-columns: 1fr; }
+        
+        /* Turn table into stackable cards */
+        .data-table thead { display: none; }
+        .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+        .data-table tr { margin-bottom: 15px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; }
+        .data-table td { display: flex; justify-content: space-between; border-bottom: none; padding: 5px 0; }
+        .data-table td::before { content: attr(data-label); font-weight: bold; color: #64748b; }
+    }
+</style>
 <?php 
 // Ensure your layouts handle the <html>, <head>, and <body> tags
 require_once dirname(__DIR__, 2) . '/layouts/header.php'; 
@@ -55,21 +80,21 @@ require_once dirname(__DIR__, 2) . '/layouts/header.php';
                 <thead>
                     <tr><th>Loan ID</th><th>Amount</th><th>Payable</th><th>Status</th><th>Action</th></tr>
                 </thead>
-                <tbody>
-                    <?php if (empty($loans)): ?>
-                        <tr><td colspan="5" style="text-align:center;">No loan history found.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($loans as $loan): ?>
-                        <tr>
-                            <td>#LN-<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></td>
-                            <td>₱<?= number_format($loan['amount'], 2) ?></td>
-                            <td>₱<?= number_format($loan['total_payable'], 2) ?></td>
-                            <td><?= htmlspecialchars($loan['status']) ?></td>
-                            <td><a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>">View</a></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
+               <tbody>
+    <?php if (empty($loans)): ?>
+        <tr><td colspan="5" style="text-align:center;">No loan history found.</td></tr>
+    <?php else: ?>
+        <?php foreach ($loans as $loan): ?>
+        <tr>
+            <td data-label="Loan ID">#LN-<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></td>
+            <td data-label="Amount">₱<?= number_format($loan['amount'], 2) ?></td>
+            <td data-label="Payable">₱<?= number_format($loan['total_payable'], 2) ?></td>
+            <td data-label="Status"><?= htmlspecialchars($loan['status']) ?></td>
+            <td data-label="Action"><a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>">View</a></td>
+        </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</tbody>
             </table>
         </div>
     </div>

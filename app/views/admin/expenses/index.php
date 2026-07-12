@@ -3,14 +3,43 @@
 <style>
     /* Consistent Page Layout */
     .exp-card { background: #1e293b; color: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .exp-list { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .exp-list { background: transparent; }
     
-    .exp-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; }
-    .exp-row.header { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
+    /* Desktop Row: Grid layout */
+    .exp-row { 
+        display: grid; 
+        grid-template-columns: 1fr 2fr 1fr 1fr; 
+        padding: 16px 20px; 
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        align-items: center;
+    }
+    
+    .exp-row.header { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.85rem; text-transform: uppercase; border: 1px solid #e2e8f0; }
     
     /* Modal Styles */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; }
     .modal-content { background: #fff; width: 90%; max-width: 500px; border-radius: 12px; padding: 24px; position: relative; }
+
+    /* Mobile Responsive Logic */
+    @media (max-width: 768px) {
+        .exp-row.header { display: none; } /* Hide header on mobile */
+        
+        .exp-row { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; 
+            gap: 8px; 
+            padding: 20px; 
+        }
+
+        .exp-row > div { width: 100%; }
+        
+        /* Flex row for items on mobile */
+        .mobile-meta { display: flex; justify-content: space-between; align-items: center; }
+    }
 </style>
 
 <div class="exp-card">
@@ -31,7 +60,7 @@
         <div>Date</div>
         <div>Title</div>
         <div>Category</div>
-        <div>Amount</div>
+        <div style="text-align: right;">Amount</div>
     </div>
 
     <?php if (empty($expenses)): ?>
@@ -39,15 +68,19 @@
     <?php else: ?>
         <?php foreach ($expenses as $exp): ?>
         <div class="exp-row">
-            <div style="color: #64748b;"><?= date('M d, Y', strtotime($exp['expense_date'])) ?></div>
+            <div style="font-size: 0.85rem; color: #64748b;"><?= date('M d, Y', strtotime($exp['expense_date'])) ?></div>
             <div style="font-weight: 600; color: #1e293b;"><?= htmlspecialchars($exp['title']) ?></div>
-            <div><span style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:0.8rem;"><?= htmlspecialchars($exp['category_name'] ?? 'General') ?></span></div>
-            <div style="color: #dc2626; font-weight: 700;">-₱<?= number_format($exp['amount'], 2) ?></div>
+            
+            <div class="mobile-meta">
+                <span style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:0.75rem;">
+                    <?= htmlspecialchars($exp['category_name'] ?? 'General') ?>
+                </span>
+                <div style="color: #dc2626; font-weight: 700; text-align: right;">-₱<?= number_format($exp['amount'], 2) ?></div>
+            </div>
         </div>
         <?php endforeach; ?>
     <?php endif; ?>
 </div>
-
 <div id="expModal" class="modal-overlay">
     <div class="modal-content">
         <button type="button" onclick="document.getElementById('expModal').style.display='none'" 

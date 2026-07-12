@@ -1,15 +1,39 @@
 <?php require_once dirname(__DIR__, 2) . '/layouts/header.php'; ?>
-
 <style>
-    .loan-card { max-width: 600px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
-    .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-    .row { display: flex; gap: 15px; }
-    .btn-save { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
+    .loan-card { 
+        max-width: 600px; 
+        margin: 20px auto; 
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 12px; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: #444; font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    
+    /* Desktop Row: flex-row */
+    .row { display: flex; gap: 15px; flex-wrap: wrap; }
+    
+    .btn-save { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
     .btn-save:hover { background: #1d4ed8; }
-    .due-date-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-weight: bold; color: #0f172a; text-align: left; }
-    .collateral-box { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #e2e8f0; }
+    
+    .due-date-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-size: 0.85rem; color: #0f172a; }
+    .collateral-box { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #e2e8f0; }
+
+    /* Mobile Responsive Logic */
+    @media (max-width: 600px) {
+        .loan-card { margin: 10px; padding: 15px; }
+        
+        /* Force rows to stack on mobile */
+        .row { flex-direction: column; gap: 0; }
+        
+        /* Ensure inputs take full width when stacked */
+        .row > div { flex: 1 1 100% !important; margin-bottom: 15px; }
+        
+        h2 { font-size: 1.5rem; }
+    }
 </style>
 
 <div class="loan-card">
@@ -66,19 +90,23 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label>Loan Duration</label>
-            <div class="row">
-                <input type="number" id="term_months" name="term_months" class="form-control" placeholder="Qty (e.g. 3)" required style="flex: 2;">
-                <select name="term_type" id="term_type" class="form-control" required style="flex: 1;">
-                    <option value="one_time">One Time (Full Payment)</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="semi_monthly">Every 15 Days</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="daily">Daily</option>
-                </select>
-            </div>
+       <div class="form-group">
+    <label>Loan Duration</label>
+    <div class="row">
+        <div style="flex: 2;">
+            <input type="number" id="term_months" name="term_months" class="form-control" placeholder="Qty (e.g. 3)" required>
         </div>
+        <div style="flex: 1;">
+            <select name="term_type" id="term_type" class="form-control" required>
+                <option value="one_time">One Time</option>
+                <option value="monthly">Monthly</option>
+                <option value="semi_monthly">Every 15 Days</option>
+                <option value="weekly">Weekly</option>
+                <option value="daily">Daily</option>
+            </select>
+        </div>
+    </div>
+</div>
 
         <div class="form-group">
             <label>Release Date</label>

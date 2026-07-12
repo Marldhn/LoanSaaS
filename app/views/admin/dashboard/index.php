@@ -2,6 +2,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+    /* Global Page Wrapper */
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; }
+    .page-header p { color: #64748b; margin: 4px 0 0 0; }
+
     /* Dashboard Stats Grid */
     .stats-grid {
         display: grid;
@@ -20,30 +25,15 @@
         gap: 20px;
     }
 
-
-
-    .filter-buttons { margin-bottom: 15px; }
-.filter-buttons a {
-    padding: 6px 12px;
-    background: #e2e8f0;
-    border-radius: 6px;
-    text-decoration: none;
-    color: #475569;
-    font-size: 0.8rem;
-    margin-right: 5px;
-}
-.filter-buttons a:hover { background: #cbd5e1; }
-
     .stat-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
     .stat-info { display: flex; flex-direction: column; }
     .stat-label { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; }
     .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; margin-top: 4px; }
 
+    /* Dashboard Bottom Section */
     .dashboard-bottom {
         display: grid;
-        /* Use minmax to ensure the chart is at least 500px, 
-           and the sidebar is exactly 320px */
-        grid-template-columns: minmax(500px, 2fr) 320px; 
+        grid-template-columns: 1fr; /* Default to vertical stacking */
         gap: 20px;
         align-items: start;
     }
@@ -54,21 +44,54 @@
         border-radius: 16px;
         border: 1px solid #e2e8f0;
         width: 100%;
+        box-sizing: border-box;
     }
 
-    /* Fixed height container for chart */
     .chart-container {
         position: relative;
         height: 350px; 
         width: 100%;
     }
 
-    @media (max-width: 1200px) {
-        /* If the screen is smaller than 1200px, stack them vertically 
-           instead of trying to squish them side-by-side */
-        .dashboard-bottom { 
-            grid-template-columns: 1fr; 
+    .filter-buttons { margin-bottom: 15px; }
+    .filter-buttons a {
+        padding: 6px 12px;
+        background: #e2e8f0;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #475569;
+        font-size: 0.8rem;
+        margin-right: 5px;
+    }
+    .filter-buttons a:hover { background: #cbd5e1; }
+
+    .borrower-list {
+        list-style: none; 
+        padding: 0; 
+        margin-top: 15px;
+        display: block;
+    }
+
+    /* Responsive Adjustments */
+    @media (min-width: 1024px) {
+        .dashboard-bottom {
+            grid-template-columns: 1fr 350px; /* Side-by-side on large screens */
         }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-card { padding: 12px; gap: 10px; }
+        .stat-icon { width: 40px; height: 40px; font-size: 18px; }
+        .stat-label { font-size: 10px; }
+        .stat-value { font-size: 16px; }
+        
+        .chart-container { height: 250px; }
+        .dashboard-bottom { gap: 15px; }
     }
 </style>
 
@@ -93,42 +116,32 @@
 
 <div class="dashboard-bottom">
     <div class="card-box">
-        
-<h3>Loan Trends (Last <?= htmlspecialchars($_GET['range'] ?? '30') ?> Days)</h3>
-       <div class="filter-buttons" style="margin-bottom: 15px;">
-    <?php 
-    // Get the base URL for your dashboard
-    $baseUrl = "/loansaas/public/index.php?url=dashboard/index&range="; 
-    ?>
-    <a href="<?= $baseUrl ?>7">7 Days</a>
-    <a href="<?= $baseUrl ?>15">15 Days</a>
-    <a href="<?= $baseUrl ?>30">30 Days</a>
-    <a href="<?= $baseUrl ?>365">Yearly</a>
-</div>
-
+        <h3>Loan Trends (Last <?= htmlspecialchars($_GET['range'] ?? '30') ?> Days)</h3>
         <div class="chart-container">
             <canvas id="loanChart"></canvas>
         </div>
     </div>
-   <div class="card-box">
-    <h3>Active Borrowers</h3>
-    <?php if (!empty($activeBorrowers)): ?>
-        <ul style="list-style: none; padding: 0; margin-top: 15px;">
-            <?php foreach ($activeBorrowers as $borrower): ?>
-                <li style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center;">
-                        <i class="fas fa-user-circle" style="margin-right: 10px; color: #6366f1;"></i>
-                        <span style="color: #334155; font-weight: 500;"><?= htmlspecialchars($borrower['name']) ?></span>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: bold; color: #e11d48;">
-                        ₱<?= number_format($borrower['total_due'], 2) ?>
-                    </span>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p style="color: #64748b; margin-top: 15px;">No active borrowers found.</p>
-    <?php endif; ?>
+
+    <div class="card-box">
+        <h3>Active Borrowers</h3>
+        <?php if (!empty($activeBorrowers)): ?>
+            <ul class="borrower-list">
+                <?php foreach ($activeBorrowers as $borrower): ?>
+                    <li style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center;">
+                            <i class="fas fa-user-circle" style="margin-right: 10px; color: #6366f1;"></i>
+                            <span style="color: #334155; font-weight: 500; font-size: 0.9rem;"><?= htmlspecialchars($borrower['name']) ?></span>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: bold; color: #e11d48;">
+                            ₱<?= number_format($borrower['total_due'], 2) ?>
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p style="color: #64748b; margin-top: 15px;">No active borrowers found.</p>
+        <?php endif; ?>
+    </div>
 </div>
 </div>
 
@@ -166,16 +179,20 @@ new Chart(ctx, {
             }
         ]
     },
-    options: { 
-        responsive: true, 
-        maintainAspectRatio: false,
-        plugins: { 
-            legend: { position: 'top' } 
-        }, 
-        scales: { 
-            y: { beginAtZero: true } 
+   options: { 
+    responsive: true, 
+    maintainAspectRatio: false,
+    plugins: { 
+        legend: { 
+            position: 'bottom', // Move legend to bottom for more space
+            labels: { font: { size: 10 } } 
         } 
-    }
+    }, 
+    scales: { 
+        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        x: { ticks: { font: { size: 10 } } }
+    } 
+}
 });
 </script>
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>
