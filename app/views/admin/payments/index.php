@@ -68,19 +68,16 @@
     <?php if (empty($payments)): ?>
         <div style="padding: 40px; text-align: center; color: #94a3b8;">No payment records found.</div>
     <?php else: ?>
-        <?php foreach ($payments as $p): ?>
+    <?php foreach ($payments as $p): ?>
             <div class="pay-row">
-                <div style="font-size: 0.85rem; color:#64748b;"><?= htmlspecialchars($p['payment_date']) ?></div>
-                <div style="font-weight: 700; color: #1e293b;">#LN-<?= str_pad($p['loan_id'], 6, '0', STR_PAD_LEFT) ?></div>
-                
-                <div class="mobile-meta">
-                    <div style="font-weight: 700; color: #059669;">₱<?= number_format($p['amount'], 2) ?></div>
-                    <div style="text-align: right;">
-                        <a href="/loansaas/public/index.php?url=loan/details&id=<?= $p['loan_id'] ?>" 
-                           style="color:#64748b; text-decoration:none; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                           View
-                        </a>
-                    </div>
+                <div data-label="Date" style="font-size: 0.85rem; color:#64748b;"><?= htmlspecialchars($p['payment_date']) ?></div>
+                <div data-label="Reference" style="font-weight: 700; color: #1e293b;">#LN-<?= str_pad($p['loan_id'], 6, '0', STR_PAD_LEFT) ?></div>
+                <div data-label="Amount" style="font-weight: 700; color: #059669;">₱<?= number_format($p['amount'], 2) ?></div>
+                <div data-label="Action" style="text-align: right;">
+                    <a href="/loansaas/public/index.php?url=loan/details&id=<?= $p['loan_id'] ?>" 
+                       style="color:#64748b; text-decoration:none; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem;">
+                       View
+                    </a>
                 </div>
             </div>
         <?php endforeach; ?>

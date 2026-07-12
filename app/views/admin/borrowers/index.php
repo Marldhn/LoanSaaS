@@ -91,7 +91,6 @@
     <div class="customer-row header">
         <div>Customer</div>
         <div>Contact</div>
-        <div>Location</div>
         <div>Status</div>
         <div style="text-align: right;">Actions</div>
     </div>
@@ -109,7 +108,6 @@
                     <div style="font-size: 0.85rem;"><i class="fas fa-envelope" style="color: #94a3b8;"></i> <?= htmlspecialchars($b['email']) ?></div>
                     <div style="font-size: 0.85rem;"><i class="fas fa-phone" style="color: #94a3b8;"></i> <?= htmlspecialchars($b['phone']) ?></div>
                 </div>
-                <div style="font-size: 0.85rem;"><?= htmlspecialchars($b['address']) ?></div>
                 <div>
                     <span class="badge <?= $b['status'] == 1 ? 'badge-active' : 'badge-inactive' ?>">
                         <?= $b['status'] == 1 ? 'Active' : 'Inactive' ?>

@@ -6,7 +6,15 @@
     .filter-bar { background: #ffffff; padding: 15px 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
     .loan-list { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
     
-    .loan-row { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 0.5fr; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; }
+    /* Desktop: 5 columns (Borrower/ID combined as 1.5fr) */
+    .loan-row { 
+        display: grid; 
+        grid-template-columns: 1.5fr 1fr 1fr 1fr 0.5fr; 
+        padding: 15px 20px; 
+        border-bottom: 1px solid #f1f5f9; 
+        align-items: center; 
+    }
+    
     .loan-row.header { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 12px; text-transform: uppercase; }
     
     .badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 600; }
@@ -28,23 +36,24 @@
             align-items: flex-start !important; 
             gap: 8px; 
             padding: 16px !important; 
-            
-            /* ADD THIS LINE */
             margin-bottom: 15px !important; 
-            
-            /* Optional: Add a border back if the gap makes the list look disconnected */
             border: 1px solid #e2e8f0 !important;
             border-radius: 8px !important;
         }
 
-        .loan-list { 
-    background: transparent !important; /* This will make the gap show the page color */
-    border: none !important;
-}
+        .loan-list { background: transparent !important; border: none !important; }
         .loan-row.header { display: none !important; }
         
         .loan-row > div { width: 100%; display: flex; justify-content: space-between; }
-        .loan-row > div::before { content: attr(data-label); font-weight: 700; color: #64748b; font-size: 11px; text-transform: uppercase; }
+        
+        /* Adds the label to the left of the value on mobile */
+        .loan-row > div:not(:first-child)::before { 
+            content: attr(data-label); 
+            font-weight: 700; 
+            color: #64748b; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+        }
         
         .loan-row .btn-view { padding: 8px 16px; background: #f1f5f9; border-radius: 6px; }
     }
@@ -74,8 +83,7 @@
         $nextOrder = (($_GET['order'] ?? 'DESC') === 'DESC') ? 'ASC' : 'DESC';
         $qs = "&order=$nextOrder&status=" . urlencode($_GET['status'] ?? '');
         ?>
-        <div><a href="?url=loan/index&sort=id<?= $qs ?>" class="sort-link">ID</a></div>
-        <div><a href="?url=loan/index&sort=borrower_name<?= $qs ?>" class="sort-link">Borrower</a></div>
+        <div><a href="?url=loan/index&sort=borrower_name<?= $qs ?>" class="sort-link">Borrower / ID</a></div>
         <div><a href="?url=loan/index&sort=remaining_balance<?= $qs ?>" class="sort-link">Balance</a></div>
         <div><a href="?url=loan/index&sort=due_date<?= $qs ?>" class="sort-link">Due Date</a></div>
         <div>Status</div>
@@ -90,13 +98,16 @@
             $color = $statusColors[$loan['display_status']] ?? '#94a3b8';
     ?>
        <div class="loan-row">
-            <div data-label="Loan ID" style="color: #4f46e5; font-weight: 700;">#LN-<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></div>
-            <div data-label="Borrower" style="font-weight: 600;"><?= htmlspecialchars($loan['first_name'] . ' ' . $loan['last_name']) ?></div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 700; color: #1e293b;"><?= htmlspecialchars($loan['first_name'] . ' ' . $loan['last_name']) ?></span>
+                <span style="font-size: 0.85rem; color: #64748b;">LOAN ID: #LN<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></span>
+            </div>
+            
             <div data-label="Balance" style="font-weight: 700;">₱<?= number_format($loan['remaining_balance'], 2) ?></div>
             <div data-label="Due Date"><?= htmlspecialchars($loan['due_date']) ?></div>
             <div data-label="Status"><span class="badge" style="background: <?= $color ?>15; color: <?= $color ?>;"><?= htmlspecialchars($loan['display_status']) ?></span></div>
             <div data-label="Action" style="text-align:right;"><a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-view">View</a></div>
-        </div>
+       </div>
     <?php endforeach; endif; ?>
 </div>
 
