@@ -56,42 +56,41 @@
         <div class="grid-container">
             <div class="form-group">
                 <label>Principal Amount</label>
-                <input type="number" id="amount" name="amount" value="<?= htmlspecialchars($loan['amount']) ?>" required oninput="calculateTotal()">
+                <input type="number" id="amount" name="amount" value="<?= htmlspecialchars($loan['amount']) ?>" required>
             </div>
             <div class="form-group">
                 <label>Interest Rate (%)</label>
-                <input type="number" id="interest_rate" step="0.01" name="interest_rate" value="<?= htmlspecialchars($loan['interest_rate']) ?>" required oninput="calculateTotal()">
+                <input type="number" id="interest_rate" step="0.01" name="interest_rate" value="<?= htmlspecialchars($loan['interest_rate']) ?>" required>
             </div>
 
-   
-     <div class="form-group">
-    <label>Loan Duration & Frequency</label>
-    <div style="display: flex; gap: 5px;">
-        <input type="number" id="term_months" name="term_months" 
-               value="<?= htmlspecialchars($loan['term_months'] ?? '1') ?>" 
-               style="width: 40%;" required oninput="calculateTotal()">
-        
-        <select name="term_type" id="term_type" style="width: 60%;" onchange="calculateTotal()">
-            <option value="one_time" <?= ($loan['term_type'] ?? '') === 'one_time' ? 'selected' : '' ?>>One Time (Full Payment)</option>
-            <option value="monthly" <?= ($loan['term_type'] ?? '') === 'monthly' ? 'selected' : '' ?>>Monthly</option>
-            <option value="semi_monthly" <?= ($loan['term_type'] ?? '') === 'semi_monthly' ? 'selected' : '' ?>>Every 15 Days</option>
-            <option value="weekly" <?= ($loan['term_type'] ?? '') === 'weekly' ? 'selected' : '' ?>>Weekly</option>
-            <option value="daily" <?= ($loan['term_type'] ?? '') === 'daily' ? 'selected' : '' ?>>Daily</option>
-        </select>
-    </div>
-</div>
+            <div class="form-group">
+                <label>Loan Duration & Frequency</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="term_months" name="term_months" 
+                           value="<?= htmlspecialchars($loan['term_months'] ?? '1') ?>" 
+                           style="width: 40%;" required>
+                    
+                    <select name="term_type" id="term_type" style="width: 60%;">
+                        <option value="one_time" <?= ($loan['term_type'] ?? '') === 'one_time' ? 'selected' : '' ?>>One Time (Full Payment)</option>
+                        <option value="monthly" <?= ($loan['term_type'] ?? '') === 'monthly' ? 'selected' : '' ?>>Monthly</option>
+                        <option value="semi_monthly" <?= ($loan['term_type'] ?? '') === 'semi_monthly' ? 'selected' : '' ?>>Every 15 Days</option>
+                        <option value="weekly" <?= ($loan['term_type'] ?? '') === 'weekly' ? 'selected' : '' ?>>Weekly</option>
+                        <option value="daily" <?= ($loan['term_type'] ?? '') === 'daily' ? 'selected' : '' ?>>Daily</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label>Released Date</label>
-                <input type="date" name="released_date" value="<?= htmlspecialchars($loan['released_date']) ?>" required>
+                <input type="date" id="released_date" name="released_date" value="<?= htmlspecialchars($loan['released_date']) ?>" required>
             </div>
 
-
-                     <div class="form-group">
+            <div class="form-group">
                 <label>Total Payable Amount</label>
-<input type="text" id="total_payable" name="total_payable" 
-       value="<?= htmlspecialchars($loan['total_payable']) ?>" 
-       readonly style="background: #f1f5f9;">            </div>
+                <input type="text" id="total_payable" name="total_payable" 
+                       value="<?= htmlspecialchars($loan['total_payable']) ?>" 
+                       readonly style="background: #f1f5f9;"> 
+            </div>
 
             <div class="form-group">
                 <label>Loan Account</label>
@@ -106,7 +105,7 @@
             
             <div class="form-group">
                 <label>Due Date</label>
-                <input type="date" name="due_date" value="<?= htmlspecialchars($loan['due_date']) ?>" required>
+                <input type="date" id="due_date" name="due_date" value="<?= htmlspecialchars($loan['due_date']) ?>" required>
             </div>
 
             <div class="form-group full-width">
@@ -144,17 +143,76 @@ function calculateTotal() {
 
     let total = 0;
 
+    // For One-Time loans, interest is applied once regardless of duration multiplier
     if (freq === 'one_time') {
         total = P + (P * (rate / 100));
     } else {
         total = P + (P * (rate / 100) * qty);
     }
     
-    // Set the value to the raw number (no commas) so PHP can process it
     document.getElementById('total_payable').value = total.toFixed(2);
 }
-// Run on load
-window.onload = calculateTotal;
+
+function calculateDueDate() {
+    const releasedValue = document.getElementById('released_date').value;
+    if (!releasedValue) return;
+
+    const qty = parseInt(document.getElementById('term_months').value) || 1;
+    const freq = document.getElementById('term_type').value;
+
+    // Split YYYY-MM-DD manually to prevent UTC timezone offset bugs
+    const parts = releasedValue.split('-');
+    let date = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    switch (freq) {
+        case 'daily':
+            date.setDate(date.getDate() + qty);
+            break;
+        case 'weekly':
+            date.setDate(date.getDate() + (7 * qty));
+            break;
+        case 'semi_monthly':
+            date.setDate(date.getDate() + (15 * qty));
+            break;
+        case 'monthly':
+            date.setMonth(date.getMonth() + qty);
+            break;
+        case 'one_time':
+            // IF 'One Time' duration input represents DAYS (e.g. 5 days from release):
+            date.setDate(date.getDate() + qty);
+            
+            // NOTE: If 'One Time' duration input represents MONTHS instead, use this line:
+            // date.setMonth(date.getMonth() + qty);
+            break;
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    document.getElementById('due_date').value = `${year}-${month}-${day}`;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const triggerElements = ['released_date', 'term_months', 'term_type'];
+    
+    triggerElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', calculateDueDate);
+            el.addEventListener('input', calculateDueDate);
+            el.addEventListener('change', calculateTotal);
+            el.addEventListener('input', calculateTotal);
+        }
+    });
+
+    document.getElementById('amount').addEventListener('input', calculateTotal);
+    document.getElementById('interest_rate').addEventListener('input', calculateTotal);
+
+    // Calculate on load
+    calculateTotal();
+    calculateDueDate();
+});
 </script>
 
 <?php require_once dirname(__DIR__, 2) . '/layouts/footer.php'; ?>

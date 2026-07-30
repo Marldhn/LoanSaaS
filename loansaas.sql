@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 28, 2026 at 11:07 PM
+-- Generation Time: Jul 12, 2026 at 11:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,7 +39,7 @@ CREATE TABLE `accounts` (
 --
 
 INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`) VALUES
-(4, 1, 'Opening Account', 0.00),
+(4, 1, 'Opening Account', 1000.00),
 (5, 1, 'Gcash', 583.00),
 (6, 1, 'Maya', 0.00),
 (7, 1, 'Gotyme', 3067.00),
@@ -134,7 +134,9 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (14, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:55:08'),
 (15, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 19:00:42'),
 (16, 1, 1, 'UPDATE_LOAN', 'loans', 38, 'Updated loan #38', '::1', '2026-06-28 19:00:50'),
-(17, 1, 1, 'APPLY_PENALTY', 'penalties', 44, 'Applied penalty of ₱10 to loan #44. Reason: Late Payment', '::1', '2026-06-28 20:22:11');
+(17, 1, 1, 'APPLY_PENALTY', 'penalties', 44, 'Applied penalty of ₱10 to loan #44. Reason: Late Payment', '::1', '2026-06-28 20:22:11'),
+(18, 1, 1, 'CREATE_LOAN', 'loans', 45, 'Created new loan #45', '::1', '2026-07-12 17:23:39'),
+(19, 1, 1, 'UPDATE_BUSINESS_NAME', 'companies', 1, 'Updated business name to: Marldohn Financial', '::1', '2026-07-12 20:40:58');
 
 -- --------------------------------------------------------
 
@@ -219,7 +221,8 @@ CREATE TABLE `companies` (
 --
 
 INSERT INTO `companies` (`id`, `name`, `plan_tier`, `subscription_status`, `expires_at`, `created_at`) VALUES
-(1, 'Sheldons Financial', 'free', 'active', NULL, '2026-06-27 19:39:21');
+(1, 'Marldohn Financial', 'free', 'active', NULL, '2026-06-27 19:39:21'),
+(5, 'AZPIRED LENDING GROUP', 'free', 'active', NULL, '2026-06-28 21:40:45');
 
 -- --------------------------------------------------------
 
@@ -310,7 +313,8 @@ INSERT INTO `loans` (`id`, `company_id`, `account_id`, `borrower_id`, `amount`, 
 (38, 1, 4, 15, 10000.00, 11.00, 11100.00, 'Approved', '2026-06-15', '2026-06-30', '2026-06-27 20:57:17', 15, '', 'one_time', 0.00, 9, ''),
 (39, 1, 4, 10, 3000.00, 15.00, 3450.00, 'Approved', '2026-06-15', '2026-06-30', '2026-06-27 21:00:43', 15, '', 'day', 0.00, 9, 'fixed'),
 (40, 1, 10, 13, 3000.00, 15.00, 3450.00, 'Approved', '2026-06-28', '2026-07-13', '2026-06-28 12:15:54', 15, '', 'day', 0.00, 9, 'fixed'),
-(44, 1, 4, 16, 100.00, 10.00, 120.00, 'Approved', '2026-06-28', '2026-06-29', '2026-06-28 18:16:59', 2, '', 'semi_monthly', 0.00, 9, '');
+(44, 1, 4, 16, 100.00, 10.00, 120.00, 'Approved', '2026-06-28', '2026-06-29', '2026-06-28 18:16:59', 2, '', 'semi_monthly', 0.00, 9, ''),
+(45, 1, 4, 16, 1000.00, 10.00, 1110.00, 'Pending', '2026-07-13', '2026-07-14', '2026-07-12 17:23:39', 1, 'NA', 'semi_monthly', 10.00, 9, 'standard');
 
 -- --------------------------------------------------------
 
@@ -328,6 +332,13 @@ CREATE TABLE `loan_collaterals` (
   `file_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `loan_collaterals`
+--
+
+INSERT INTO `loan_collaterals` (`id`, `company_id`, `loan_id`, `item_name`, `description`, `estimated_value`, `file_path`, `created_at`) VALUES
+(4, 1, 45, 'Gold Ring', NULL, 10000.00, NULL, '2026-07-12 17:23:39');
 
 -- --------------------------------------------------------
 
@@ -419,7 +430,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `company_id`, `username`, `password`, `role`, `created_at`, `status`) VALUES
 (1, 1, 'mrubinos@azpired.net', '$2y$10$/DhJJCjKBhl./meP.7NkiebnAojnXPOppxye5HfYdAYRJqRZJpAPy', 'admin', '2026-05-27 13:22:38', 1),
-(2, 1, 'superadmin2', '$2y$10$T8ZJ1pC4O6.Ym9G2Fv4Wk.x9eHwK2aT0.iL0P4K/yXzQ4T2oN5.yS', 'superadmin', '2026-05-30 06:49:23', 1);
+(2, 1, 'superadmin2', '$2y$10$T8ZJ1pC4O6.Ym9G2Fv4Wk.x9eHwK2aT0.iL0P4K/yXzQ4T2oN5.yS', 'superadmin', '2026-05-30 06:49:23', 1),
+(11, 5, 'mardonio@azpired.net', '$2y$10$jl1HqHLWKe.KJAbolV.NwuEmywcN3TMuNQlLI4XXwhoshnKvf3Wba', 'admin', '2026-06-28 21:40:45', 0);
 
 --
 -- Indexes for dumped tables
@@ -552,7 +564,7 @@ ALTER TABLE `account_transactions`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
@@ -570,7 +582,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `company_funds`
@@ -594,13 +606,13 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `loans`
 --
 ALTER TABLE `loans`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `loan_collaterals`
 --
 ALTER TABLE `loan_collaterals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `loan_installments`
@@ -624,7 +636,7 @@ ALTER TABLE `penalties`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables

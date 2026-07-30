@@ -17,16 +17,16 @@ $userRole = $_SESSION['user']['role'] ?? '';
         --hover-bg: #f5f3ff; 
         --text-main: #1e293b; 
         --text-muted: #64748b;
-        --border-color: #f1f5f9;
+        --border-color: #e2e8f0;
     }
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f8fafc; display: flex; }
     
     /* Sidebar Structure */
     .sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 1000; }
     
     .sidebar-brand { padding: 25px 20px; font-weight: 800; color: var(--primary-color); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
     
-    .sidebar-menu { list-style: none; padding: 15px; flex-grow: 1; margin: 0; }
+    .sidebar-menu { list-style: none; padding: 15px; flex-grow: 1; margin: 0; overflow-y: auto; }
     .menu-item { margin-bottom: 4px; }
     .menu-item a { 
         display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
@@ -44,85 +44,202 @@ $userRole = $_SESSION['user']['role'] ?? '';
     }
     .sidebar-footer a:hover { background: #fef2f2; }
 
-    .mobile-header { 
-    display: none; 
-    background: #ffffff; 
-    padding: 15px 20px; 
-    border-bottom: 1px solid var(--border-color); 
-    align-items: center; 
-    justify-content: space-between;
-}
+    /* Main Wrapper to handle layout beside sidebar */
+    .main-wrapper {
+        margin-left: 260px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        width: calc(100% - 260px);
+    }
     
-    .main-content { margin-left: 260px; padding: 25px; }
+    .main-content { padding: 25px; flex: 1; }
+
+    /* Top Header Custom Styles */
+    .top-header {
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        height: 70px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+        margin: 0;
+    }
+
+    .top-header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .sidebar-toggle-btn {
+        background: #f1f5f9;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-toggle-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .top-header-search {
+        position: relative;
+        flex: 1;
+    }
+
+    .top-header-search i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .top-header-search input {
+        width: 100%;
+        padding: 10px 16px 10px 38px;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        color: #1e293b;
+        outline: none;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    .top-header-search input:focus {
+        background: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .top-header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .top-header-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 12px;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+    }
+
+    .profile-avatar {
+        width: 34px;
+        height: 34px;
+        background: #e0e7ff;
+        color: #4f46e5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profile-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: capitalize;
+    }
 
     @media (max-width: 900px) {
         .sidebar { left: -260px; transition: 0.3s; }
         .sidebar.active { left: 0; box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
-        .main-content { margin-left: 0; }
+        .main-wrapper { margin-left: 0; width: 100%; }
         .close-btn { display: block !important; }
-        .mobile-header { display: flex; }
-    .main-content { margin-left: 0; padding: 15px; }
+        .top-header { padding: 0 15px; height: 60px; }
+        .top-header-search { display: none; }
+        .main-content { padding: 15px; }
     }
 </style>
 </head>
 <body>
-<header class="mobile-header">
-    <div style="font-weight:700;"><?= htmlspecialchars($_SESSION['user']['company_name'] ?? 'Loan Management') ?></div>
-    <button onclick="document.querySelector('.sidebar').classList.toggle('active')" 
-            style="border:none; background:none; font-size:20px; cursor:pointer;">
-        <i class="fas fa-bars"></i>
-    </button>
-</header>
+
 <aside class="sidebar">
     <div class="sidebar-brand">
         <i class="fas fa-wallet" style="background: #e0e7ff; padding: 8px; border-radius: 8px;"></i> 
         Lowndesk
         <button onclick="document.querySelector('.sidebar').classList.remove('active')" 
-                style="margin-left:auto; border:none; background:none; cursor:pointer;" class="close-btn"><i class="fas fa-times"></i></button>
+                style="margin-left:auto; border:none; background:none; cursor:pointer; display:none;" class="close-btn"><i class="fas fa-times"></i></button>
     </div>
 
     <ul class="sidebar-menu">
        <?php
-$userRole = $_SESSION['user']['role'] ?? '';
-$menuItems = [];
+        $menuItems = [];
 
-if ($userRole === 'superadmin') {
-    $menuItems = [
-        ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'],
-        ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'],
-        ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
-        ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
-        ['url' => 'superadmin/manage', 'icon' => 'fa-chart-line', 'label' => 'Registration Requests']
-    ];
-} elseif ($userRole === 'admin') {
-    $menuItems = [
-        ['url' => 'dashboard/index', 'icon' => 'fa-chart-line', 'label' => 'Dashboard'],
-        ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
-        ['url' => 'account/index', 'icon' => 'fa-building-columns', 'label' => 'Accounts'],
-        ['url' => 'borrower/index', 'icon' => 'fa-users', 'label' => 'Borrowers'],
-        ['url' => 'payment/index', 'icon' => 'fa-money-bill-wave', 'label' => 'Payments'],
-        ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'],
-        ['url' => 'expense/index', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Expenses'],
-        ['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Categories'],
-        ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
-        ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback'],
-        ['url' => 'admin/settings', 'icon' => 'fa-gear', 'label' => 'Settings']
-    ];
-} elseif ($userRole === 'staff') {
-    $menuItems = [
-        ['url' => 'dashboard/index', 'icon' => 'fa-chart-line', 'label' => 'Dashboard'],
-        ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
-        ['url' => 'account/index', 'icon' => 'fa-building-columns', 'label' => 'Accounts'],
-        ['url' => 'borrower/index', 'icon' => 'fa-users', 'label' => 'Borrowers'],
-        ['url' => 'payment/index', 'icon' => 'fa-money-bill-wave', 'label' => 'Payments'],
-        ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'],
-        ['url' => 'expense/index', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Expenses'],
-        ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
-        ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback']
-    ];
-}
+        if ($userRole === 'superadmin') {
+            $menuItems = [
+                ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'],
+                ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'],
+                ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
+                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
+                ['url' => 'superadmin/manage', 'icon' => 'fa-chart-line', 'label' => 'Registration Requests']
+            ];
+        } elseif ($userRole === 'admin') {
+            $menuItems = [
+                ['url' => 'dashboard/index', 'icon' => 'fa-chart-line', 'label' => 'Dashboard'],
+                ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
+                ['url' => 'account/index', 'icon' => 'fa-building-columns', 'label' => 'Accounts'],
+                ['url' => 'borrower/index', 'icon' => 'fa-users', 'label' => 'Borrowers'],
+                ['url' => 'payment/index', 'icon' => 'fa-money-bill-wave', 'label' => 'Payments'],
+                ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'],
+                ['url' => 'expense/index', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Expenses'],
+                ['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Categories'],
+                ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
+                ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback'],
+                ['url' => 'admin/settings', 'icon' => 'fa-gear', 'label' => 'Settings']
+            ];
+        } elseif ($userRole === 'staff') {
+            $menuItems = [
+                ['url' => 'dashboard/index', 'icon' => 'fa-chart-line', 'label' => 'Dashboard'],
+                ['url' => 'loan/index', 'icon' => 'fa-hand-holding-dollar', 'label' => 'Loans'],
+                ['url' => 'account/index', 'icon' => 'fa-building-columns', 'label' => 'Accounts'],
+                ['url' => 'borrower/index', 'icon' => 'fa-users', 'label' => 'Borrowers'],
+                ['url' => 'payment/index', 'icon' => 'fa-money-bill-wave', 'label' => 'Payments'],
+                ['url' => 'collateral/index', 'icon' => 'fa-shield-halved', 'label' => 'Collateral'],
+                ['url' => 'expense/index', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Expenses'],
+                ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
+                ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback']
+            ];
+        }
 
-foreach ($menuItems as $item) {
+        foreach ($menuItems as $item) {
             $active = (strpos($current_url, explode('/', $item['url'])[0]) === 0) ? 'active' : '';
             echo "<li class='menu-item $active'>
                     <a href='/loansaas/public/index.php?url={$item['url']}'>
@@ -132,20 +249,49 @@ foreach ($menuItems as $item) {
         }
         ?>
     </ul>
-<div class="sidebar-footer">
+    <div class="sidebar-footer">
         <a href="/loansaas/public/index.php?url=auth/logout">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </div>
 </aside>
 
-<main class="main-content">
-    <script>
-        // Optional: Close sidebar when clicking outside
-        document.addEventListener('click', (e) => {
-            const sidebar = document.querySelector('.sidebar');
-            if (!sidebar.contains(e.target) && !e.target.closest('.mobile-header')) {
-                sidebar.classList.remove('active');
-            }
-        });
-    </script>
+<!-- Main Wrapper Container -->
+<div class="main-wrapper">
+    
+    <!-- Inline Integrated Top Header Bar -->
+    <header class="top-header">
+        <div class="top-header-left">
+            <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" onclick="document.querySelector('.sidebar').classList.toggle('active')" title="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="top-header-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search loans, borrowers, accounts..." id="globalSearchInput">
+            </div>
+        </div>
+
+        <div class="top-header-right">
+            <div class="top-header-profile">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name"><?= htmlspecialchars($_SESSION['user']['username'] ?? 'Administrator') ?></span>
+                    <span class="profile-role"><?= htmlspecialchars($userRole ?: 'Active User') ?></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <script>
+            // Close sidebar when clicking outside on smaller screens
+            document.addEventListener('click', (e) => {
+                const sidebar = document.querySelector('.sidebar');
+                const toggleBtn = document.getElementById('sidebarToggle');
+                if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        </script>
