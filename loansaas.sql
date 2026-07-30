@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 12, 2026 at 11:58 PM
+-- Generation Time: Jul 31, 2026 at 12:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,7 +39,7 @@ CREATE TABLE `accounts` (
 --
 
 INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`) VALUES
-(4, 1, 'Opening Account', 1000.00),
+(4, 1, 'Opening Account', 0.00),
 (5, 1, 'Gcash', 583.00),
 (6, 1, 'Maya', 0.00),
 (7, 1, 'Gotyme', 3067.00),
@@ -93,7 +93,8 @@ INSERT INTO `account_transactions` (`id`, `company_id`, `account_id`, `loan_id`,
 (75, 1, 4, 44, -100.00, '', NULL, 'Loan #44 Approved', '2026-06-28 18:35:20'),
 (76, 1, 4, 33, 3543.48, '', NULL, 'Reversing loan #33 for edit', '2026-06-28 18:45:08'),
 (77, 1, 4, 33, -8326.48, '', NULL, 'Loan #33 re-issued with updated amount', '2026-06-28 18:45:08'),
-(78, 1, 4, NULL, 4383.00, '', NULL, 'Add', '2026-06-28 18:48:40');
+(78, 1, 4, NULL, 4383.00, '', NULL, 'Add', '2026-06-28 18:48:40'),
+(79, 1, 4, 45, -1000.00, '', NULL, 'Loan #45 Approved', '2026-07-30 18:52:28');
 
 -- --------------------------------------------------------
 
@@ -136,7 +137,15 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (16, 1, 1, 'UPDATE_LOAN', 'loans', 38, 'Updated loan #38', '::1', '2026-06-28 19:00:50'),
 (17, 1, 1, 'APPLY_PENALTY', 'penalties', 44, 'Applied penalty of ₱10 to loan #44. Reason: Late Payment', '::1', '2026-06-28 20:22:11'),
 (18, 1, 1, 'CREATE_LOAN', 'loans', 45, 'Created new loan #45', '::1', '2026-07-12 17:23:39'),
-(19, 1, 1, 'UPDATE_BUSINESS_NAME', 'companies', 1, 'Updated business name to: Marldohn Financial', '::1', '2026-07-12 20:40:58');
+(19, 1, 1, 'UPDATE_BUSINESS_NAME', 'companies', 1, 'Updated business name to: Marldohn Financial', '::1', '2026-07-12 20:40:58'),
+(20, 1, 1, 'CREATE_LOAN', 'loans', 46, 'Created new loan #46', '::1', '2026-07-30 18:52:23'),
+(21, 1, 1, 'APPROVE_LOAN', 'loans', 45, 'Approved loan #45', '::1', '2026-07-30 18:52:28'),
+(22, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 18:53:12'),
+(23, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 18:58:05'),
+(24, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 19:00:47'),
+(25, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 19:02:41'),
+(26, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 19:02:46'),
+(27, 1, 1, 'UPDATE_BORROWER', 'borrowers', 8, 'Updated profile for: Myles Batayola', '::1', '2026-07-30 19:48:37');
 
 -- --------------------------------------------------------
 
@@ -168,7 +177,7 @@ CREATE TABLE `borrowers` (
 INSERT INTO `borrowers` (`id`, `company_id`, `first_name`, `middle_name`, `last_name`, `gender`, `birthdate`, `phone`, `email`, `address`, `valid_id`, `status`, `created_at`, `occupation`) VALUES
 (6, 1, 'Janice', '', 'Olan-Olan', 'Female', '0001-01-01', '-', '', 'Leyte, Philippines', '', 1, '2026-06-27 19:55:44', NULL),
 (7, 1, 'Anne', '', 'Hilded', 'Female', '0000-00-00', '-', '', 'Sikatuna Street Cebu City, Cebu', '', 1, '2026-06-27 20:03:41', NULL),
-(8, 1, 'Myles', '', 'Batayola', '', '0000-00-00', '-', '', 'Sikatuna Street Cebu City, Cebu', '', 1, '2026-06-27 20:04:14', NULL),
+(8, 1, 'Myles', '', 'Batayola', '', '0000-00-00', '-', 'marldohncrubinos11@gmail.com', 'Sikatuna Street Cebu City, Cebu', '', 1, '2026-06-27 20:04:14', NULL),
 (9, 1, 'Marldohn', '', 'Rubinos', 'Male', '0000-00-00', '09061941138', 'marldohncrubinos11@gmail.com', 'Jakosalem Street Cebu City, Cebu', 'G06-24-008078', 1, '2026-06-27 20:05:12', NULL),
 (10, 1, 'Kitkit', '', 'Olan-olan', 'Female', '0000-00-00', '-', '', 'Leyte Philippines', '', 1, '2026-06-27 20:28:39', NULL),
 (11, 1, 'Noli', '', 'Absin', 'Female', '0000-00-00', '-', '', 'Mevisa Cebu City, Cebu', '', 1, '2026-06-27 20:29:04', NULL),
@@ -314,7 +323,8 @@ INSERT INTO `loans` (`id`, `company_id`, `account_id`, `borrower_id`, `amount`, 
 (39, 1, 4, 10, 3000.00, 15.00, 3450.00, 'Approved', '2026-06-15', '2026-06-30', '2026-06-27 21:00:43', 15, '', 'day', 0.00, 9, 'fixed'),
 (40, 1, 10, 13, 3000.00, 15.00, 3450.00, 'Approved', '2026-06-28', '2026-07-13', '2026-06-28 12:15:54', 15, '', 'day', 0.00, 9, 'fixed'),
 (44, 1, 4, 16, 100.00, 10.00, 120.00, 'Approved', '2026-06-28', '2026-06-29', '2026-06-28 18:16:59', 2, '', 'semi_monthly', 0.00, 9, ''),
-(45, 1, 4, 16, 1000.00, 10.00, 1110.00, 'Pending', '2026-07-13', '2026-07-14', '2026-07-12 17:23:39', 1, 'NA', 'semi_monthly', 10.00, 9, 'standard');
+(45, 1, 4, 16, 1000.00, 10.00, 1100.00, 'Approved', '2026-07-31', '2026-08-10', '2026-07-12 17:23:39', 10, 'NA', 'one_time', 10.00, 9, ''),
+(46, 1, 4, 7, 1000.00, 10.00, 1100.00, 'Pending', '2026-07-30', '2026-08-09', '2026-07-30 18:52:23', 10, '', 'one_time', 0.00, 9, 'standard');
 
 -- --------------------------------------------------------
 
@@ -558,13 +568,13 @@ ALTER TABLE `accounts`
 -- AUTO_INCREMENT for table `account_transactions`
 --
 ALTER TABLE `account_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
@@ -606,7 +616,7 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `loans`
 --
 ALTER TABLE `loans`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `loan_collaterals`
