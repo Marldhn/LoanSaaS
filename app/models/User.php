@@ -20,6 +20,51 @@ class User extends Model {
         return $stmt->fetch();
     }
 
+
+    public function getRegistrationRequests()
+{
+    $stmt = $this->conn->prepare("
+        SELECT
+            c.id,
+            c.name AS company_name,
+            c.plan_tier,
+            c.subscription_status AS status,
+            c.created_at,
+            u.username
+        FROM companies c
+        INNER JOIN users u
+            ON c.id = u.company_id
+        WHERE u.role = 'admin'
+        ORDER BY c.created_at DESC
+    ");
+
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function approveRegistration($companyId)
+{
+    $stmt = $this->conn->prepare("
+        UPDATE companies
+        SET subscription_status = 'active'
+        WHERE id = ?
+    ");
+
+    return $stmt->execute([$companyId]);
+}
+
+public function rejectRegistration($companyId)
+{
+    $stmt = $this->conn->prepare("
+        UPDATE companies
+        SET subscription_status = 'rejected'
+        WHERE id = ?
+    ");
+
+    return $stmt->execute([$companyId]);
+}
+
     public function registerTenant($companyName, $username, $password) {
         try {
             $this->conn->beginTransaction();

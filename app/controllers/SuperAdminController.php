@@ -62,6 +62,65 @@ class SuperAdminController {
         }
     }
 
+
+
+    public function getRegistrationRequests()
+    {
+        $stmt = $this->conn->query("
+            SELECT
+                c.id,
+                c.name AS company_name,
+                c.plan_tier,
+                c.subscription_status AS status,
+                c.created_at,
+                u.username
+            FROM companies c
+            INNER JOIN users u
+                ON u.company_id = c.id
+            WHERE u.role = 'admin'
+            ORDER BY c.created_at DESC
+        ");
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function approvals()
+{
+    // Only Super Admin can access
+    if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'superadmin') {
+        die("Access Denied");
+    }
+
+    // Load all registration requests
+$registrations = $this->userModel->getRegistrationRequests();
+    // Load the view
+    require_once dirname(__DIR__) . '/views/superadmin/registrations/index.php';
+}
+
+    public function approve($id)
+{
+    if ($_SESSION['user']['role'] !== 'superadmin') {
+        die("Access Denied");
+    }
+
+    $this->userModel->approveRegistration($id);
+
+    header("Location: /loansaas/public/index.php?url=superadmin/approvals");
+    exit;
+}
+
+    public function reject($id)
+{
+    if ($_SESSION['user']['role'] !== 'superadmin') {
+        die("Access Denied");
+    }
+
+    $this->userModel->rejectRegistration($id);
+
+    header("Location: /loansaas/public/index.php?url=superadmin/approvals");
+    exit;
+}
+
     public function dashboard() {
         // Security Check
         if ($_SESSION['user']['role'] !== 'superadmin') {
