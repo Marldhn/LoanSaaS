@@ -645,8 +645,8 @@
             'LN-<?= str_pad($item['loan_id'], 7, '0', STR_PAD_LEFT) ?>', 
             '₱<?= number_format($item['amount_due'], 2) ?>', 
             '<?= date('n/j/Y', strtotime($item['due_date'])) ?>', 
-            'upcoming', 
-            <?= $item['loan_id'] ?>
+            'overdue',
+<?= $item['loan_id'] ?>
         )">
     <i class="fas fa-envelope btn-icon"></i>
     <span class="btn-text">Remind</span>
