@@ -205,11 +205,11 @@ $userRole = $_SESSION['user']['role'] ?? '';
 
         if ($userRole === 'superadmin') {
             $menuItems = [
+                                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
                 ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'],
                 ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'],
                 ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
-                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
-                ['url' => 'superadmin/manage', 'icon' => 'fa-chart-line', 'label' => 'Registration Requests']
+                ['url' => 'superadmin/approvals', 'icon' => 'fa-chart-line', 'label' => 'Registration Requests']
             ];
         } elseif ($userRole === 'admin') {
             $menuItems = [
@@ -240,13 +240,17 @@ $userRole = $_SESSION['user']['role'] ?? '';
         }
 
         foreach ($menuItems as $item) {
-            $active = (strpos($current_url, explode('/', $item['url'])[0]) === 0) ? 'active' : '';
-            echo "<li class='menu-item $active'>
-                    <a href='/loansaas/public/index.php?url={$item['url']}'>
-                        <i class='fas {$item['icon']}'></i> <span>{$item['label']}</span>
-                    </a>
-                  </li>";
-        }
+
+    // Exact URL matching for active sidebar
+    $active = ($current_url === $item['url']) ? 'active' : '';
+
+    echo "<li class='menu-item $active'>
+            <a href='/loansaas/public/index.php?url={$item['url']}'>
+                <i class='fas {$item['icon']}'></i> 
+                <span>{$item['label']}</span>
+            </a>
+          </li>";
+}
         ?>
     </ul>
     <div class="sidebar-footer">
@@ -265,10 +269,7 @@ $userRole = $_SESSION['user']['role'] ?? '';
             <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" onclick="document.querySelector('.sidebar').classList.toggle('active')" title="Toggle Sidebar">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="top-header-search">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search loans, borrowers, accounts..." id="globalSearchInput">
-            </div>
+
         </div>
 
         <div class="top-header-right">

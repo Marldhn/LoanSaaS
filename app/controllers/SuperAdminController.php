@@ -15,14 +15,58 @@ class SuperAdminController {
         $this->db = $loanModel->getDb();
     }
 
+
+       // ============================
+    // Registration Requests
+    // ============================
+    public function approvals()
+    {
+        if ($_SESSION['user']['role'] !== 'superadmin') {
+            die("Access Denied");
+        }
+
+        $registrations = $this->userModel->getRegistrationRequests();
+
+        require_once dirname(__DIR__) . '/views/superadmin/registrations/index.php';
+    }
+
+    // ============================
+    // Approve Registration
+    // ============================
+    public function approve($id)
+    {
+        if ($_SESSION['user']['role'] !== 'superadmin') {
+            die("Access Denied");
+        }
+
+        $this->userModel->approveRegistration($id);
+
+        header("Location: /loansaas/public/index.php?url=superadmin/approvals");
+        exit;
+    }
+
+    // ============================
+    // Reject Registration
+    // ============================
+    public function reject($id)
+    {
+        if ($_SESSION['user']['role'] !== 'superadmin') {
+            die("Access Denied");
+        }
+
+        $this->userModel->rejectRegistration($id);
+
+        header("Location: /loansaas/public/index.php?url=superadmin/approvals");
+        exit;
+    }
+
     public function listAdmins() {
         if ($_SESSION['user']['role'] !== 'superadmin') {
             die("Unauthorized");
         }
 
         $admins = $this->userModel->getAllAdmins();
-        require_once dirname(__DIR__) . '/views/superadmin/admins/adminlist.php';
-    }
+require_once dirname(__DIR__) . '/views/superadmin/admins/adminlist.php';    }
 
     public function businessSettings() {
         if ($_SESSION['user']['role'] !== 'admin') {
