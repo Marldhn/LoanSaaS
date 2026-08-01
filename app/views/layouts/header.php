@@ -205,7 +205,7 @@ $userRole = $_SESSION['user']['role'] ?? '';
 
         if ($userRole === 'superadmin') {
             $menuItems = [
-                                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
+                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
                 ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'],
                 ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'],
                 ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
