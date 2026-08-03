@@ -127,6 +127,55 @@
         border-color: #6366f1 !important;
     }
 
+    /* Horizontal & Vertical Scroll Wrapper with Custom Scrollbar Indicator */
+    .table-responsive-wrapper {
+        width: 100%;
+        max-height: 480px; 
+        overflow-y: auto;   
+        overflow-x: auto;   
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+    }
+
+    /* Custom scrollbar styling to make the horizontal scroll track clear and user-friendly */
+    .table-responsive-wrapper::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+
+    .table-responsive-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    .table-responsive-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .loan-table-inner {
+        min-width: 850px; /* Forces content to expand so horizontal scrolling is activated when columns increase */
+    }
+
+    .loan-row.header { 
+        display: grid !important; 
+        grid-template-columns: 2fr 1.2fr 1.2fr 1fr 0.5fr !important; 
+        padding: 14px 20px !important; 
+        background: #f8fafc !important; 
+        font-weight: 700 !important; 
+        color: #64748b !important; 
+        font-size: 11px !important; 
+        text-transform: uppercase !important; 
+        letter-spacing: 0.05em !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
     /* Table Rows */
     .loan-row { 
         display: grid !important; 
@@ -138,16 +187,6 @@
 
     .loan-row:last-child {
         border-bottom: none !important;
-    }
-    
-    .loan-row.header { 
-        background: #f8fafc !important; 
-        font-weight: 700 !important; 
-        color: #64748b !important; 
-        font-size: 11px !important; 
-        text-transform: uppercase !important; 
-        letter-spacing: 0.05em !important;
-        border-bottom: 1px solid #e2e8f0 !important;
     }
     
     /* Badges */
@@ -238,54 +277,59 @@
             </div>
         </form>
 
-        <!-- Column Headers -->
-        <div class="loan-row header">
-            <?php 
-            $nextOrder = (($_GET['order'] ?? 'DESC') === 'DESC') ? 'ASC' : 'DESC';
-            $qs = "&order=$nextOrder&status=" . urlencode($_GET['status'] ?? '');
-            ?>
-            <div><a href="?url=loan/index&sort=borrower_name<?= $qs ?>" class="sort-link">Borrower / ID</a></div>
-            <div><a href="?url=loan/index&sort=remaining_balance<?= $qs ?>" class="sort-link">Balance</a></div>
-            <div><a href="?url=loan/index&sort=due_date<?= $qs ?>" class="sort-link">Due Date</a></div>
-            <div>Status</div>
-            <div style="text-align:right;">Action</div>
-        </div>
+        <!-- Horizontal & Vertical Scrollable Container -->
+        <div class="table-responsive-wrapper">
+            <div class="loan-table-inner">
+                <!-- Column Headers (Sticky) -->
+                <div class="loan-row header">
+                    <?php 
+                    $nextOrder = (($_GET['order'] ?? 'DESC') === 'DESC') ? 'ASC' : 'DESC';
+                    $qs = "&order=$nextOrder&status=" . urlencode($_GET['status'] ?? '');
+                    ?>
+                    <div><a href="?url=loan/index&sort=borrower_name<?= $qs ?>" class="sort-link">Borrower / ID</a></div>
+                    <div><a href="?url=loan/index&sort=remaining_balance<?= $qs ?>" class="sort-link">Balance</a></div>
+                    <div><a href="?url=loan/index&sort=due_date<?= $qs ?>" class="sort-link">Due Date</a></div>
+                    <div>Status</div>
+                    <div style="text-align:right;">Action</div>
+                </div>
 
-        <!-- Data Rows -->
-        <?php if (empty($loans)): ?>
-            <div style="padding:40px; text-align:center; color:#94a3b8; font-size:0.9rem;">No loans found matching your criteria.</div>
-        <?php else: 
-            $statusClasses = [
-                'Active'   => 'badge-active',
-                'Overdue'  => 'badge-overdue',
-                'Pending'  => 'badge-pending',
-                'Paid'     => 'badge-paid',
-                'Rejected' => 'badge-rejected'
-            ];
-            
-            foreach ($loans as $loan): 
-                $badgeClass = $statusClasses[$loan['display_status']] ?? 'badge-rejected';
-                
-                $dueDate = (!empty($loan['due_date']) && $loan['due_date'] !== '0000-00-00' && strtotime($loan['due_date']) > 0) 
-                    ? htmlspecialchars($loan['due_date']) 
-                    : '—';
-        ?>
-            <div class="loan-row">
-                <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;"><?= htmlspecialchars($loan['first_name'] . ' ' . $loan['last_name']) ?></span>
-                    <span style="font-size: 0.8rem; color: #64748b;">LOAN ID: #LN<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></span>
-                </div>
-                
-                <div style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">₱<?= number_format($loan['remaining_balance'], 2) ?></div>
-                <div style="color: #334155; font-size: 0.875rem;"><?= $dueDate ?></div>
-                <div>
-                    <span class="badge-status <?= $badgeClass ?>"><?= htmlspecialchars($loan['display_status']) ?></span>
-                </div>
-                <div style="text-align:right;">
-                    <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-view">View →</a>
-                </div>
+                <!-- Data Rows -->
+                <?php if (empty($loans)): ?>
+                    <div style="padding:40px; text-align:center; color:#94a3b8; font-size:0.9rem;">No loans found matching your criteria.</div>
+                <?php else: 
+                    $statusClasses = [
+                        'Active'   => 'badge-active',
+                        'Overdue'  => 'badge-overdue',
+                        'Pending'  => 'badge-pending',
+                        'Paid'     => 'badge-paid',
+                        'Rejected' => 'badge-rejected'
+                    ];
+                    
+                    foreach ($loans as $loan): 
+                        $badgeClass = $statusClasses[$loan['display_status']] ?? 'badge-rejected';
+                        
+                        $dueDate = (!empty($loan['due_date']) && $loan['due_date'] !== '0000-00-00' && strtotime($loan['due_date']) > 0) 
+                            ? htmlspecialchars($loan['due_date']) 
+                            : '—';
+                ?>
+                    <div class="loan-row">
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;"><?= htmlspecialchars($loan['first_name'] . ' ' . $loan['last_name']) ?></span>
+                            <span style="font-size: 0.8rem; color: #64748b;">LOAN ID: #LN<?= str_pad($loan['id'], 6, '0', STR_PAD_LEFT) ?></span>
+                        </div>
+                        
+                        <div style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">₱<?= number_format($loan['remaining_balance'], 2) ?></div>
+                        <div style="color: #334155; font-size: 0.875rem;"><?= $dueDate ?></div>
+                        <div>
+                            <span class="badge-status <?= $badgeClass ?>"><?= htmlspecialchars($loan['display_status']) ?></span>
+                        </div>
+                        <div style="text-align:right;">
+                            <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-view">View →</a>
+                        </div>
+                    </div>
+                <?php endforeach; endif; ?>
             </div>
-        <?php endforeach; endif; ?>
+        </div>
     </div>
 
     <!-- Pagination -->

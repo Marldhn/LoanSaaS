@@ -19,7 +19,6 @@ class SuperAdminController {
         if ($_SESSION['user']['role'] !== 'superadmin') {
             die("Unauthorized");
         }
-
         $admins = $this->userModel->getAllAdmins();
         require_once dirname(__DIR__) . '/views/superadmin/admins/adminlist.php';
     }

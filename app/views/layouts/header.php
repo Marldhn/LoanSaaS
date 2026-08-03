@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 $current_url = $_GET['url'] ?? '';
 $userRole = $_SESSION['user']['role'] ?? '';
+$userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administrator';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,13 +37,7 @@ $userRole = $_SESSION['user']['role'] ?? '';
     .menu-item a:hover { background: var(--hover-bg); color: var(--primary-color); }
     .menu-item.active a { background: var(--primary-color); color: #fff; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3); }
     
-    .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
-    .sidebar-footer a { 
-        display: flex; align-items: center; gap: 10px; color: #ef4444 !important; 
-        text-decoration: none; font-weight: 600; padding: 10px; border-radius: 8px; 
-        transition: background 0.2s;
-    }
-    .sidebar-footer a:hover { background: #fef2f2; }
+    .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); display: none; }
 
     /* Main Wrapper to handle layout beside sidebar */
     .main-wrapper {
@@ -76,8 +71,6 @@ $userRole = $_SESSION['user']['role'] ?? '';
         display: flex;
         align-items: center;
         gap: 20px;
-        flex: 1;
-        max-width: 500px;
     }
 
     .sidebar-toggle-btn {
@@ -99,70 +92,40 @@ $userRole = $_SESSION['user']['role'] ?? '';
         color: #0f172a;
     }
 
-    .top-header-search {
-        position: relative;
-        flex: 1;
-    }
-
-    .top-header-search i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 0.85rem;
-    }
-
-    .top-header-search input {
-        width: 100%;
-        padding: 10px 16px 10px 38px;
-        background: #f8fafc;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 0.875rem;
-        color: #1e293b;
-        outline: none;
-        box-sizing: border-box;
-        transition: all 0.2s ease;
-    }
-
-    .top-header-search input:focus {
-        background: #ffffff;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
     .top-header-right {
         display: flex;
         align-items: center;
         gap: 16px;
     }
 
-    .top-header-profile {
+    /* Profile Dropdown Navbar Design with Vertical Separator */
+    .profile-dropdown-container {
+        position: relative;
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 6px 12px;
-        background: #f8fafc;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
     }
 
-    .profile-avatar {
-        width: 34px;
-        height: 34px;
-        background: #e0e7ff;
-        color: #4f46e5;
-        border-radius: 50%;
+    .profile-trigger {
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+        background: transparent;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: background 0.15s ease;
+    }
+
+    .profile-trigger:hover {
+        background: #f8fafc;
     }
 
     .profile-info {
         display: flex;
         flex-direction: column;
+        text-align: right;
     }
 
     .profile-name {
@@ -178,13 +141,59 @@ $userRole = $_SESSION['user']['role'] ?? '';
         text-transform: capitalize;
     }
 
+    /* Dropdown Menu Box */
+    .user-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        width: 190px;
+        z-index: 1000;
+        padding: 6px 0;
+    }
+
+    .user-dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: background 0.15s ease;
+    }
+
+    .user-dropdown-menu a:hover {
+        background: #f8fafc;
+        color: var(--primary-color);
+    }
+
+    .user-dropdown-menu a.logout-link {
+        color: #ef4444;
+    }
+
+    .user-dropdown-menu a.logout-link:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border-color);
+        margin: 4px 0;
+    }
+
     @media (max-width: 900px) {
         .sidebar { left: -260px; transition: 0.3s; }
         .sidebar.active { left: 0; box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
         .main-wrapper { margin-left: 0; width: 100%; }
         .close-btn { display: block !important; }
         .top-header { padding: 0 15px; height: 60px; }
-        .top-header-search { display: none; }
         .main-content { padding: 15px; }
     }
 </style>
@@ -240,49 +249,53 @@ $userRole = $_SESSION['user']['role'] ?? '';
         }
 
         foreach ($menuItems as $item) {
-
-    // Exact URL matching for active sidebar
-    $active = ($current_url === $item['url']) ? 'active' : '';
-
-    echo "<li class='menu-item $active'>
-            <a href='/loansaas/public/index.php?url={$item['url']}'>
-                <i class='fas {$item['icon']}'></i> 
-                <span>{$item['label']}</span>
-            </a>
-          </li>";
-}
+            $active = ($current_url === $item['url']) ? 'active' : '';
+            echo "<li class='menu-item $active'>
+                    <a href='/loansaas/public/index.php?url={$item['url']}'>
+                        <i class='fas {$item['icon']}'></i> 
+                        <span>{$item['label']}</span>
+                    </a>
+                  </li>";
+        }
         ?>
     </ul>
-    <div class="sidebar-footer">
-        <a href="/loansaas/public/index.php?url=auth/logout">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
 </aside>
 
 <!-- Main Wrapper Container -->
 <div class="main-wrapper">
     
-    <!-- Inline Integrated Top Header Bar -->
+    <!-- Top Header Bar (Search box removed) -->
     <header class="top-header">
         <div class="top-header-left">
             <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" onclick="document.querySelector('.sidebar').classList.toggle('active')" title="Toggle Sidebar">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="top-header-search">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search loans, borrowers, accounts..." id="globalSearchInput">
-            </div>
         </div>
 
         <div class="top-header-right">
-            <div class="top-header-profile">
-                <div class="profile-avatar">
-                    <i class="fas fa-user"></i>
+            <div class="profile-dropdown-container">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <!-- Vertical Line Separator -->
+                    <span style="color: #cbd5e1; font-size: 1.4rem; font-weight: 300;">|</span>
+                    
+                    <button type="button" class="profile-trigger" id="userDropdownTrigger">
+                        <div class="profile-info">
+                            <span class="profile-name"><?= htmlspecialchars($userName, ENT_QUOTES) ?></span>
+                            <span class="profile-role"><?= htmlspecialchars($userRole ?: 'Active User', ENT_QUOTES) ?></span>
+                        </div>
+                        <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: #64748b; margin-left: 4px;"></i>
+                    </button>
                 </div>
-                <div class="profile-info">
-                    <span class="profile-name"><?= htmlspecialchars($_SESSION['user']['username'] ?? 'Administrator') ?></span>
-                    <span class="profile-role"><?= htmlspecialchars($userRole ?: 'Active User') ?></span>
+
+                <!-- Dropdown Menu -->
+                <div class="user-dropdown-menu" id="userDropdownMenu">
+                    <a href="/loansaas/public/index.php?url=admin/settings">
+                        <i class="fas fa-gear" style="width: 16px;"></i> Settings
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/loansaas/public/index.php?url=auth/logout" class="logout-link">
+                        <i class="fas fa-sign-out-alt" style="width: 16px;"></i> Logout
+                    </a>
                 </div>
             </div>
         </div>
@@ -290,12 +303,29 @@ $userRole = $_SESSION['user']['role'] ?? '';
 
     <main class="main-content">
         <script>
-            // Close sidebar when clicking outside on smaller screens
-            document.addEventListener('click', (e) => {
-                const sidebar = document.querySelector('.sidebar');
-                const toggleBtn = document.getElementById('sidebarToggle');
-                if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                    sidebar.classList.remove('active');
+            // Dropdown Toggle and Outside Click Handler
+            document.addEventListener('DOMContentLoaded', function() {
+                const dropdownTrigger = document.getElementById('userDropdownTrigger');
+                const dropdownMenu = document.getElementById('userDropdownMenu');
+
+                if (dropdownTrigger && dropdownMenu) {
+                    dropdownTrigger.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                    });
+
+                    window.addEventListener('click', function() {
+                        dropdownMenu.style.display = 'none';
+                    });
                 }
+
+                // Close sidebar when clicking outside on smaller screens
+                document.addEventListener('click', (e) => {
+                    const sidebar = document.querySelector('.sidebar');
+                    const toggleBtn = document.getElementById('sidebarToggle');
+                    if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                        sidebar.classList.remove('active');
+                    }
+                });
             });
         </script>
