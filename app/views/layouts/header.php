@@ -301,10 +301,11 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
 
         if ($userRole === 'superadmin') {
             $menuItems = [
+                                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
+
                 ['url' => 'feedback/index', 'icon' => 'fa-inbox', 'label' => 'User Messages'],
                 ['url' => 'admin/index', 'icon' => 'fa-building', 'label' => 'Companies'],
                 ['url' => 'superadmin/listAdmins', 'icon' => 'fa-user-shield', 'label' => 'Admin List'],
-                ['url' => 'superadmin/dashboard', 'icon' => 'fa-chart-line', 'label' => 'Admin Dashboard'],
                 ['url' => 'superadmin/approvals', 'icon' => 'fa-chart-line', 'label' => 'Registration Requests']
             ];
         } elseif ($userRole === 'admin') {

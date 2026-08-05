@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 05, 2026 at 05:55 PM
+-- Generation Time: Aug 06, 2026 at 12:01 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,22 +31,21 @@ CREATE TABLE `accounts` (
   `id` int(11) NOT NULL,
   `company_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `current_balance` decimal(15,2) DEFAULT 0.00
+  `current_balance` decimal(15,2) DEFAULT 0.00,
+  `icon` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `accounts`
 --
 
-INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`) VALUES
-(4, 1, 'Opening Account', 0.00),
-(5, 1, 'Gcash', 583.00),
-(6, 1, 'Maya', 0.00),
-(7, 1, 'Gotyme', 3067.00),
-(8, 1, 'Cash', 4150.00),
-(9, 1, 'Coins', 0.00),
-(10, 1, 'Maribank', 59273.00),
-(11, 1, 'BPI', 80.00);
+INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`, `icon`) VALUES
+(1, 1, 'Gcash', 3177.00, 'account_1785951150_9771.png'),
+(2, 1, 'Maribank - DONSS', 9937.00, 'account_1785950259_3333.webp'),
+(3, 1, 'BPI', 191.00, NULL),
+(4, 1, 'Gotyme', 9243.00, NULL),
+(5, 1, 'Maribank - SHE', 12416.00, 'account_1785951226_4901.webp'),
+(6, 1, 'Initial Balance', 0.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -71,30 +70,22 @@ CREATE TABLE `account_transactions` (
 --
 
 INSERT INTO `account_transactions` (`id`, `company_id`, `account_id`, `loan_id`, `amount`, `type`, `reference_id`, `notes`, `created_at`) VALUES
-(55, 1, 4, 30, -40000.00, '', NULL, 'Loan #30 Approved', '2026-06-27 20:13:26'),
-(56, 1, 4, 31, -26000.00, '', NULL, 'Loan #31 Approved', '2026-06-27 20:23:18'),
-(57, 1, 4, 32, -26000.00, '', NULL, 'Loan #32 Approved', '2026-06-27 20:25:50'),
-(58, 1, 4, 34, -38146.00, '', NULL, 'Loan #34 Approved', '2026-06-27 20:43:18'),
-(59, 1, 4, 35, -12196.00, '', NULL, 'Loan #35 Approved', '2026-06-27 20:43:24'),
-(60, 1, 4, 33, -3543.48, '', NULL, 'Loan #33 Approved', '2026-06-27 20:43:28'),
-(61, 1, 4, 36, -7000.00, '', NULL, 'Loan #36 Approved', '2026-06-27 20:53:36'),
-(62, 1, 4, 37, -800.00, '', NULL, 'Loan #37 Approved', '2026-06-27 20:54:39'),
-(63, 1, 4, 38, -10000.00, '', NULL, 'Loan #38 Approved', '2026-06-27 20:57:22'),
-(64, 1, 4, 34, 38146.00, '', NULL, 'Reversing loan #34 for edit', '2026-06-27 20:59:08'),
-(65, 1, 4, 34, -39176.00, '', NULL, 'Loan #34 re-issued with updated amount', '2026-06-27 20:59:08'),
-(66, 1, 4, 39, -3000.00, '', NULL, 'Loan #39 Approved', '2026-06-27 21:00:47'),
-(67, 1, 8, NULL, 2850.00, '', NULL, 'Add', '2026-06-27 21:05:23'),
-(68, 1, 8, NULL, 1000.00, '', NULL, 'Shelou ONhand', '2026-06-27 21:05:44'),
-(69, 1, 8, NULL, 300.00, '', NULL, 'Sold Juice', '2026-06-27 21:06:01'),
-(70, 1, 10, NULL, 16273.00, '', NULL, 'Adjustment', '2026-06-27 21:06:36'),
-(71, 1, 7, NULL, 3067.00, '', NULL, 'Adjustment', '2026-06-27 21:07:15'),
-(72, 1, 5, NULL, 583.00, '', NULL, '-', '2026-06-27 21:08:01'),
-(73, 1, 10, 40, -3000.00, '', NULL, 'Loan #40 Approved', '2026-06-28 12:15:59'),
-(75, 1, 4, 44, -100.00, '', NULL, 'Loan #44 Approved', '2026-06-28 18:35:20'),
-(76, 1, 4, 33, 3543.48, '', NULL, 'Reversing loan #33 for edit', '2026-06-28 18:45:08'),
-(77, 1, 4, 33, -8326.48, '', NULL, 'Loan #33 re-issued with updated amount', '2026-06-28 18:45:08'),
-(78, 1, 4, NULL, 4383.00, '', NULL, 'Add', '2026-06-28 18:48:40'),
-(79, 1, 4, 45, -1000.00, '', NULL, 'Loan #45 Approved', '2026-07-30 18:52:28');
+(1, 1, 6, 1, -40049.00, '', NULL, 'Loan #1 Approved', '2026-08-05 17:45:15'),
+(2, 1, 6, 2, -10000.00, '', NULL, 'Loan #2 Approved', '2026-08-05 18:20:35'),
+(3, 1, 6, 3, -8090.00, '', NULL, 'Loan #3 Approved', '2026-08-05 18:30:30'),
+(4, 1, 6, 4, -50000.00, '', NULL, 'Loan #4 Approved', '2026-08-05 18:33:04'),
+(5, 1, 6, 5, -14500.00, '', NULL, 'Loan #5 Approved', '2026-08-05 19:07:14'),
+(6, 1, 6, 6, -5000.00, '', NULL, 'Loan #6 Approved', '2026-08-05 19:09:54'),
+(7, 1, 2, 7, -2000.00, '', NULL, 'Loan #7 Approved', '2026-08-05 19:10:00'),
+(8, 1, 6, 8, -800.00, '', NULL, 'Loan #8 Approved', '2026-08-05 19:13:44'),
+(9, 1, 6, 9, -13036.00, '', NULL, 'Loan #9 Approved', '2026-08-05 19:13:47'),
+(10, 1, 6, 10, -10000.00, '', NULL, 'Loan #10 Approved', '2026-08-05 19:14:59'),
+(11, 1, 6, 11, -2750.00, '', NULL, 'Loan #11 Approved', '2026-08-05 19:19:06'),
+(12, 1, 6, 12, -3000.00, '', NULL, 'Loan #12 Approved', '2026-08-05 19:19:31'),
+(13, 1, 6, 1, 40049.00, '', NULL, 'Reversing loan #1 for edit', '2026-08-05 19:28:14'),
+(14, 1, 6, 1, -41877.00, '', NULL, 'Loan #1 re-issued with updated amount', '2026-08-05 19:28:14'),
+(15, 1, 6, 2, 10000.00, '', NULL, 'Reversing loan #2 for edit', '2026-08-05 19:29:52'),
+(16, 1, 6, 2, -11724.00, '', NULL, 'Loan #2 re-issued with updated amount', '2026-08-05 19:29:52');
 
 -- --------------------------------------------------------
 
@@ -119,33 +110,61 @@ CREATE TABLE `activity_logs` (
 --
 
 INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_name`, `record_id`, `description`, `ip_address`, `created_at`) VALUES
-(1, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:13:05'),
-(2, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:14:06'),
-(3, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:14:19'),
-(4, 1, 1, 'CREATE_LOAN', 'loans', 44, 'Created new loan #44', '::1', '2026-06-28 18:16:59'),
-(5, 1, 1, 'APPROVE_LOAN', 'loans', 44, 'Approved loan #44', '::1', '2026-06-28 18:35:20'),
-(6, 1, 1, 'UPDATE_LOAN', 'loans', 44, 'Updated loan #44', '::1', '2026-06-28 18:38:16'),
-(7, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:39:01'),
-(8, 1, 1, 'UPDATE_LOAN', 'loans', 44, 'Updated loan #44', '::1', '2026-06-28 18:39:14'),
-(9, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:45:08'),
-(10, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:46:39'),
-(11, 1, 1, 'UPDATE_LOAN', 'loans', 44, 'Updated loan #44', '::1', '2026-06-28 18:46:54'),
-(12, 1, 1, 'UPDATE_LOAN', 'loans', 38, 'Updated loan #38', '::1', '2026-06-28 18:47:06'),
-(13, 1, 1, 'ADJUST_BALANCE', 'accounts', 4, 'Adjusted account balance: add ₱4,383.00 | Note: Add', '::1', '2026-06-28 18:48:40'),
-(14, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 18:55:08'),
-(15, 1, 1, 'UPDATE_LOAN', 'loans', 33, 'Updated loan #33', '::1', '2026-06-28 19:00:42'),
-(16, 1, 1, 'UPDATE_LOAN', 'loans', 38, 'Updated loan #38', '::1', '2026-06-28 19:00:50'),
-(17, 1, 1, 'APPLY_PENALTY', 'penalties', 44, 'Applied penalty of ₱10 to loan #44. Reason: Late Payment', '::1', '2026-06-28 20:22:11'),
-(18, 1, 1, 'CREATE_LOAN', 'loans', 45, 'Created new loan #45', '::1', '2026-07-12 17:23:39'),
-(19, 1, 1, 'UPDATE_BUSINESS_NAME', 'companies', 1, 'Updated business name to: Marldohn Financial', '::1', '2026-07-12 20:40:58'),
-(20, 1, 1, 'CREATE_LOAN', 'loans', 46, 'Created new loan #46', '::1', '2026-07-30 18:52:23'),
-(21, 1, 1, 'APPROVE_LOAN', 'loans', 45, 'Approved loan #45', '::1', '2026-07-30 18:52:28'),
-(22, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 18:53:12'),
-(23, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 18:58:05'),
-(24, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 19:00:47'),
-(25, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 19:02:41'),
-(26, 1, 1, 'UPDATE_LOAN', 'loans', 45, 'Updated loan #45', '::1', '2026-07-30 19:02:46'),
-(27, 1, 1, 'UPDATE_BORROWER', 'borrowers', 8, 'Updated profile for: Myles Batayola', '::1', '2026-07-30 19:48:37');
+(1, 1, 1, 'CREATE_ACCOUNT', 'accounts', 0, 'Created new account: Gcash', '::1', '2026-08-05 16:10:18'),
+(2, 1, 1, 'CREATE_ACCOUNT', 'accounts', 0, 'Created new account: Maribank', '::1', '2026-08-05 16:10:42'),
+(3, 1, 1, 'CREATE_ACCOUNT', 'accounts', 0, 'Created new account: BPI', '::1', '2026-08-05 16:10:50'),
+(4, 1, 1, 'CREATE_ACCOUNT', 'accounts', 0, 'Created new account: Gotyme', '::1', '2026-08-05 16:11:01'),
+(5, 1, 1, 'CREATE_ACCOUNT', 'accounts', 0, 'Created new account: Maribank - SHE', '::1', '2026-08-05 16:11:24'),
+(6, 1, 1, 'UPDATE_ACCOUNT', 'accounts', 2, 'Updated account name to: Maribank - DONSS', '::1', '2026-08-05 16:35:36'),
+(7, 1, 1, 'UPDATE_ACCOUNT', 'accounts', 2, 'Updated account details for: Maribank - DONSS', '::1', '2026-08-05 17:17:39'),
+(8, 1, 1, 'UPDATE_ACCOUNT', 'accounts', 1, 'Updated account details for: Gcash', '::1', '2026-08-05 17:32:30'),
+(9, 1, 1, 'UPDATE_ACCOUNT', 'accounts', 5, 'Updated account details for: Maribank - SHE', '::1', '2026-08-05 17:33:46'),
+(10, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Marldohn Rubinos', '::1', '2026-08-05 17:34:45'),
+(11, 1, 1, 'CREATE_ACCOUNT', 'accounts', 0, 'Created new account: Initial Balance', '::1', '2026-08-05 17:35:42'),
+(12, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Emergency', '::1', '2026-08-05 17:37:03'),
+(13, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Allowance', '::1', '2026-08-05 17:37:11'),
+(14, 1, 1, 'CREATE_LOAN', 'loans', 1, 'Created new loan #1', '::1', '2026-08-05 17:37:46'),
+(15, 1, 1, 'APPROVE_LOAN', 'loans', 1, 'Approved loan #1', '::1', '2026-08-05 17:45:15'),
+(16, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Myles  Batayola', '::1', '2026-08-05 17:46:38'),
+(17, 1, 1, 'CREATE_LOAN', 'loans', 2, 'Created new loan #2', '::1', '2026-08-05 18:18:03'),
+(18, 1, 1, 'APPROVE_LOAN', 'loans', 2, 'Approved loan #2', '::1', '2026-08-05 18:20:35'),
+(19, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Jerryniel  Lauronal', '192.168.8.100', '2026-08-05 18:27:47'),
+(20, 1, 1, 'CREATE_LOAN', 'loans', 3, 'Created new loan #3', '192.168.8.100', '2026-08-05 18:30:24'),
+(21, 1, 1, 'APPROVE_LOAN', 'loans', 3, 'Approved loan #3', '192.168.8.100', '2026-08-05 18:30:30'),
+(22, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Janice Olan-olan', '192.168.8.100', '2026-08-05 18:31:49'),
+(23, 1, 1, 'CREATE_LOAN', 'loans', 4, 'Created new loan #4', '192.168.8.100', '2026-08-05 18:32:59'),
+(24, 1, 1, 'APPROVE_LOAN', 'loans', 4, 'Approved loan #4', '192.168.8.100', '2026-08-05 18:33:04'),
+(25, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: March Shelou Ardillo', '192.168.8.100', '2026-08-05 19:01:15'),
+(26, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Cheyanne  Jumilla', '192.168.8.100', '2026-08-05 19:03:04'),
+(27, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Allen Jayme', '192.168.8.100', '2026-08-05 19:03:50'),
+(28, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Marilyn Rubinos', '192.168.8.100', '2026-08-05 19:04:54'),
+(29, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: Anne Hildred Olan-Olan', '192.168.8.100', '2026-08-05 19:05:35'),
+(30, 1, 1, 'CREATE_LOAN', 'loans', 5, 'Created new loan #5', '192.168.8.100', '2026-08-05 19:07:05'),
+(31, 1, 1, 'APPROVE_LOAN', 'loans', 5, 'Approved loan #5', '192.168.8.100', '2026-08-05 19:07:14'),
+(32, 1, 1, 'CREATE_LOAN', 'loans', 6, 'Created new loan #6', '192.168.8.100', '2026-08-05 19:09:31'),
+(33, 1, 1, 'CREATE_LOAN', 'loans', 7, 'Created new loan #7', '192.168.8.100', '2026-08-05 19:09:50'),
+(34, 1, 1, 'APPROVE_LOAN', 'loans', 6, 'Approved loan #6', '192.168.8.100', '2026-08-05 19:09:54'),
+(35, 1, 1, 'APPROVE_LOAN', 'loans', 7, 'Approved loan #7', '192.168.8.100', '2026-08-05 19:10:00'),
+(36, 1, 1, 'CREATE_LOAN', 'loans', 8, 'Created new loan #8', '192.168.8.100', '2026-08-05 19:12:57'),
+(37, 1, 1, 'CREATE_LOAN', 'loans', 9, 'Created new loan #9', '192.168.8.100', '2026-08-05 19:13:40'),
+(38, 1, 1, 'APPROVE_LOAN', 'loans', 8, 'Approved loan #8', '192.168.8.100', '2026-08-05 19:13:44'),
+(39, 1, 1, 'APPROVE_LOAN', 'loans', 9, 'Approved loan #9', '192.168.8.100', '2026-08-05 19:13:47'),
+(40, 1, 1, 'CREATE_LOAN', 'loans', 10, 'Created new loan #10', '192.168.8.100', '2026-08-05 19:14:55'),
+(41, 1, 1, 'APPROVE_LOAN', 'loans', 10, 'Approved loan #10', '192.168.8.100', '2026-08-05 19:14:59'),
+(42, 1, 1, 'CREATE_BORROWER', 'borrowers', 1, 'Added new borrower: John Bert', '192.168.8.100', '2026-08-05 19:17:48'),
+(43, 1, 1, 'CREATE_LOAN', 'loans', 11, 'Created new loan #11', '192.168.8.100', '2026-08-05 19:18:05'),
+(44, 1, 1, 'APPROVE_LOAN', 'loans', 11, 'Approved loan #11', '192.168.8.100', '2026-08-05 19:19:06'),
+(45, 1, 1, 'CREATE_LOAN', 'loans', 12, 'Created new loan #12', '192.168.8.100', '2026-08-05 19:19:26'),
+(46, 1, 1, 'APPROVE_LOAN', 'loans', 12, 'Approved loan #12', '192.168.8.100', '2026-08-05 19:19:31'),
+(47, 1, 1, 'UPDATE_LOAN', 'loans', 1, 'Updated loan #1', '::1', '2026-08-05 19:28:14'),
+(48, 1, 1, 'UPDATE_LOAN', 'loans', 2, 'Updated loan #2', '::1', '2026-08-05 19:29:52'),
+(49, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Salaries & Wages', '::1', '2026-08-05 19:32:11'),
+(50, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Rent', '::1', '2026-08-05 19:32:20'),
+(51, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Utilities', '::1', '2026-08-05 19:32:32'),
+(52, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Loan Loss / Bad Debt', '::1', '2026-08-05 19:32:48'),
+(53, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Miscellaneous', '::1', '2026-08-05 19:33:02'),
+(54, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Rent', '::1', '2026-08-05 19:33:56'),
+(55, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Internet', '::1', '2026-08-05 19:34:03');
 
 -- --------------------------------------------------------
 
@@ -175,17 +194,16 @@ CREATE TABLE `borrowers` (
 --
 
 INSERT INTO `borrowers` (`id`, `company_id`, `first_name`, `middle_name`, `last_name`, `gender`, `birthdate`, `phone`, `email`, `address`, `valid_id`, `status`, `created_at`, `occupation`) VALUES
-(6, 1, 'Janice', '', 'Olan-Olan', 'Female', '0001-01-01', '-', '', 'Leyte, Philippines', '', 1, '2026-06-27 19:55:44', NULL),
-(7, 1, 'Anne', '', 'Hilded', 'Female', '0000-00-00', '-', '', 'Sikatuna Street Cebu City, Cebu', '', 1, '2026-06-27 20:03:41', NULL),
-(8, 1, 'Myles', '', 'Batayola', '', '0000-00-00', '-', 'marldohncrubinos11@gmail.com', 'Sikatuna Street Cebu City, Cebu', '', 1, '2026-06-27 20:04:14', NULL),
-(9, 1, 'Marldohn', '', 'Rubinos', 'Male', '0000-00-00', '09061941138', 'marldohncrubinos11@gmail.com', 'Jakosalem Street Cebu City, Cebu', 'G06-24-008078', 1, '2026-06-27 20:05:12', NULL),
-(10, 1, 'Kitkit', '', 'Olan-olan', 'Female', '0000-00-00', '-', '', 'Leyte Philippines', '', 1, '2026-06-27 20:28:39', NULL),
-(11, 1, 'Noli', '', 'Absin', 'Female', '0000-00-00', '-', '', 'Mevisa Cebu City, Cebu', '', 1, '2026-06-27 20:29:04', NULL),
-(12, 1, 'March Shelou', 'Goc-ong', 'Ardillo', 'Female', '0000-00-00', '09059626063', 'ardillomarch@gmail.com', 'Balamban, Cebu', '', 1, '2026-06-27 20:29:41', NULL),
-(13, 1, 'Jerry ', '', 'Lauronal', 'Male', '0000-00-00', '-', '', 'Sikatuna Street Cebu City, Cebu', '', 1, '2026-06-27 20:52:14', NULL),
-(14, 1, 'Marilyn ', '', 'Rubinos', 'Female', '0000-00-00', '09754171178', '', 'Jakosalem Street Cebu City, Cebu', '', 1, '2026-06-27 20:54:15', NULL),
-(15, 1, 'Cheyanne', '', 'Jumilla', 'Male', '0000-00-00', '-', '', 'Bohol Philippines', '', 1, '2026-06-27 20:56:44', NULL),
-(16, 1, 'Test', '', 'User0', '', '0000-00-00', '1818410841', '', '0', '', 1, '2026-06-28 13:28:20', NULL);
+(1, 1, 'Marldohn', 'Codizar', 'Rubinos', 'Male', '2002-11-04', '09061941138', 'marldohncrubinos11@gmail.com', 'Jakosalem Street Cebu City', '0000', 1, '2026-08-05 17:34:45', NULL),
+(2, 1, 'Myles ', '', 'Batayola', 'Male', '0001-01-01', '-', 'test@test.com', 'Sikatuna Street Cebu City', '-', 1, '2026-08-05 17:46:38', NULL),
+(3, 1, 'Jerryniel ', '', 'Lauronal', 'Male', '0001-01-01', '-', 'test@test.com', 'Sikatuna Street Cebu City', '00000', 1, '2026-08-05 18:27:47', NULL),
+(4, 1, 'Janice', '', 'Olan-olan', 'Female', '0001-01-01', '-', 'test@test.com', 'Leyte, Philippines', '0000', 1, '2026-08-05 18:31:49', NULL),
+(5, 1, 'March Shelou', '', 'Ardillo', 'Female', '2004-05-19', '09059626063', 'marchshelou@gmail.com', 'Balamban, Cebu', '0000', 1, '2026-08-05 19:01:15', NULL),
+(6, 1, 'Cheyanne ', '', 'Jumilla', 'Male', '0001-01-01', '000000', 'test@test.com', 'Bohol, Philippines', '0000', 1, '2026-08-05 19:03:04', NULL),
+(7, 1, 'Allen', '', 'Jayme', 'Male', '0001-01-01', '00000', 'test@test.com', 'Jakosalem Street Cebu City, Cebu', '000000', 1, '2026-08-05 19:03:50', NULL),
+(8, 1, 'Marilyn', '', 'Rubinos', 'Female', '1978-12-18', '09754171178', 'marilynrubinos@gmail.com', 'Jakosalem Street Cebu City, Cebu', '0000', 1, '2026-08-05 19:04:54', NULL),
+(9, 1, 'Anne Hildred', '', 'Olan-Olan', 'Female', '0001-01-01', '000', 'test@test.com', 'Sikatuna Street Cebu City, Cebu', '00000', 1, '2026-08-05 19:05:35', NULL),
+(10, 1, 'John', '', 'Bert', 'Male', '0001-01-01', '0000', 'test@test.com', 'Sikatuna Street Cebu City, Cebu', '0000', 1, '2026-08-05 19:17:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -207,8 +225,15 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `company_id`, `type`, `name`, `description`, `created_at`) VALUES
-(9, 1, 'loan', 'Emergency', 'Emergency', '2026-06-27 20:07:03'),
-(10, 1, 'expense', 'Food', 'Food', '2026-06-28 13:13:22');
+(1, 1, 'loan', 'Emergency', '', '2026-08-05 17:37:03'),
+(2, 1, 'loan', 'Allowance', '', '2026-08-05 17:37:11'),
+(3, 1, 'expense', 'Salaries & Wages', 'Salaries & Wages', '2026-08-05 19:32:11'),
+(4, 1, 'expense', 'Rent', 'Rent', '2026-08-05 19:32:20'),
+(5, 1, 'expense', 'Utilities', 'Utilities', '2026-08-05 19:32:31'),
+(6, 1, 'expense', 'Loan Loss / Bad Debt', 'Loan Loss / Bad Debt', '2026-08-05 19:32:48'),
+(7, 1, 'expense', 'Miscellaneous', 'Miscellaneous', '2026-08-05 19:33:02'),
+(8, 1, 'loan', 'Rent', 'Rent', '2026-08-05 19:33:56'),
+(9, 1, 'loan', 'Internet', 'Internet', '2026-08-05 19:34:03');
 
 -- --------------------------------------------------------
 
@@ -230,8 +255,7 @@ CREATE TABLE `companies` (
 --
 
 INSERT INTO `companies` (`id`, `name`, `plan_tier`, `subscription_status`, `expires_at`, `created_at`) VALUES
-(1, 'Marldohn Financial', 'free', 'active', NULL, '2026-06-27 19:39:21'),
-(5, 'AZPIRED LENDING GROUP', 'free', 'active', NULL, '2026-06-28 21:40:45');
+(1, 'Marldohn Financial', 'free', 'active', NULL, '2026-08-05 16:05:51');
 
 -- --------------------------------------------------------
 
@@ -282,15 +306,6 @@ CREATE TABLE `feedback` (
   `category_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `feedback`
---
-
-INSERT INTO `feedback` (`id`, `sender_id`, `company_id`, `message`, `image_path`, `created_at`, `is_read`, `category_id`) VALUES
-(2, 1, 1, 'Hello', NULL, '2026-07-31 14:34:40', 0, NULL),
-(3, 1, 1, 'qwfqwf', NULL, '2026-07-31 14:34:47', 0, NULL),
-(4, 1, 1, 'qwfjiqwbfji your text ', 'uploads/feedback/1785793013_Unable to Change Password 2.png', '2026-08-03 21:36:53', 0, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -322,19 +337,18 @@ CREATE TABLE `loans` (
 --
 
 INSERT INTO `loans` (`id`, `company_id`, `account_id`, `borrower_id`, `amount`, `interest_rate`, `total_payable`, `status`, `released_date`, `due_date`, `created_at`, `term_months`, `notes`, `term_type`, `fee`, `category_id`, `loan_type`) VALUES
-(30, 1, 4, 6, 40000.00, 15.00, 46000.00, 'Approved', '2026-05-15', '2026-05-30', '2026-06-27 20:13:09', 15, '', 'day', 0.00, 9, 'fixed'),
-(32, 1, 4, 7, 26000.00, 0.00, 26000.00, 'Approved', '2026-05-15', '2026-10-15', '2026-06-27 20:25:45', 5, '', 'month', 0.00, 9, 'fixed'),
-(33, 1, 4, 8, 8326.48, 15.00, 9575.45, 'Approved', '2026-06-27', '2026-06-30', '2026-06-27 20:41:30', 1, '', 'semi_monthly', 0.00, 9, ''),
-(34, 1, 4, 9, 39176.00, 0.00, 39176.00, 'Approved', '2026-06-27', '2859-09-27', '2026-06-27 20:42:16', 9999, '', 'month', 0.00, 9, ''),
-(35, 1, 4, 12, 12196.00, 0.00, 12196.00, 'Approved', '2026-06-27', '2859-09-27', '2026-06-27 20:43:12', 9999, '', 'month', 0.00, 9, 'fixed'),
-(36, 1, 4, 13, 7000.00, 15.00, 8050.00, 'Approved', '2026-06-15', '2026-06-30', '2026-06-27 20:53:31', 15, '', 'day', 0.00, 9, 'fixed'),
-(37, 1, 4, 14, 800.00, 0.00, 800.00, 'Approved', '2026-06-27', '2859-09-27', '2026-06-27 20:54:34', 9999, '', 'month', 0.00, 9, ''),
-(38, 1, 4, 15, 10000.00, 11.00, 11100.00, 'Approved', '2026-06-15', '2026-06-30', '2026-06-27 20:57:17', 15, '', 'one_time', 0.00, 9, ''),
-(39, 1, 4, 10, 3000.00, 15.00, 3450.00, 'Approved', '2026-06-15', '2026-06-30', '2026-06-27 21:00:43', 15, '', 'day', 0.00, 9, 'fixed'),
-(40, 1, 10, 13, 3000.00, 15.00, 3450.00, 'Approved', '2026-06-28', '2026-07-13', '2026-06-28 12:15:54', 15, '', 'day', 0.00, 9, 'fixed'),
-(44, 1, 4, 16, 100.00, 10.00, 120.00, 'Approved', '2026-06-28', '2026-06-29', '2026-06-28 18:16:59', 2, '', 'semi_monthly', 0.00, 9, ''),
-(45, 1, 4, 16, 1000.00, 10.00, 1100.00, 'Approved', '2026-07-31', '2026-08-10', '2026-07-12 17:23:39', 10, 'NA', 'one_time', 10.00, 9, ''),
-(46, 1, 4, 7, 1000.00, 10.00, 1100.00, 'Pending', '2026-07-30', '2026-08-09', '2026-07-30 18:52:23', 10, '', 'one_time', 0.00, 9, 'standard');
+(1, 1, 6, 1, 41877.00, 0.00, 41877.00, 'Approved', '2026-08-05', '4764-07-01', '2026-08-05 17:37:45', 999999, '', 'one_time', 0.00, 2, ''),
+(2, 1, 6, 2, 11724.00, 15.00, 13482.60, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 18:18:03', 10, '', 'one_time', 0.00, 2, ''),
+(3, 1, 6, 3, 8090.00, 15.00, 9300.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 18:30:24', 10, '', 'one_time', -3.50, 1, 'standard'),
+(4, 1, 6, 4, 50000.00, 15.00, 57500.00, 'Approved', '2026-07-25', '2026-08-07', '2026-08-05 18:32:59', 13, '', 'one_time', 0.00, 1, 'standard'),
+(5, 1, 6, 9, 14500.00, 0.00, 14500.00, 'Approved', '2026-08-05', '2026-09-30', '2026-08-05 19:07:05', 56, '', 'one_time', 0.00, 1, 'standard'),
+(6, 1, 6, 7, 5000.00, 15.00, 5750.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:09:31', 10, '', 'one_time', 0.00, 2, 'standard'),
+(7, 1, 2, 7, 2000.00, 15.00, 2300.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:09:50', 10, '', 'one_time', 0.00, 2, 'standard'),
+(8, 1, 6, 8, 800.00, 0.00, 800.00, 'Approved', '2026-08-05', '2053-12-20', '2026-08-05 19:12:57', 9999, '', 'one_time', 0.00, 1, 'standard'),
+(9, 1, 6, 5, 13036.00, 0.00, 13036.00, 'Approved', '2026-08-05', '2053-12-20', '2026-08-05 19:13:40', 9999, '', 'one_time', 0.00, 2, 'standard'),
+(10, 1, 6, 6, 10000.00, 11.00, 11100.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:14:55', 10, '', 'one_time', 0.00, 1, 'standard'),
+(11, 1, 6, 10, 2750.00, 15.00, 3162.50, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:18:05', 10, '', 'one_time', 0.00, 2, 'standard'),
+(12, 1, 6, 3, 3000.00, 15.00, 3450.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:19:26', 10, '', 'one_time', 0.00, 2, 'standard');
 
 -- --------------------------------------------------------
 
@@ -352,13 +366,6 @@ CREATE TABLE `loan_collaterals` (
   `file_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `loan_collaterals`
---
-
-INSERT INTO `loan_collaterals` (`id`, `company_id`, `loan_id`, `item_name`, `description`, `estimated_value`, `file_path`, `created_at`) VALUES
-(4, 1, 45, 'Gold Ring', NULL, 10000.00, NULL, '2026-07-12 17:23:39');
 
 -- --------------------------------------------------------
 
@@ -399,13 +406,6 @@ CREATE TABLE `payments` (
   `category_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `payments`
---
-
-INSERT INTO `payments` (`id`, `account_id`, `company_id`, `loan_id`, `amount`, `payment_date`, `payment_method`, `reference_number`, `created_at`, `principal_amount`, `interest_amount`, `fees_amount`, `notes`, `category_id`) VALUES
-(5, 10, 1, 30, 46000.00, '2026-06-28', NULL, NULL, '2026-06-27 20:14:57', 0.00, 0.00, 0.00, NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -420,13 +420,6 @@ CREATE TABLE `penalties` (
   `reason` text DEFAULT NULL,
   `date_applied` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `penalties`
---
-
-INSERT INTO `penalties` (`id`, `company_id`, `loan_id`, `amount`, `reason`, `date_applied`) VALUES
-(3, 1, 44, 10.00, 'Late Payment', '2026-06-29');
 
 -- --------------------------------------------------------
 
@@ -449,9 +442,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `username`, `password`, `role`, `created_at`, `status`) VALUES
-(1, 1, 'mrubinos@azpired.net', '$2y$10$/DhJJCjKBhl./meP.7NkiebnAojnXPOppxye5HfYdAYRJqRZJpAPy', 'admin', '2026-05-27 13:22:38', 1),
-(2, 1, 'superadmin2', '$2y$10$T8ZJ1pC4O6.Ym9G2Fv4Wk.x9eHwK2aT0.iL0P4K/yXzQ4T2oN5.yS', 'superadmin', '2026-05-30 06:49:23', 1),
-(11, 5, 'mardonio@azpired.net', '$2y$10$jl1HqHLWKe.KJAbolV.NwuEmywcN3TMuNQlLI4XXwhoshnKvf3Wba', 'admin', '2026-06-28 21:40:45', 0);
+(1, 1, 'mrubinos@admin.net', '$2y$10$/DhJJCjKBhl./meP.7NkiebnAojnXPOppxye5HfYdAYRJqRZJpAPy', 'admin', '2026-05-27 05:22:38', 1),
+(2, 1, 'superadmin', '$2y$10$Aer/QH7qOQrYCwqCopAkzOggT.pz5sAOehC/aU6ZbPv2k2rxhn5Iq', 'superadmin', '2026-05-29 22:49:23', 1);
 
 --
 -- Indexes for dumped tables
@@ -572,37 +564,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `accounts`
 --
 ALTER TABLE `accounts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `account_transactions`
 --
 ALTER TABLE `account_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
 --
 ALTER TABLE `borrowers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `company_funds`
@@ -614,25 +606,25 @@ ALTER TABLE `company_funds`
 -- AUTO_INCREMENT for table `expenses`
 --
 ALTER TABLE `expenses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `loans`
 --
 ALTER TABLE `loans`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `loan_collaterals`
 --
 ALTER TABLE `loan_collaterals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `loan_installments`
@@ -644,19 +636,19 @@ ALTER TABLE `loan_installments`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `penalties`
 --
 ALTER TABLE `penalties`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
