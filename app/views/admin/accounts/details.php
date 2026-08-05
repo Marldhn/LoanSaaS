@@ -21,8 +21,9 @@
     .data-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 12px; color: #64748b; text-transform: uppercase; }
     .data-table td { padding: 16px 24px; border-top: 1px solid #f1f5f9; font-size: 14px; color: #334155; }
     
-    .btn-back { padding: 10px 20px; background: #64748b; color: white; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .btn-back { padding: 10px 20px; background: #64748b; color: white; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; }
     .btn-adjust { background: #059669; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-edit-account { background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
 </style>
 
 <div class="page-container">
@@ -30,6 +31,9 @@
         <h1><?= htmlspecialchars($account['name']) ?> Details</h1>
         <div class="d-flex gap-2">
             <?php if ($_SESSION['user']['role'] === 'admin'): ?>
+                <button type="button" class="btn-edit-account" data-bs-toggle="modal" data-bs-target="#editAccountModal">
+                    Edit Name
+                </button>
                 <button type="button" class="btn-adjust" data-bs-toggle="modal" data-bs-target="#adjustModal">
                     Adjust Balance
                 </button>
@@ -68,6 +72,45 @@
     </div>
 </div>
 
+<!-- Edit Account Modal -->
+<div class="modal fade" id="editAccountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="?url=account/updateAccount" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="account_id" value="<?= $account['id'] ?>">
+        
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Account Name</label>
+            <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($account['name']) ?>" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Account Icon / Logo</label>
+            <input type="file" name="icon" class="form-control" accept="image/*">
+            <?php if (!empty($account['icon'])): ?>
+                <div class="mt-2">
+                    <small class="text-muted">Current Icon:</small><br>
+                    <img src="/loansaas/public/uploads/accounts/<?= htmlspecialchars($account['icon']) ?>" alt="Icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-top: 4px;">
+                </div>
+            <?php endif; ?>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Adjust Balance Modal -->
 <div class="modal fade" id="adjustModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">

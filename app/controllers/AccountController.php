@@ -11,12 +11,27 @@ class AccountController {
         require_once __DIR__ . '/../views/admin/accounts/index.php';
     }
 
-    public function storeAccount() {
+    // ADD THIS METHOD TO YOUR ACCOUNT CONTROLLER
+   public function storeAccount() {
         $acc = new Account();
-        $acc->create($_POST['name'], $_POST['initial_balance']);
+        $db = $acc->getDb();
+        
+        $iconName = null;
+        if (isset($_FILES['icon']) && $_FILES['icon']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../public/uploads/accounts/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $fileExtension = pathinfo($_FILES['icon']['name'], PATHINFO_EXTENSION);
+            $iconName = 'account_' . time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
+            move_uploaded_file($_FILES['icon']['tmp_name'], $uploadDir . $iconName);
+        }
+
+        // Save account with icon (ensure your Model's create method supports the icon argument, or modify it)
+        $acc->create($_POST['name'], $_POST['initial_balance'], $iconName);
         
         // Log the creation
-        (new ActivityLog($acc->getDb()))->logAction(
+        (new ActivityLog($db))->logAction(
             $_SESSION['user']['company_id'], 
             $_SESSION['user']['id'], 
             'CREATE_ACCOUNT', 
@@ -26,6 +41,54 @@ class AccountController {
         );
 
         header("Location: /loansaas/public/index.php?url=account/index");
+        exit;
+    }
+
+    public function updateAccount() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $accountModel = new Account();
+            $db = $accountModel->getDb();
+
+            $account_id = $_POST['account_id'];
+            $newName = trim($_POST['name']);
+            
+            // Fetch current account to check old icon
+            $currentAccount = $accountModel->getById($account_id);
+            $iconName = $currentAccount['icon'] ?? null;
+
+            if (isset($_FILES['icon']) && $_FILES['icon']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../public/uploads/accounts/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $fileExtension = pathinfo($_FILES['icon']['name'], PATHINFO_EXTENSION);
+                $iconName = 'account_' . time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
+                move_uploaded_file($_FILES['icon']['tmp_name'], $uploadDir . $iconName);
+            }
+
+            $db->beginTransaction();
+            try {
+                $stmt = $db->prepare("UPDATE accounts SET name = ?, icon = ? WHERE id = ?");
+                $stmt->execute([$newName, $iconName, $account_id]);
+
+                // Log the activity
+                (new ActivityLog($db))->logAction(
+                    $_SESSION['user']['company_id'], 
+                    $_SESSION['user']['id'], 
+                    'UPDATE_ACCOUNT', 
+                    'accounts', 
+                    $account_id, 
+                    "Updated account details for: " . $newName
+                );
+
+                $db->commit();
+                header("Location: /loansaas/public/index.php?url=account/details&id=" . $account_id);
+                exit;
+            } catch (Exception $e) {
+                $db->rollBack();
+                die("Update failed: " . $e->getMessage());
+            }
+        }
     }
 
     public function transfer() {

@@ -324,7 +324,9 @@
                             <span class="badge-status <?= $badgeClass ?>"><?= htmlspecialchars($loan['display_status']) ?></span>
                         </div>
                         <div style="text-align:right;">
-                            <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-view">View →</a>
+                            <a href="/loansaas/public/index.php?url=loan/details&id=<?= $loan['id'] ?>" class="btn-view" title="View Details">
+                                <i class="fas fa-eye"></i> View
+                            </a>
                         </div>
                     </div>
                 <?php endforeach; endif; ?>

@@ -3,20 +3,33 @@ require_once __DIR__ . '/../core/Model.php';
 
 class Account extends Model {
 
-public function __construct() {
+    public function __construct() {
         // This ensures the parent Model initializes the $this->conn variable
         parent::__construct(); 
     }
 
-      public function getAll() {
-    // Both your Payment form and Account index are looking for 'current_balance'
-    $stmt = $this->conn->prepare("SELECT id, name, current_balance FROM accounts WHERE company_id = ?");
-    $stmt->execute([$this->getTenantId()]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-    public function create($name, $initial_balance = 0.00) {
-        $stmt = $this->conn->prepare("INSERT INTO accounts (company_id, name, current_balance) VALUES (?, ?, ?)");
-        return $stmt->execute([$this->getTenantId(), $name, $initial_balance]);
+    public function getAll() {
+        // Added 'icon' to the selected columns
+        $stmt = $this->conn->prepare("SELECT id, name, current_balance, icon FROM accounts WHERE company_id = ?");
+        $stmt->execute([$this->getTenantId()]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function create($name, $initial_balance = 0.00, $icon = null) {
+        // Added 'icon' column insertion
+        $stmt = $this->conn->prepare("INSERT INTO accounts (company_id, name, current_balance, icon) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$this->getTenantId(), $name, $initial_balance, $icon]);
+    }
+
+    public function update($id, $name, $icon = null) {
+        // If a new icon is uploaded, update both name and icon. Otherwise, keep the old icon.
+        if ($icon !== null) {
+            $stmt = $this->conn->prepare("UPDATE accounts SET name = ?, icon = ? WHERE id = ? AND company_id = ?");
+            return $stmt->execute([$name, $icon, $id, $this->getTenantId()]);
+        } else {
+            $stmt = $this->conn->prepare("UPDATE accounts SET name = ? WHERE id = ? AND company_id = ?");
+            return $stmt->execute([$name, $id, $this->getTenantId()]);
+        }
     }
 
     public function transferFunds($from_id, $to_id, $amount, $notes = '') {
@@ -38,24 +51,23 @@ public function __construct() {
     }
 
     public function addTransaction($account_id, $amount, $type, $notes = '', $loan_id = null) {
-    // Record the transaction including the loan_id
-    $stmt = $this->conn->prepare("
-        INSERT INTO account_transactions (company_id, account_id, loan_id, amount, type, notes) 
-        VALUES (?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->execute([$this->getTenantId(), $account_id, $loan_id, $amount, $type, $notes]);
+        // Record the transaction including the loan_id
+        $stmt = $this->conn->prepare("
+            INSERT INTO account_transactions (company_id, account_id, loan_id, amount, type, notes) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([$this->getTenantId(), $account_id, $loan_id, $amount, $type, $notes]);
 
-    // Update the account balance
-    $stmt = $this->conn->prepare("
-        UPDATE accounts 
-        SET current_balance = current_balance + ? 
-        WHERE id = ? AND company_id = ?
-    ");
-    $stmt->execute([$amount, $account_id, $this->getTenantId()]);
-}
+        // Update the account balance
+        $stmt = $this->conn->prepare("
+            UPDATE accounts 
+            SET current_balance = current_balance + ? 
+            WHERE id = ? AND company_id = ?
+        ");
+        $stmt->execute([$amount, $account_id, $this->getTenantId()]);
+    }
 
-
-public function getHistoryByLoanId($loan_id) {
+    public function getHistoryByLoanId($loan_id) {
         $stmt = $this->conn->prepare("
             SELECT * FROM account_transactions 
             WHERE loan_id = ? AND company_id = ? 
@@ -73,21 +85,19 @@ public function getHistoryByLoanId($loan_id) {
         return $result['current_balance'] ?? 0;
     }
 
-public function getById($id) {
-    // Change this from $this->db->prepare to $this->conn->prepare
-    $stmt = $this->conn->prepare("SELECT * FROM accounts WHERE id = ? AND company_id = ?");
-    $stmt->execute([$id, $this->getTenantId()]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+    public function getById($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM accounts WHERE id = ? AND company_id = ?");
+        $stmt->execute([$id, $this->getTenantId()]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
-
-public function getTransactionsByAccountId($account_id) {
-    $stmt = $this->conn->prepare("
-        SELECT * FROM account_transactions 
-        WHERE account_id = ? AND company_id = ? 
-        ORDER BY created_at DESC
-    ");
-    $stmt->execute([$account_id, $this->getTenantId()]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    public function getTransactionsByAccountId($account_id) {
+        $stmt = $this->conn->prepare("
+            SELECT * FROM account_transactions 
+            WHERE account_id = ? AND company_id = ? 
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$account_id, $this->getTenantId()]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

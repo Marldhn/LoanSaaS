@@ -1,9 +1,20 @@
 <?php require_once dirname(__DIR__, 2) . '/layouts/header.php'; ?>
 
+<?php
+// Calculate the total balance across all accounts
+$total_balance = 0;
+if (!empty($accounts)) {
+    foreach ($accounts as $a) {
+        $total_balance += $a['current_balance'];
+    }
+}
+?>
+
 <style>
-    /* Container Reset */
     .accounts-page-wrapper {
         width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
         box-sizing: border-box;
     }
 
@@ -12,7 +23,7 @@
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
-        margin-bottom: 24px !important;
+        margin-bottom: 20px !important;
     }
 
     .page-title {
@@ -50,46 +61,100 @@
         color: #ffffff !important;
     }
 
+    /* Top Stats & Create Form Layout Grid */
+    .top-section-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 1024px) {
+        .top-section-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Total Balance Card */
+    .total-balance-card {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        color: #ffffff !important;
+        padding: 24px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .total-balance-card h4 {
+        margin: 0 0 6px 0 !important;
+        font-size: 0.8125rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        font-weight: 600 !important;
+        color: #e0e7ff !important;
+    }
+
+    .total-balance-card h2 {
+        margin: 0 !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+    }
+
+    .total-balance-icon {
+        background: rgba(255, 255, 255, 0.15);
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #fff;
+    }
+
     /* Create Account Card */
     .create-account-card {
         background: #ffffff !important;
-        padding: 20px 24px !important;
+        padding: 24px !important;
         border-radius: 12px !important;
         border: 1px solid #e2e8f0 !important;
-        margin-bottom: 24px !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        box-sizing: border-box;
     }
 
     .card-heading {
-        margin: 0 0 16px 0 !important;
-        font-size: 1rem !important;
+        margin: 0 0 14px 0 !important;
+        font-size: 0.95rem !important;
         font-weight: 700 !important;
         color: #0f172a !important;
     }
 
     .inline-form {
         display: flex !important;
-        gap: 16px !important;
+        gap: 12px !important;
         align-items: flex-end !important;
-        flex-wrap: wrap !important;
     }
 
     .form-field {
         flex: 1 !important;
-        min-width: 220px !important;
     }
 
     .form-field label {
         display: block !important;
-        font-size: 0.8125rem !important;
+        font-size: 0.775rem !important;
         font-weight: 600 !important;
         color: #475569 !important;
         margin-bottom: 6px !important;
     }
 
     .form-input {
-        height: 40px !important;
-        padding: 8px 12px !important;
+        height: 38px !important;
+        padding: 6px 12px !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 8px !important;
         font-size: 0.875rem !important;
@@ -107,10 +172,17 @@
     }
 
     /* Accounts Grid */
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 28px 0 16px 0;
+    }
+
     .accounts-grid {
         display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
-        gap: 20px !important;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+        gap: 16px !important;
         margin-bottom: 32px !important;
     }
 
@@ -122,7 +194,7 @@
 
     .account-card {
         background: #ffffff !important;
-        padding: 20px 24px !important;
+        padding: 20px !important;
         border-radius: 12px !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
@@ -136,7 +208,7 @@
     }
 
     .account-card h4 {
-        margin: 0 0 8px 0 !important;
+        margin: 0 0 6px 0 !important;
         font-size: 0.75rem !important;
         color: #64748b !important;
         text-transform: uppercase !important;
@@ -146,7 +218,7 @@
 
     .account-card h2 {
         margin: 0 !important;
-        font-size: 1.5rem !important;
+        font-size: 1.35rem !important;
         font-weight: 700 !important;
         color: #0f172a !important;
     }
@@ -176,6 +248,26 @@
         border: 1px solid #e2e8f0 !important;
     }
 
+    .custom-file-upload {
+        border: 1px solid #cbd5e1;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .custom-file-upload:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
     .modal-header-flex {
         display: flex !important;
         justify-content: space-between !important;
@@ -195,12 +287,11 @@
         color: #0f172a !important;
     }
 
-    /* Responsive Queries */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
         .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
         .inline-form { flex-direction: column !important; align-items: stretch !important; }
         .accounts-grid { grid-template-columns: 1fr !important; }
-        .form-field { min-width: 100% !important; }
         .btn-primary-custom { width: 100% !important; justify-content: center !important; }
     }
 </style>
@@ -217,29 +308,67 @@
         </button>
     </div>
 
-    <!-- Create New Account Card -->
-    <div class="create-account-card">
-        <h3 class="card-heading">Create New Account</h3>
-        <form method="POST" action="/loansaas/public/index.php?url=account/storeAccount" class="inline-form">
-            <div class="form-field">
-                <label>Account Name</label>
-                <input type="text" name="name" placeholder="e.g. GCash" class="form-input" required>
+    <!-- Top Grid: Balance Summary & Compact Form Side-by-Side -->
+    <div class="top-section-grid">
+        <!-- Total Balance Card -->
+        <div class="total-balance-card">
+            <div>
+                <h4>Total Liquid Balance</h4>
+                <h2>₱<?= number_format($total_balance, 2) ?></h2>
             </div>
-            <div class="form-field">
-                <label>Initial Balance</label>
-                <input type="number" name="initial_balance" placeholder="0.00" class="form-input" step="0.01">
+            <div class="total-balance-icon">
+                <i class="fas fa-wallet"></i>
             </div>
-            <button type="submit" class="btn-primary-custom" style="height: 40px;">Create Account</button>
-        </form>
+        </div>
+
+        <!-- Create New Account Card -->
+        <div class="create-account-card">
+            <h3 class="card-heading">Create New Account</h3>
+         <form method="POST" action="/loansaas/public/index.php?url=account/storeAccount" class="inline-form" enctype="multipart/form-data">
+    <div class="form-field">
+        <label>Account Name</label>
+        <input type="text" name="name" placeholder="e.g. GCash" class="form-input" required>
     </div>
+    <div class="form-field">
+        <label>Initial Balance</label>
+        <input type="number" name="initial_balance" placeholder="0.00" class="form-input" step="0.01">
+    </div>
+    
+    <!-- Custom File Upload Field -->
+    <div class="form-field">
+        <label>Icon / Logo</label>
+        <div style="display: flex; align-items: center; gap: 10px; height: 38px;">
+            <label for="account-icon-file" class="custom-file-upload" style="margin: 0; display: inline-flex; align-items: center; justify-content: center; height: 38px; box-sizing: border-box;">
+                <i class="fas fa-upload"></i> Choose Image
+            </label>
+            <input id="account-icon-file" type="file" name="icon" accept="image/*" style="display: none;" onchange="updateFileName(this)">
+            <span id="file-chosen-name" style="font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; line-height: 38px;">No file chosen</span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn-primary-custom" style="height: 38px;">Create</button>
+</form>
+        </div>
+    </div>
+
+    <h4 class="section-title">All Accounts</h4>
 
     <!-- Accounts Grid -->
     <div class="accounts-grid">
         <?php foreach ($accounts as $a): ?>
         <a href="/loansaas/public/index.php?url=account/details&id=<?= $a['id'] ?>" class="account-card-link">
-            <div class="account-card">
-                <h4><?= htmlspecialchars($a['name']) ?></h4>
-                <h2>₱<?= number_format($a['current_balance'], 2) ?></h2>
+            <div class="account-card" style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                    <?php if (!empty($a['icon'])): ?>
+                        <img src="/loansaas/public/uploads/accounts/<?= htmlspecialchars($a['icon']) ?>" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                    <?php else: ?>
+                        <i class="fas fa-wallet text-secondary"></i>
+                    <?php endif; ?>
+                </div>
+                <div>
+                    <h4><?= htmlspecialchars($a['name']) ?></h4>
+                    <h2>₱<?= number_format($a['current_balance'], 2) ?></h2>
+                </div>
             </div>
         </a>
         <?php endforeach; ?>
@@ -299,6 +428,17 @@
 <?php unset($_SESSION['error_message']); ?>
 
 <script>
+
+    function updateFileName(input) {
+    const fileNameSpan = document.getElementById('file-chosen-name');
+    if (input.files && input.files.length > 0) {
+        fileNameSpan.textContent = input.files[0].name;
+        fileNameSpan.style.color = '#0f172a';
+    } else {
+        fileNameSpan.textContent = 'No file chosen';
+        fileNameSpan.style.color = '#64748b';
+    }
+}
     function toggleModal(id) {
         const modal = document.getElementById(id);
         if (modal) {

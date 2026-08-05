@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 31, 2026 at 12:00 AM
+-- Generation Time: Aug 05, 2026 at 05:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -276,10 +276,20 @@ CREATE TABLE `feedback` (
   `sender_id` int(11) NOT NULL,
   `company_id` int(11) NOT NULL,
   `message` text NOT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `is_read` tinyint(1) DEFAULT 0,
   `category_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`id`, `sender_id`, `company_id`, `message`, `image_path`, `created_at`, `is_read`, `category_id`) VALUES
+(2, 1, 1, 'Hello', NULL, '2026-07-31 14:34:40', 0, NULL),
+(3, 1, 1, 'qwfqwf', NULL, '2026-07-31 14:34:47', 0, NULL),
+(4, 1, 1, 'qwfjiqwbfji your text ', 'uploads/feedback/1785793013_Unable to Change Password 2.png', '2026-08-03 21:36:53', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -610,7 +620,7 @@ ALTER TABLE `expenses`
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `loans`

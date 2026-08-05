@@ -22,22 +22,93 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
     }
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f8fafc; display: flex; }
     
-    /* Sidebar Structure */
-    .sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 1000; }
-    
-    .sidebar-brand { padding: 25px 20px; font-weight: 800; color: var(--primary-color); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-    
-    .sidebar-menu { list-style: none; padding: 15px; flex-grow: 1; margin: 0; overflow-y: auto; }
-    .menu-item { margin-bottom: 4px; }
-    .menu-item a { 
-        display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
-        color: var(--text-muted); text-decoration: none; border-radius: 10px; 
-        transition: all 0.2s ease; font-weight: 500; font-size: 0.95rem;
+    /* Sidebar Structure with Collapse Transition */
+    .sidebar { 
+        width: 260px; 
+        height: 100vh; 
+        background: var(--sidebar-bg); 
+        border-right: 1px solid var(--border-color); 
+        display: flex; 
+        flex-direction: column; 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        z-index: 1000; 
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    
+    .sidebar-brand { 
+        padding: 25px 20px; 
+        font-weight: 800; 
+        color: var(--primary-color); 
+        font-size: 1.2rem; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        white-space: nowrap; 
+        overflow: hidden; 
+    }
+    
+    .sidebar-brand span {
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+    
+    .sidebar-menu { 
+        list-style: none; 
+        padding: 15px; 
+        flex-grow: 1; 
+        margin: 0; 
+        overflow-y: auto; 
+        overflow-x: hidden;
+    }
+
+    .menu-item { margin-bottom: 4px; }
+    
+    .menu-item a { 
+        display: flex; 
+        align-items: center; 
+        gap: 12px; 
+        padding: 12px 16px; 
+        color: var(--text-muted); 
+        text-decoration: none; 
+        border-radius: 10px; 
+        transition: all 0.2s ease; 
+        font-weight: 500; 
+        font-size: 0.95rem; 
+        white-space: nowrap;
+    }
+
+    .menu-item a i {
+        min-width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .menu-item a span {
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
     .menu-item a:hover { background: var(--hover-bg); color: var(--primary-color); }
     .menu-item.active a { background: var(--primary-color); color: #fff; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3); }
     
     .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); display: none; }
+
+    /* Collapsed Sidebar State Classes */
+    body.sidebar-collapsed .sidebar {
+        width: 78px;
+    }
+
+    body.sidebar-collapsed .sidebar-brand span,
+    body.sidebar-collapsed .menu-item a span {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    body.sidebar-collapsed .main-wrapper {
+        margin-left: 78px;
+        width: calc(100% - 78px);
+    }
 
     /* Main Wrapper to handle layout beside sidebar */
     .main-wrapper {
@@ -47,6 +118,7 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
         flex-direction: column;
         min-height: 100vh;
         width: calc(100% - 260px);
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .main-content { padding: 25px; flex: 1; }
@@ -190,20 +262,35 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
 
     @media (max-width: 900px) {
         .sidebar { left: -260px; transition: 0.3s; }
-        .sidebar.active { left: 0; box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
-        .main-wrapper { margin-left: 0; width: 100%; }
+        .sidebar.active { left: 0; box-shadow: 10px 0 20px rgba(0,0,0,0.1); width: 260px !important; }
+        body.sidebar-collapsed .sidebar { left: -260px; }
+        body.sidebar-collapsed .sidebar.active { left: 0; width: 260px !important; }
+        body.sidebar-collapsed .sidebar.active .sidebar-brand span,
+        body.sidebar-collapsed .sidebar.active .menu-item a span {
+            opacity: 1;
+            visibility: visible;
+        }
+        .main-wrapper { margin-left: 0 !important; width: 100% !important; }
         .close-btn { display: block !important; }
         .top-header { padding: 0 15px; height: 60px; }
         .main-content { padding: 15px; }
     }
 </style>
+<script>
+    // Apply saved sidebar state instantly before page renders to prevent layout flashing
+    if (localStorage.getItem('sidebar_collapsed') === 'true' && window.innerWidth > 900) {
+        document.documentElement.classList.add('preload-collapsed');
+        document.write('<style>body.sidebar-collapsed .sidebar { width: 78px; } body.sidebar-collapsed .sidebar-brand span, body.sidebar-collapsed .menu-item a span { opacity: 0; visibility: hidden; pointer-events: none; } body.sidebar-collapsed .main-wrapper { margin-left: 78px; width: calc(100% - 78px); }</style>');
+        document.body ? document.body.classList.add('sidebar-collapsed') : document.addEventListener('DOMContentLoaded', () => document.body.classList.add('sidebar-collapsed'));
+    }
+</script>
 </head>
 <body>
 
 <aside class="sidebar">
     <div class="sidebar-brand">
         <i class="fas fa-wallet" style="background: #e0e7ff; padding: 8px; border-radius: 8px;"></i> 
-        Lowndesk
+        <span>Lowndesk</span>
         <button onclick="document.querySelector('.sidebar').classList.remove('active')" 
                 style="margin-left:auto; border:none; background:none; cursor:pointer; display:none;" class="close-btn"><i class="fas fa-times"></i></button>
     </div>
@@ -232,7 +319,6 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
                 ['url' => 'category/index', 'icon' => 'fa-tags', 'label' => 'Categories'],
                 ['url' => 'activitylogs/index', 'icon' => 'fa-clock-rotate-left', 'label' => 'Logs'],
                 ['url' => 'feedback/create', 'icon' => 'fa-comment-dots', 'label' => 'Send Feedback'],
-                ['url' => 'admin/settings', 'icon' => 'fa-gear', 'label' => 'Settings']
             ];
         } elseif ($userRole === 'staff') {
             $menuItems = [
@@ -251,7 +337,7 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
         foreach ($menuItems as $item) {
             $active = ($current_url === $item['url']) ? 'active' : '';
             echo "<li class='menu-item $active'>
-                    <a href='/loansaas/public/index.php?url={$item['url']}'>
+                    <a href='/loansaas/public/index.php?url={$item['url']}' title='{$item['label']}'>
                         <i class='fas {$item['icon']}'></i> 
                         <span>{$item['label']}</span>
                     </a>
@@ -264,10 +350,10 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
 <!-- Main Wrapper Container -->
 <div class="main-wrapper">
     
-    <!-- Top Header Bar (Search box removed) -->
+    <!-- Top Header Bar -->
     <header class="top-header">
         <div class="top-header-left">
-            <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" onclick="document.querySelector('.sidebar').classList.toggle('active')" title="Toggle Sidebar">
+            <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle Sidebar">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -303,8 +389,29 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
 
     <main class="main-content">
         <script>
-            // Dropdown Toggle and Outside Click Handler
+            // Sidebar Collapse and Dropdown Toggle Handlers with LocalStorage Persistence
             document.addEventListener('DOMContentLoaded', function() {
+                const sidebarToggle = document.getElementById('sidebarToggle');
+                const sidebar = document.querySelector('.sidebar');
+                
+                // Sync initial state from local storage on load
+                if (localStorage.getItem('sidebar_collapsed') === 'true' && window.innerWidth > 900) {
+                    document.body.classList.add('sidebar-collapsed');
+                }
+
+                if (sidebarToggle) {
+                    sidebarToggle.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (window.innerWidth <= 900) {
+                            sidebar.classList.toggle('active');
+                        } else {
+                            document.body.classList.toggle('sidebar-collapsed');
+                            const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+                            localStorage.setItem('sidebar_collapsed', isCollapsed);
+                        }
+                    });
+                }
+
                 const dropdownTrigger = document.getElementById('userDropdownTrigger');
                 const dropdownMenu = document.getElementById('userDropdownMenu');
 
@@ -319,11 +426,9 @@ $userName = $_SESSION['user']['username'] ?? $_SESSION['user_name'] ?? 'Administ
                     });
                 }
 
-                // Close sidebar when clicking outside on smaller screens
+                // Close mobile sidebar when clicking outside
                 document.addEventListener('click', (e) => {
-                    const sidebar = document.querySelector('.sidebar');
-                    const toggleBtn = document.getElementById('sidebarToggle');
-                    if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
                         sidebar.classList.remove('active');
                     }
                 });
