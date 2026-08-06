@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 06, 2026 at 12:01 AM
+-- Generation Time: Aug 07, 2026 at 12:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,11 +40,11 @@ CREATE TABLE `accounts` (
 --
 
 INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`, `icon`) VALUES
-(1, 1, 'Gcash', 3177.00, 'account_1785951150_9771.png'),
-(2, 1, 'Maribank - DONSS', 9937.00, 'account_1785950259_3333.webp'),
-(3, 1, 'BPI', 191.00, NULL),
-(4, 1, 'Gotyme', 9243.00, NULL),
-(5, 1, 'Maribank - SHE', 12416.00, 'account_1785951226_4901.webp'),
+(1, 1, 'Gcash', 3920.00, 'account_1785951150_9771.png'),
+(2, 1, 'Maribank - DONSS', 13621.00, 'account_1785950259_3333.webp'),
+(3, 1, 'BPI', 4000.00, NULL),
+(4, 1, 'Gotyme', 0.00, NULL),
+(5, 1, 'Maribank - SHE', 11517.00, 'account_1785951226_4901.webp'),
 (6, 1, 'Initial Balance', 0.00, NULL);
 
 -- --------------------------------------------------------
@@ -85,7 +85,13 @@ INSERT INTO `account_transactions` (`id`, `company_id`, `account_id`, `loan_id`,
 (13, 1, 6, 1, 40049.00, '', NULL, 'Reversing loan #1 for edit', '2026-08-05 19:28:14'),
 (14, 1, 6, 1, -41877.00, '', NULL, 'Loan #1 re-issued with updated amount', '2026-08-05 19:28:14'),
 (15, 1, 6, 2, 10000.00, '', NULL, 'Reversing loan #2 for edit', '2026-08-05 19:29:52'),
-(16, 1, 6, 2, -11724.00, '', NULL, 'Loan #2 re-issued with updated amount', '2026-08-05 19:29:52');
+(16, 1, 6, 2, -11724.00, '', NULL, 'Loan #2 re-issued with updated amount', '2026-08-05 19:29:52'),
+(17, 1, 4, NULL, -8344.00, 'transfer_out', NULL, 'Transfer to Maribank - DONSS', '2026-08-06 15:51:38'),
+(18, 1, 2, NULL, 8344.00, 'transfer_in', NULL, 'Transfer from Gotyme', '2026-08-06 15:51:38'),
+(19, 1, 2, NULL, -4660.00, 'transfer_out', NULL, 'Transfer to BPI', '2026-08-06 15:53:51'),
+(20, 1, 3, NULL, 4660.00, 'transfer_in', NULL, 'Transfer from Maribank - DONSS', '2026-08-06 15:53:51'),
+(21, 1, 3, NULL, -743.00, 'transfer_out', NULL, 'Transfer to Gcash', '2026-08-06 15:54:54'),
+(22, 1, 1, NULL, 743.00, 'transfer_in', NULL, 'Transfer from BPI', '2026-08-06 15:54:54');
 
 -- --------------------------------------------------------
 
@@ -164,7 +170,13 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (52, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Loan Loss / Bad Debt', '::1', '2026-08-05 19:32:48'),
 (53, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Miscellaneous', '::1', '2026-08-05 19:33:02'),
 (54, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Rent', '::1', '2026-08-05 19:33:56'),
-(55, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Internet', '::1', '2026-08-05 19:34:03');
+(55, 1, 1, 'CREATE_CATEGORY', 'categories', 0, 'Created new category: Internet', '::1', '2026-08-05 19:34:03'),
+(56, 1, 1, 'CREATE_EXPENSE', 'expenses', 1, 'Created new expense: Wifi - Amount: ₱899.00', '192.168.8.100', '2026-08-06 15:29:49'),
+(57, 1, 1, 'CREATE_EXPENSE', 'expenses', 2, 'Created new expense: Wifi - Amount: ₱899.00', '::1', '2026-08-06 15:45:12'),
+(58, 1, 1, 'TRANSFER_FUNDS', 'accounts', 0, 'Transferred ₱8,344.00 from Gotyme to Maribank - DONSS', '::1', '2026-08-06 15:51:38'),
+(59, 1, 1, 'TRANSFER_FUNDS', 'accounts', 0, 'Transferred ₱4,660.00 from Maribank - DONSS to BPI', '::1', '2026-08-06 15:53:51'),
+(60, 1, 1, 'TRANSFER_FUNDS', 'accounts', 0, 'Transferred ₱743.00 from BPI to Gcash', '::1', '2026-08-06 15:54:54'),
+(61, 1, 1, 'CREATE_EXPENSE', 'expenses', 3, 'Created new expense: Birthday Gift to Noli - Amount: ₱108.00', '::1', '2026-08-06 15:56:02');
 
 -- --------------------------------------------------------
 
@@ -288,6 +300,15 @@ CREATE TABLE `expenses` (
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `expenses`
+--
+
+INSERT INTO `expenses` (`id`, `company_id`, `account_id`, `title`, `amount`, `category`, `category_id`, `expense_date`, `notes`, `created_at`) VALUES
+(1, 1, 5, 'Wifi', 899.00, 'General', 5, '2026-08-06', NULL, '2026-08-06 15:29:49'),
+(2, 1, 4, 'Wifi', 899.00, 'General', 5, '2026-08-06', NULL, '2026-08-06 15:45:12'),
+(3, 1, 3, 'Birthday Gift to Noli', 108.00, 'General', 7, '2026-08-06', NULL, '2026-08-06 15:56:02');
 
 -- --------------------------------------------------------
 
@@ -570,13 +591,13 @@ ALTER TABLE `accounts`
 -- AUTO_INCREMENT for table `account_transactions`
 --
 ALTER TABLE `account_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
@@ -606,7 +627,7 @@ ALTER TABLE `company_funds`
 -- AUTO_INCREMENT for table `expenses`
 --
 ALTER TABLE `expenses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `feedback`
