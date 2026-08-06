@@ -33,6 +33,7 @@
             <input type="text" name="title" class="form-control" placeholder="e.g., Office Rent, Electricity" required>
         </div>
 
+
         <div class="form-group">
             <label>Expense Category</label>
             <select name="category_id" class="form-control" required>

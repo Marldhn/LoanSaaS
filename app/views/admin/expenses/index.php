@@ -99,14 +99,14 @@
     
     .exp-row { 
         display: grid; 
-        grid-template-columns: 120px minmax(150px, 1fr) 140px 130px 100px; 
+        grid-template-columns: 110px minmax(130px, 1fr) 130px 140px 100px 90px; 
         padding: 16px 20px; 
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         margin-bottom: 12px;
         align-items: center;
-        gap: 20px;
+        gap: 16px;
         transition: background-color 0.15s;
     }
     
@@ -251,6 +251,7 @@
             <div>Date</div>
             <div>Title</div>
             <div>Category</div>
+            <div>Account</div>
             <div style="text-align: right;">Amount</div>
             <div style="text-align: right;">Action</div>
         </div>
@@ -267,6 +268,9 @@
                         <?= htmlspecialchars($exp['category_name'] ?? 'General') ?>
                     </span>
                 </div>
+                <div data-label="Account" style="font-size: 0.85rem; color: #475569; font-weight: 500;">
+                    <?= htmlspecialchars($exp['account_name'] ?? 'N/A') ?>
+                </div>
                 <div data-label="Amount" style="color: #dc2626; font-weight: 700; text-align: right;">-₱<?= number_format($exp['amount'], 2) ?></div>
                 <div data-label="Action" class="action-group">
                     <button type="button" class="icon-btn icon-btn-edit" 
@@ -275,6 +279,8 @@
                             data-title="<?= htmlspecialchars($exp['title'] ?? '', ENT_QUOTES) ?>"
                             data-amount="<?= $exp['amount'] ?>"
                             data-date="<?= $exp['expense_date'] ?>"
+                            data-category="<?= $exp['category_id'] ?>"
+                            data-account="<?= $exp['account_id'] ?>"
                             onclick="openEditModal(this)">
                         <i class="fas fa-pen"></i>
                     </button>
@@ -305,6 +311,28 @@
                 <input type="text" name="title" class="form-input" required>
             </div>
             <div class="form-group">
+                <label class="form-label">Account *</label>
+                <select name="account_id" class="form-select" required>
+                    <option value="">-- Select Account --</option>
+                    <?php foreach ($accounts as $acc): ?>
+                        <option value="<?= $acc['id'] ?>">
+                            <?= htmlspecialchars($acc['name']) ?> (Balance: ₱<?= number_format($acc['current_balance'], 2) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expense Category *</label>
+                <select name="category_id" class="form-select" required>
+                    <option value="">-- Select Category --</option>
+                    <?php foreach ($expenseCategories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>">
+                            <?= htmlspecialchars($cat['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Amount *</label>
                 <input type="number" name="amount" step="0.01" class="form-input" required>
             </div>
@@ -331,6 +359,28 @@
             <div class="form-group">
                 <label class="form-label">Title *</label>
                 <input type="text" id="edit_title" name="title" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Account *</label>
+                <select id="edit_account" name="account_id" class="form-select" required>
+                    <option value="">-- Select Account --</option>
+                    <?php foreach ($accounts as $acc): ?>
+                        <option value="<?= $acc['id'] ?>">
+                            <?= htmlspecialchars($acc['name']) ?> (Balance: ₱<?= number_format($acc['current_balance'], 2) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expense Category *</label>
+                <select id="edit_category" name="category_id" class="form-select" required>
+                    <option value="">-- Select Category --</option>
+                    <?php foreach ($expenseCategories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>">
+                            <?= htmlspecialchars($cat['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Amount *</label>
@@ -391,6 +441,8 @@
         document.getElementById('edit_title').value = button.getAttribute('data-title');
         document.getElementById('edit_amount').value = button.getAttribute('data-amount');
         document.getElementById('edit_date').value = button.getAttribute('data-date');
+        document.getElementById('edit_category').value = button.getAttribute('data-category');
+        document.getElementById('edit_account').value = button.getAttribute('data-account');
         document.getElementById('editExpModal').style.display = 'flex';
     }
     function closeEditModal() { document.getElementById('editExpModal').style.display = 'none'; }
