@@ -48,6 +48,44 @@
         color: #ffffff !important;
     }
 
+    /* Summary Metrics Cards Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .metric-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .metric-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+
+    .metric-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .metric-desc {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
     /* Main Table Card Structure */
     .table-card {
         background: #ffffff !important;
@@ -137,7 +175,6 @@
         position: relative;
     }
 
-    /* Custom scrollbar styling to make the horizontal scroll track clear and user-friendly */
     .table-responsive-wrapper::-webkit-scrollbar {
         height: 8px;
         width: 8px;
@@ -157,7 +194,7 @@
     }
 
     .loan-table-inner {
-        min-width: 850px; /* Forces content to expand so horizontal scrolling is activated when columns increase */
+        min-width: 850px;
     }
 
     .loan-row.header { 
@@ -176,7 +213,6 @@
         z-index: 10;
     }
 
-    /* Table Rows */
     .loan-row { 
         display: grid !important; 
         grid-template-columns: 2fr 1.2fr 1.2fr 1fr 0.5fr !important; 
@@ -189,7 +225,6 @@
         border-bottom: none !important;
     }
     
-    /* Badges */
     .badge-status { 
         padding: 4px 10px !important; 
         border-radius: 20px !important; 
@@ -220,7 +255,6 @@
         color: inherit !important; 
     }
 
-    /* Pagination */
     .pagination { 
         margin-top: 20px !important; 
         display: flex !important; 
@@ -251,6 +285,58 @@
         <a href="/loansaas/public/index.php?url=loan/create" class="btn-primary-custom">
             <span>+</span> New Loan
         </a>
+    </div>
+
+    <?php
+    // Calculate Summary Metrics dynamically using $allLoans, with a safe fallback to $loans
+    $totalPortfolioBalance = 0;
+    $activeLoansCount = 0;
+    $overdueLoansCount = 0;
+    $totalOverdueAmount = 0;
+
+    $metricsSource = !empty($allLoans) ? $allLoans : ($loans ?? []);
+
+    if (!empty($metricsSource)) {
+        foreach ($metricsSource as $l) {
+            $bal = (float)($l['remaining_balance'] ?? 0);
+            $status = trim(ucfirst(strtolower($l['display_status'] ?? $l['status'] ?? '')));
+            
+            if ($status !== 'Rejected' && $status !== 'Pending' && $status !== 'Paid') {
+                $totalPortfolioBalance += $bal;
+            }
+            if ($status === 'Active') {
+                $activeLoansCount++;
+            }
+            if ($status === 'Overdue') {
+                $overdueLoansCount++;
+                $totalOverdueAmount += $bal;
+            }
+        }
+    }
+    ?>
+
+    <!-- Summary Metrics Cards Grid Bar -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <span class="metric-title">Total Outstanding Portfolio</span>
+            <span class="metric-value">₱<?= number_format($totalPortfolioBalance, 2) ?></span>
+            <span class="metric-desc">Combined active remaining balances</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-title">Active Loans</span>
+            <span class="metric-value"><?= number_format($activeLoansCount) ?></span>
+            <span class="metric-desc">Currently performing accounts</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-title">Overdue Accounts</span>
+            <span class="metric-value" style="color: #b91c1c;"><?= number_format($overdueLoansCount) ?></span>
+            <span class="metric-desc">₱<?= number_format($totalOverdueAmount, 2) ?> past due</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-title">Total Records Filtered</span>
+            <span class="metric-value"><?= count($metricsSource) ?></span>
+            <span class="metric-desc">Loaded in current result set</span>
+        </div>
     </div>
 
     <!-- Unified Table Card -->

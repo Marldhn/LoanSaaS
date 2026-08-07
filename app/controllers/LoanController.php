@@ -243,10 +243,19 @@ public function index() {
     $allLoans = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // 2. Calculate balance and status, then apply filters
+    // 2. Calculate balance and status, then apply filters
     $filteredLoans = [];
     foreach ($allLoans as $loan) {
         $totalPaid = $paymentModel->getTotalPaidByLoanId($loan['id']);
-        $loan['remaining_balance'] = (float)($loan['total_payable'] - $totalPaid);
+        
+        // Fetch penalties for this specific loan to match the details page formula
+        $stmtPen = $db->prepare("SELECT SUM(amount) as total_penalties FROM penalties WHERE loan_id = ?");
+        $stmtPen->execute([$loan['id']]);
+        $penaltyResult = $stmtPen->fetch(PDO::FETCH_ASSOC);
+        $totalPenalties = (float)($penaltyResult['total_penalties'] ?? 0);
+
+        // Calculate remaining balance matching details.php exactly: Total Payable - Paid + Penalties
+        $loan['remaining_balance'] = (float)($loan['total_payable'] - $totalPaid + $totalPenalties);
         $loan['display_status'] = $this->calculateLoanStatus($loan);
 
         if (empty($status) || $loan['display_status'] === $status) {
