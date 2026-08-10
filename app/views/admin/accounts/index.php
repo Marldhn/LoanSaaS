@@ -171,7 +171,7 @@ if (!empty($accounts)) {
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
     }
 
-    /* Accounts Grid */
+    /* Accounts Grid & Smooth Dragging Enhancements */
     .section-title {
         font-size: 1.1rem;
         font-weight: 700;
@@ -190,6 +190,17 @@ if (!empty($accounts)) {
         text-decoration: none !important;
         color: inherit !important;
         display: block !important;
+        cursor: grab !important;
+        transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s ease, opacity 0.2s ease !important;
+    }
+
+    .account-card-link:active {
+        cursor: grabbing !important;
+    }
+
+    .account-card-link.dragging {
+        opacity: 0.35;
+        transform: scale(0.96);
     }
 
     .account-card {
@@ -198,12 +209,17 @@ if (!empty($accounts)) {
         border-radius: 12px !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+        pointer-events: none; /* Prevents text/image selection weirdness while dragging */
     }
 
-    .account-card:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    /* Re-enable pointer events for inner card content elements so links stay clean */
+    .account-card * {
+        pointer-events: auto;
+    }
+
+    .account-card-link:hover .account-card {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
         border-color: #cbd5e1 !important;
     }
 
@@ -324,39 +340,39 @@ if (!empty($accounts)) {
         <!-- Create New Account Card -->
         <div class="create-account-card">
             <h3 class="card-heading">Create New Account</h3>
-         <form method="POST" action="/loansaas/public/index.php?url=account/storeAccount" class="inline-form" enctype="multipart/form-data">
-    <div class="form-field">
-        <label>Account Name</label>
-        <input type="text" name="name" placeholder="e.g. GCash" class="form-input" required>
-    </div>
-    <div class="form-field">
-        <label>Initial Balance</label>
-        <input type="number" name="initial_balance" placeholder="0.00" class="form-input" step="0.01">
-    </div>
-    
-    <!-- Custom File Upload Field -->
-    <div class="form-field">
-        <label>Icon / Logo</label>
-        <div style="display: flex; align-items: center; gap: 10px; height: 38px;">
-            <label for="account-icon-file" class="custom-file-upload" style="margin: 0; display: inline-flex; align-items: center; justify-content: center; height: 38px; box-sizing: border-box;">
-                <i class="fas fa-upload"></i> Choose Image
-            </label>
-            <input id="account-icon-file" type="file" name="icon" accept="image/*" style="display: none;" onchange="updateFileName(this)">
-            <span id="file-chosen-name" style="font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; line-height: 38px;">No file chosen</span>
-        </div>
-    </div>
+            <form method="POST" action="/loansaas/public/index.php?url=account/storeAccount" class="inline-form" enctype="multipart/form-data">
+                <div class="form-field">
+                    <label>Account Name</label>
+                    <input type="text" name="name" placeholder="e.g. GCash" class="form-input" required>
+                </div>
+                <div class="form-field">
+                    <label>Initial Balance</label>
+                    <input type="number" name="initial_balance" placeholder="0.00" class="form-input" step="0.01">
+                </div>
+                
+                <!-- Custom File Upload Field -->
+                <div class="form-field">
+                    <label>Icon / Logo</label>
+                    <div style="display: flex; align-items: center; gap: 10px; height: 38px;">
+                        <label for="account-icon-file" class="custom-file-upload" style="margin: 0; display: inline-flex; align-items: center; justify-content: center; height: 38px; box-sizing: border-box;">
+                            <i class="fas fa-upload"></i> Choose Image
+                        </label>
+                        <input id="account-icon-file" type="file" name="icon" accept="image/*" style="display: none;" onchange="updateFileName(this)">
+                        <span id="file-chosen-name" style="font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; line-height: 38px;">No file chosen</span>
+                    </div>
+                </div>
 
-    <button type="submit" class="btn-primary-custom" style="height: 38px;">Create</button>
-</form>
+                <button type="submit" class="btn-primary-custom" style="height: 38px;">Create</button>
+            </form>
         </div>
     </div>
 
     <h4 class="section-title">All Accounts</h4>
 
     <!-- Accounts Grid -->
-    <div class="accounts-grid">
+    <div class="accounts-grid" id="accountsGrid">
         <?php foreach ($accounts as $a): ?>
-        <a href="/loansaas/public/index.php?url=account/details&id=<?= $a['id'] ?>" class="account-card-link">
+        <a href="/loansaas/public/index.php?url=account/details&id=<?= $a['id'] ?>" class="account-card-link" draggable="true" data-id="<?= $a['id'] ?>">
             <div class="account-card" style="display: flex; align-items: center; gap: 16px;">
                 <div style="width: 48px; height: 48px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
                     <?php if (!empty($a['icon'])): ?>
@@ -428,17 +444,17 @@ if (!empty($accounts)) {
 <?php unset($_SESSION['error_message']); ?>
 
 <script>
-
     function updateFileName(input) {
-    const fileNameSpan = document.getElementById('file-chosen-name');
-    if (input.files && input.files.length > 0) {
-        fileNameSpan.textContent = input.files[0].name;
-        fileNameSpan.style.color = '#0f172a';
-    } else {
-        fileNameSpan.textContent = 'No file chosen';
-        fileNameSpan.style.color = '#64748b';
+        const fileNameSpan = document.getElementById('file-chosen-name');
+        if (input.files && input.files.length > 0) {
+            fileNameSpan.textContent = input.files[0].name;
+            fileNameSpan.style.color = '#0f172a';
+        } else {
+            fileNameSpan.textContent = 'No file chosen';
+            fileNameSpan.style.color = '#64748b';
+        }
     }
-}
+
     function toggleModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
@@ -452,6 +468,81 @@ if (!empty($accounts)) {
         if (from === to) {
             alert("Please select a different destination account.");
             e.preventDefault();
+        }
+    });
+
+    // --- Smooth Drag & Drop Sorting with LocalStorage Persistence ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const grid = document.getElementById('accountsGrid');
+        const storageKey = 'account_cards_order_user';
+
+        // 1. Restore saved order from localStorage smoothly
+        const savedOrder = localStorage.getItem(storageKey);
+        if (savedOrder) {
+            try {
+                const orderIds = JSON.parse(savedOrder);
+                const cardMap = {};
+                Array.from(grid.children).forEach(card => {
+                    cardMap[card.getAttribute('data-id')] = card;
+                });
+                orderIds.forEach(id => {
+                    if (cardMap[id]) {
+                        grid.appendChild(cardMap[id]);
+                    }
+                });
+            } catch (e) {
+                console.error("Error loading card arrangement", e);
+            }
+        }
+
+        let draggedItem = null;
+
+        // 2. Add Drag Events with fluid handling
+        grid.querySelectorAll('.account-card-link').forEach(card => {
+            card.addEventListener('dragstart', function (e) {
+                draggedItem = this;
+                setTimeout(() => this.classList.add('dragging'), 0);
+            });
+
+            card.addEventListener('dragend', function () {
+                this.classList.remove('dragging');
+                draggedItem = null;
+                saveCardOrder();
+            });
+
+            card.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(grid, e.clientX, e.clientY);
+                if (afterElement == null) {
+                    grid.appendChild(draggedItem);
+                } else {
+                    grid.insertBefore(draggedItem, afterElement);
+                }
+            });
+        });
+
+        function getDragAfterElement(container, x, y) {
+            const draggableElements = Array.from(container.querySelectorAll('.account-card-link:not(.dragging)'));
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offsetX = x - box.left - box.width / 2;
+                const offsetY = y - box.top - box.height / 2;
+                
+                const distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+                
+                if (closest == null || distance < closest.distance) {
+                    return { distance: distance, element: child };
+                } else {
+                    return closest;
+                }
+            }, null).element;
+        }
+
+        function saveCardOrder() {
+            const cards = grid.querySelectorAll('.account-card-link');
+            const orderIds = Array.from(cards).map(card => card.getAttribute('data-id'));
+            localStorage.setItem(storageKey, JSON.stringify(orderIds));
         }
     });
 </script>

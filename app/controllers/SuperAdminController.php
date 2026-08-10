@@ -111,7 +111,7 @@ require_once dirname(__DIR__) . '/views/superadmin/admins/adminlist.php';    }
             die("Access Denied");
         }
 
-        // 3. Now $this->db is initialized and safe to use
+        // 1. Core Statistics Cards
         $stats = [
             'total_companies' => $this->db->query("SELECT COUNT(*) FROM companies")->fetchColumn(),
             'total_users'     => $this->db->query("SELECT COUNT(*) FROM users")->fetchColumn(),
@@ -119,9 +119,86 @@ require_once dirname(__DIR__) . '/views/superadmin/admins/adminlist.php';    }
             'active_loans'    => $this->db->query("SELECT COUNT(*) FROM loans WHERE status = 'active'")->fetchColumn()
         ];
 
-        // Fetch recent companies
+        // 2. Fetch recent companies
         $recentCompanies = $this->db->query("SELECT * FROM companies ORDER BY created_at DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
 
+        // 3. Fetch Real Monthly Loan Trends for the Current Year (for Chart.js)
+        $currentYear = date('Y');
+        $chartStmt = $this->db->prepare("
+            SELECT MONTH(created_at) as month, COUNT(*) as total 
+            FROM loans 
+            WHERE YEAR(created_at) = ? 
+            GROUP BY MONTH(created_at)
+        ");
+        $chartStmt->execute([$currentYear]);
+        $loanDataRaw = $chartStmt->fetchAll(PDO::FETCH_KEY_PAIR); // Returns [month => total]
+
+        // Map data across all 12 months (Jan = 1 to Dec = 12)
+        $monthlyLoans = array_fill(1, 12, 0);
+        foreach ($loanDataRaw as $month => $total) {
+            $monthlyLoans[(int)$month] = (int)$total;
+        }
+        $loanChartData = array_values($monthlyLoans);
+
+        // 4. Fetch Real Recent Activities (e.g., latest companies joined)
+        $recentActivities = $this->db->query("
+            SELECT name, created_at, 'company' as type 
+            FROM companies 
+            ORDER BY created_at DESC 
+            LIMIT 4
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
         require_once dirname(__DIR__) . '/views/superadmin/dashboard/dashboard.php';
+    }
+public function companyDetails($id = null) {
+        if ($_SESSION['user']['role'] !== 'superadmin') {
+            die("Access Denied");
+        }
+
+        $id = $id ?? ($_GET['id'] ?? null);
+        if (!$id) {
+            die("Company ID not provided.");
+        }
+
+        // Fetch company info
+        $stmt = $this->db->prepare("SELECT * FROM companies WHERE id = ?");
+        $stmt->execute([$id]);
+        $company = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$company) {
+            die("Company not found.");
+        }
+
+        // Fetch total users belonging to this company
+        $userStmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE company_id = ?");
+        $userStmt->execute([$id]);
+        $totalUsers = $userStmt->fetchColumn();
+
+        // Fetch total loans directly using company_id (matching your Loan model schema)
+        $loanStmt = $this->db->prepare("SELECT COUNT(*) FROM loans WHERE company_id = ?");
+        $loanStmt->execute([$id]);
+        $totalLoans = $loanStmt->fetchColumn();
+
+        require_once dirname(__DIR__) . '/views/superadmin/companies/details.php';
+    }
+
+    public function updateSubscription() {
+        if ($_SESSION['user']['role'] !== 'superadmin') {
+            die("Access Denied");
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $companyId = $_POST['company_id'] ?? null;
+            $planTier = $_POST['plan_tier'] ?? 'basic';
+            $status = $_POST['subscription_status'] ?? 'active';
+
+            if ($companyId) {
+                $stmt = $this->db->prepare("UPDATE companies SET plan_tier = ?, subscription_status = ? WHERE id = ?");
+                $stmt->execute([$planTier, $status, $companyId]);
+            }
+
+            header("Location: /loansaas/public/index.php?url=superadmin/companyDetails&id=" . $companyId);
+            exit;
+        }
     }
 }

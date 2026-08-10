@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 07, 2026 at 12:30 AM
+-- Generation Time: Aug 07, 2026 at 11:11 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,10 +41,10 @@ CREATE TABLE `accounts` (
 
 INSERT INTO `accounts` (`id`, `company_id`, `name`, `current_balance`, `icon`) VALUES
 (1, 1, 'Gcash', 3920.00, 'account_1785951150_9771.png'),
-(2, 1, 'Maribank - DONSS', 13621.00, 'account_1785950259_3333.webp'),
+(2, 1, 'Maribank - DONSS', 18121.00, 'account_1785950259_3333.webp'),
 (3, 1, 'BPI', 4000.00, NULL),
 (4, 1, 'Gotyme', 0.00, NULL),
-(5, 1, 'Maribank - SHE', 11517.00, 'account_1785951226_4901.webp'),
+(5, 1, 'Maribank - SHE', 14517.00, 'account_1785951226_4901.webp'),
 (6, 1, 'Initial Balance', 0.00, NULL);
 
 -- --------------------------------------------------------
@@ -176,7 +176,12 @@ INSERT INTO `activity_logs` (`id`, `company_id`, `user_id`, `action`, `table_nam
 (58, 1, 1, 'TRANSFER_FUNDS', 'accounts', 0, 'Transferred ₱8,344.00 from Gotyme to Maribank - DONSS', '::1', '2026-08-06 15:51:38'),
 (59, 1, 1, 'TRANSFER_FUNDS', 'accounts', 0, 'Transferred ₱4,660.00 from Maribank - DONSS to BPI', '::1', '2026-08-06 15:53:51'),
 (60, 1, 1, 'TRANSFER_FUNDS', 'accounts', 0, 'Transferred ₱743.00 from BPI to Gcash', '::1', '2026-08-06 15:54:54'),
-(61, 1, 1, 'CREATE_EXPENSE', 'expenses', 3, 'Created new expense: Birthday Gift to Noli - Amount: ₱108.00', '::1', '2026-08-06 15:56:02');
+(61, 1, 1, 'CREATE_EXPENSE', 'expenses', 3, 'Created new expense: Birthday Gift to Noli - Amount: ₱108.00', '::1', '2026-08-06 15:56:02'),
+(62, 1, 1, 'CREATE_PAYMENT', 'payments', 4, 'Received payment of ₱3,000.00 for loan #4', '::1', '2026-08-07 17:21:13'),
+(63, 1, 1, 'CREATE_PAYMENT', 'payments', 4, 'Received payment of ₱4,500.00 for loan #4', '::1', '2026-08-07 17:21:26'),
+(64, 1, 1, 'UPDATE_LOAN', 'loans', 4, 'Updated loan #4', '::1', '2026-08-07 17:21:52'),
+(65, 1, 1, 'UPDATE_LOAN', 'loans', 4, 'Updated loan #4', '::1', '2026-08-07 17:22:29'),
+(66, 1, 1, 'APPLY_PENALTY', 'penalties', 4, 'Applied penalty of ₱7500 to loan #4. Reason: Renew', '::1', '2026-08-07 17:22:56');
 
 -- --------------------------------------------------------
 
@@ -361,7 +366,7 @@ INSERT INTO `loans` (`id`, `company_id`, `account_id`, `borrower_id`, `amount`, 
 (1, 1, 6, 1, 41877.00, 0.00, 41877.00, 'Approved', '2026-08-05', '4764-07-01', '2026-08-05 17:37:45', 999999, '', 'one_time', 0.00, 2, ''),
 (2, 1, 6, 2, 11724.00, 15.00, 13482.60, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 18:18:03', 10, '', 'one_time', 0.00, 2, ''),
 (3, 1, 6, 3, 8090.00, 15.00, 9300.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 18:30:24', 10, '', 'one_time', -3.50, 1, 'standard'),
-(4, 1, 6, 4, 50000.00, 15.00, 57500.00, 'Approved', '2026-07-25', '2026-08-07', '2026-08-05 18:32:59', 13, '', 'one_time', 0.00, 1, 'standard'),
+(4, 1, 6, 4, 50000.00, 15.00, 57500.00, 'Approved', '2026-08-08', '2026-08-23', '2026-08-05 18:32:59', 15, '', 'one_time', 0.00, 1, ''),
 (5, 1, 6, 9, 14500.00, 0.00, 14500.00, 'Approved', '2026-08-05', '2026-09-30', '2026-08-05 19:07:05', 56, '', 'one_time', 0.00, 1, 'standard'),
 (6, 1, 6, 7, 5000.00, 15.00, 5750.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:09:31', 10, '', 'one_time', 0.00, 2, 'standard'),
 (7, 1, 2, 7, 2000.00, 15.00, 2300.00, 'Approved', '2026-08-05', '2026-08-15', '2026-08-05 19:09:50', 10, '', 'one_time', 0.00, 2, 'standard'),
@@ -427,6 +432,14 @@ CREATE TABLE `payments` (
   `category_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `account_id`, `company_id`, `loan_id`, `amount`, `payment_date`, `payment_method`, `reference_number`, `created_at`, `principal_amount`, `interest_amount`, `fees_amount`, `notes`, `category_id`) VALUES
+(1, 5, 1, 4, 3000.00, '2026-08-07', NULL, NULL, '2026-08-07 17:21:13', 0.00, 0.00, 0.00, NULL, NULL),
+(2, 2, 1, 4, 4500.00, '2026-08-07', NULL, NULL, '2026-08-07 17:21:26', 0.00, 0.00, 0.00, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -441,6 +454,13 @@ CREATE TABLE `penalties` (
   `reason` text DEFAULT NULL,
   `date_applied` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `penalties`
+--
+
+INSERT INTO `penalties` (`id`, `company_id`, `loan_id`, `amount`, `reason`, `date_applied`) VALUES
+(1, 1, 4, 7500.00, 'Renew', '2026-08-08');
 
 -- --------------------------------------------------------
 
@@ -597,7 +617,7 @@ ALTER TABLE `account_transactions`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `borrowers`
@@ -657,13 +677,13 @@ ALTER TABLE `loan_installments`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `penalties`
 --
 ALTER TABLE `penalties`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`

@@ -6,11 +6,31 @@ require_once __DIR__ . '/../models/Account.php';
 
 class PaymentController {
     public function index() {
-        $paymentModel = new Payment();
-        $company_id = $_SESSION['user']['company_id'] ?? 0;
-        $payments = $paymentModel->getAllByCompany($company_id);
-        require_once __DIR__ . '/../views/admin/payments/index.php';
+    $paymentModel = new Payment();
+    $loanModel = new Loan();
+    $company_id = $_SESSION['user']['company_id'] ?? 0;
+    
+    $payments = $paymentModel->getAllByCompany($company_id);
+    
+    // Fetch active/approved loans with remaining balances for the modal dropdown
+    $allLoans = $loanModel->getApprovedLoansByCompany($company_id);
+    $loans = [];
+    foreach ($allLoans as $loan) {
+        $totalPaid = $paymentModel->getTotalPaidByLoanId($loan['id']);
+        $remainingBalance = $loan['total_payable'] - $totalPaid;
+        if ($remainingBalance > 0) {
+            $loan['remaining_balance'] = $remainingBalance;
+            $loans[] = $loan;
+        }
     }
+    
+    // Fetch accounts for the dropdown
+    $accStmt = (new Account())->getDb()->prepare("SELECT id, name, current_balance FROM accounts WHERE company_id = ?");
+    $accStmt->execute([$company_id]);
+    $accounts = $accStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    require_once __DIR__ . '/../views/admin/payments/index.php';
+}
 
    public function store() {
     $loan_id = $_POST['loan_id'];
@@ -43,8 +63,7 @@ class PaymentController {
         );
 
         $db->commit();
-        header("Location: /loansaas/public/index.php?url=loan/details&id=" . $loan_id);
-        exit;
+header("Location: /loansaas/public/index.php?url=payment/index");        exit;
     } catch (Exception $e) {
         $db->rollBack();
         die("Error: " . $e->getMessage());

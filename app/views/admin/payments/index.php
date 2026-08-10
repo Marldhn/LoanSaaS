@@ -234,13 +234,41 @@
 
         <form method="POST" action="/loansaas/public/index.php?url=payment/store">
             <div class="form-group">
-                <label class="form-label">Loan ID *</label>
-                <input type="number" name="loan_id" class="form-input" placeholder="e.g. 45" required>
+                <label class="form-label">Select Loan & Borrower *</label>
+                <select name="loan_id" class="form-input" required>
+                    <option value="">-- Choose Loan --</option>
+                    <?php if (!empty($loans)): ?>
+                        <?php foreach ($loans as $l): ?>
+                            <option value="<?= $l['id'] ?>">
+                                <?= htmlspecialchars($l['borrower_name'] ?? 'Borrower') ?> - #LN-<?= str_pad($l['id'], 6, '0', STR_PAD_LEFT) ?> (Bal: ₱<?= number_format($l['remaining_balance'], 2) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
+
+            <div class="form-group">
+                <label class="form-label">Deposit Account *</label>
+                <select name="account_id" class="form-input" required>
+                    <option value="">-- Select Account --</option>
+                    <?php if (!empty($accounts)): ?>
+                        <?php foreach ($accounts as $acc): ?>
+                            <option value="<?= $acc['id'] ?>"><?= htmlspecialchars($acc['name']) ?> (₱<?= number_format($acc['current_balance'], 2) ?>)</option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Payment Date *</label>
+                <input type="date" name="payment_date" class="form-input" value="<?= date('Y-m-d') ?>" required>
+            </div>
+
             <div class="form-group" style="margin-bottom: 24px;">
                 <label class="form-label">Payment Amount (₱) *</label>
                 <input type="number" name="amount" step="0.01" class="form-input" placeholder="0.00" required>
             </div>
+
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 <button type="button" style="background: #f1f5f9; color: #475569; padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="closePayModal()">Cancel</button>
                 <button type="submit" class="btn-primary-action">Save Payment</button>
